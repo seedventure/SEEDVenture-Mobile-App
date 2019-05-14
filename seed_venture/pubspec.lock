@@ -8,20 +8,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "2.0.8"
-  base58check:
-    dependency: transitive
-    description:
-      name: base58check
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "1.0.1"
-  bech32:
-    dependency: transitive
-    description:
-      name: bech32
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "0.1.1"
   bip32:
     dependency: "direct main"
     description:
@@ -36,20 +22,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.0.3"
-  bitcoin_bip32:
-    dependency: transitive
-    description:
-      name: bitcoin_bip32
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "0.1.1"
-  bitcoin_bip44:
-    dependency: "direct main"
-    description:
-      name: bitcoin_bip44
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "0.1.1"
   boolean_selector:
     dependency: transitive
     description:

@@ -1,15 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:bip39/bip39.dart' as bip39;
-import 'package:seed_venture/utils/mnemonic.dart';
-import 'package:seed_venture/utils/hdkey.dart';
-import 'package:web3dart/web3dart.dart';
-import 'package:web3dart/conversions.dart';
-import 'package:bitcoin_bip44/bitcoin_bip44.dart';
-import 'package:bip32/bip32.dart' as bip32;
-import 'package:hex/hex.dart';
-
-
-
+import 'package:seed_venture/pages/create_config_page.dart';
+import 'package:seed_venture/blocs/createconfig_bloc.dart';
+import 'package:seed_venture/blocs/bloc_provider.dart';
 
 class OnBoardingPage extends StatelessWidget {
   @override
@@ -37,90 +29,13 @@ class OnBoardingPage extends StatelessWidget {
           ),
           RaisedButton(
             onPressed: () {
-              String randomMnemonic = bip39.generateMnemonic();
-              print(randomMnemonic);
-
-              String seed = bip39.mnemonicToSeedHex(randomMnemonic);
-              print(seed);
-
-              var masterSeed = MnemonicUtils.generateMasterSeed(
-                  randomMnemonic,
-                  "password");
-
-              var masterSeedHex = bytesToHex(masterSeed);
-
-              print('master seed hex with password: ' + masterSeedHex);
-
-              /*var rootSeed = getRootSeed(hexToBytes(
-                  masterSeedHex));
-
-
-              var childPrivateKeyHardened = CKDprivHardened(
-                rootSeed,
-                0,
-              )[0];
-
-              var childChainCode = CKDprivHardened(
-                rootSeed,
-                0,
-              )[1];
-
-              var cprivkHardHex = bytesToHex(childPrivateKeyHardened);
-              var publicKey = Credentials
-                  .fromPrivateKeyHex(cprivkHardHex)
-                  .publicKey
-                  .toRadixString(16);
-              var address = Credentials.fromPrivateKeyHex(cprivkHardHex).address.hex;
-
-              print('address -> ' + address);*/
-
-              //bip32.BIP32 root = bip32.BIP32.fromSeed(HEX.decode(seed));
-
-              bip32.BIP32 root = bip32.BIP32.fromSeed(HEX.decode(masterSeedHex));
-
-              bip32.BIP32 child = root.derivePath("m/44'/60'/0'/0/0");
-              String privateKey = HEX.encode(child.privateKey);
-
-              print('private key: ' + privateKey);
-
-              privateKey = '0x' + privateKey;
-
-              String address = Credentials.fromPrivateKeyHex(privateKey).address.hex;
-
-              print('address: ' + address);
-
-
-
-
-
-
-
-
-
-              /*var rootSeed = getRootSeed(hexToBytes(
-                  masterSeedHex));
-
-
-              var childPrivateKeyHardened = CKDprivNonHardened(
-                rootSeed,
-                0,
-              )[0];
-
-              var childChainCode = CKDprivNonHardened(
-                rootSeed,
-                0,
-              )[1];
-
-              var cprivkHardHex = bytesToHex(childPrivateKeyHardened);
-              var publicKey = Credentials
-                  .fromPrivateKeyHex(cprivkHardHex)
-                  .publicKey
-                  .toRadixString(16);
-              var address = Credentials.fromPrivateKeyHex(cprivkHardHex).address.hex;
-
-              print('address -> ' + address);
-*/
-
+              Navigator.of(context)
+                  .push(MaterialPageRoute(builder: (BuildContext context) {
+                return BlocProvider<CreateConfigBloc>(
+                  bloc: CreateConfigBloc(),
+                  child: CreateConfigPage(),
+                );
+              }));
             },
             child: Text(
               'Create Config',

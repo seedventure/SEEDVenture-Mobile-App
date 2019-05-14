@@ -3,6 +3,7 @@ import 'package:seed_venture/blocs/homepage_bloc.dart';
 import 'package:seed_venture/blocs/bloc_provider.dart';
 import 'package:seed_venture/pages/on_boarding_page.dart';
 import 'package:seed_venture/pages/grid_page.dart';
+import 'package:seed_venture/blocs/gridpage_bloc.dart';
 
 
 
@@ -16,7 +17,8 @@ class HomePage extends StatelessWidget {
       if (snapshot.hasData) {
 
         Widget returnedPage = snapshot.data == 1 ? GridPage() : OnBoardingPage();
-        return returnedPage;
+        BlocBase blocBase = snapshot.data == 1 ? GridPageBloc() : null;
+        return BlocProvider(child: returnedPage, bloc: blocBase);
 
 
       } else {
