@@ -12,13 +12,15 @@ class CreateConfigBloc implements BlocBase {
   BehaviorSubject subject = BehaviorSubject();
 
   void getRandomMnemonic() {
-    String randomMnemonic = bip39.generateMnemonic();
-    print(randomMnemonic);
-    subject.add(randomMnemonic);
+
+      String randomMnemonic = bip39.generateMnemonic();
+      print(randomMnemonic);
+      subject.add(randomMnemonic);
+
   }
 
-  void copyMnemonicToClipboard(String mnemonic) {
-    Clipboard.setData(new ClipboardData(text: mnemonic));
+  void copyMnemonicToClipboard(String mnemonic)  {
+     Clipboard.setData(new ClipboardData(text: mnemonic));
   }
 
   CreateConfigBloc() {

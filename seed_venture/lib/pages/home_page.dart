@@ -16,6 +16,8 @@ class HomePage extends StatelessWidget {
     return StreamBuilder(builder: (BuildContext context, AsyncSnapshot snapshot) {
       if (snapshot.hasData) {
 
+        homePageBloc.subject.close();
+
         Widget returnedPage = snapshot.data == 1 ? GridPage() : OnBoardingPage();
         BlocBase blocBase = snapshot.data == 1 ? GridPageBloc() : null;
         return BlocProvider(child: returnedPage, bloc: blocBase);

@@ -23,6 +23,8 @@ dependencies:
   bip39: ^1.0.3
   web3dart: ^0.4.5
   bip32: ^1.0.5
+  path_provider: ^0.4.1
+
 
   flutter:
     sdk: flutter
