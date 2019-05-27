@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:seed_venture/blocs/bloc_provider.dart';
-import 'package:seed_venture/blocs/insertpasswordmnemonic_bloc.dart';
+import 'package:seed_venture/blocs/mnemonic_logic_bloc.dart';
 import 'package:seed_venture/widgets/progress_bar_overlay.dart';
-import 'package:seed_venture/pages/grid_page.dart';
 
 class InsertPasswordMnemonicPage extends StatelessWidget {
   final String mnemonic;
@@ -14,8 +13,8 @@ class InsertPasswordMnemonicPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final InsertPasswordMnemonicBloc insertPasswordMnemonicBloc =
-        BlocProvider.of<InsertPasswordMnemonicBloc>(context);
+    final MnemonicLogicBloc insertPasswordMnemonicBloc =
+        BlocProvider.of<MnemonicLogicBloc>(context);
 
     return Scaffold(
       appBar: AppBar(

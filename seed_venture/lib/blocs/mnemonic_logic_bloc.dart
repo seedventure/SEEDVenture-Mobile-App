@@ -12,7 +12,7 @@ import 'dart:math';
 import 'dart:io';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class InsertPasswordMnemonicBloc implements BlocBase {
+class MnemonicLogicBloc implements BlocBase {
   PublishSubject subject = PublishSubject();
 
   void deriveKeysFromMnemonic(String mnemonic, String password) async {

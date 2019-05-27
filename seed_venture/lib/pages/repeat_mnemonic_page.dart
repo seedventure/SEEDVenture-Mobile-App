@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:seed_venture/blocs/repeatmnemonic_bloc.dart';
 import 'package:seed_venture/blocs/bloc_provider.dart';
-import 'package:seed_venture/blocs/insertpasswordmnemonic_bloc.dart';
+import 'package:seed_venture/blocs/mnemonic_logic_bloc.dart';
 import 'package:seed_venture/pages/insert_password_mnemonic_page.dart';
 
 class RepeatMnemonicPage extends StatefulWidget {
@@ -33,8 +33,8 @@ class _RepeatMnemonicPageState extends State<RepeatMnemonicPage> {
       } else {
         Navigator.of(context)
             .push(MaterialPageRoute(builder: (BuildContext context) {
-          return BlocProvider<InsertPasswordMnemonicBloc>(
-            bloc: InsertPasswordMnemonicBloc(),
+          return BlocProvider<MnemonicLogicBloc>(
+            bloc: MnemonicLogicBloc(),
             child: InsertPasswordMnemonicPage(
               mnemonic: rightMnemonic,
             ),

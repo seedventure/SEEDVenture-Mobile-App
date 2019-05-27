@@ -2,10 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:seed_venture/pages/create_config_page.dart';
 import 'package:seed_venture/blocs/createconfig_bloc.dart';
 import 'package:seed_venture/blocs/bloc_provider.dart';
+import 'package:seed_venture/blocs/onboarding_bloc.dart';
+import 'package:seed_venture/pages/import_config_page.dart';
+import 'package:seed_venture/blocs/mnemonic_logic_bloc.dart';
 
 class OnBoardingPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+   // final OnBoardingBloc onBoardingBloc =
+   // BlocProvider.of<OnBoardingBloc>(context);
+
     return Scaffold(
         appBar: AppBar(
           title: Text('On Boarding'),
@@ -42,7 +48,15 @@ class OnBoardingPage extends StatelessWidget {
                 ),
               ),
               RaisedButton(
-                onPressed: () => print('ciao'),
+                onPressed: () {
+                  Navigator.of(context)
+                      .push(MaterialPageRoute(builder: (BuildContext context) {
+                    return BlocProvider<MnemonicLogicBloc>(
+                      bloc: MnemonicLogicBloc(),
+                      child: ImportConfigPage(),
+                    );
+                  }));
+                },
                 child: Text('Import Config',
                     style: TextStyle(color: Colors.white)),
               ),
@@ -50,7 +64,11 @@ class OnBoardingPage extends StatelessWidget {
                   margin: const EdgeInsets.only(top: 25.0),
                   child: RaisedButton(
                     color: Theme.of(context).accentColor,
-                    onPressed: () => print('ciao'),
+                    onPressed: () {
+                      //onBoardingBloc.setOnBoardingDone();
+                      Navigator.of(context).pushNamedAndRemoveUntil(
+                          '/home', (Route<dynamic> route) => false);
+                    },
                     child: Text('Continue without Config',
                         style: TextStyle(color: Colors.white)),
                   ))
