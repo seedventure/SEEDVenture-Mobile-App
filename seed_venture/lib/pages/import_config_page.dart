@@ -3,6 +3,7 @@ import 'package:seed_venture/blocs/bloc_provider.dart';
 import 'package:seed_venture/blocs/mnemonic_logic_bloc.dart';
 import 'package:seed_venture/pages/insert_password_import_page.dart';
 import 'package:seed_venture/blocs/json_wallet_bloc.dart';
+import 'package:seed_venture/blocs/private_key_wallet_bloc.dart';
 
 class ImportConfigPage extends StatefulWidget {
   @override
@@ -12,6 +13,7 @@ class ImportConfigPage extends StatefulWidget {
 class _ImportConfigPageState extends State<ImportConfigPage> {
   final TextEditingController mnemonicController = TextEditingController();
   final TextEditingController privateKeyController = TextEditingController();
+  final _scaffoldKey = GlobalKey<ScaffoldState>();
 
   @override
   Widget build(BuildContext context) {
@@ -19,8 +21,10 @@ class _ImportConfigPageState extends State<ImportConfigPage> {
         BlocProvider.of<MnemonicLogicBloc>(context);
 
     final JSONWalletBloc jsonWalletBloc = JSONWalletBloc();
+    final PrivateKeyWalletBloc privateKeyWalletBloc = PrivateKeyWalletBloc();
 
     return Scaffold(
+      key: _scaffoldKey,
         appBar: AppBar(
           title: Text('Import Config'),
         ),
@@ -58,7 +62,7 @@ class _ImportConfigPageState extends State<ImportConfigPage> {
                   Navigator.push(
                       context,
                       MaterialPageRoute(
-                          builder: (context) => InsertPasswordImportPage()));
+                          builder: (context) => InsertPasswordImportPage(importMode: InsertPasswordImportPage.fromMnemonicWords, mnemonic: mnemonicController.text,)));
                 },
                 child: Text('Import', style: TextStyle(color: Colors.white)),
               ),
@@ -88,7 +92,10 @@ class _ImportConfigPageState extends State<ImportConfigPage> {
               ),
               RaisedButton(
                 onPressed: () {
-
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => InsertPasswordImportPage(importMode: InsertPasswordImportPage.fromPrivateKey, privateKey: privateKeyController.text,)));
                 },
                 child: Text('Import', style: TextStyle(color: Colors.white)),
               ),
@@ -112,10 +119,17 @@ class _ImportConfigPageState extends State<ImportConfigPage> {
                 onPressed: ()  async {
                   String walletPath = await jsonWalletBloc.getWalletFilePath();
 
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => InsertPasswordImportPage()));
+                  if(walletPath != null) {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => InsertPasswordImportPage(importMode: InsertPasswordImportPage.fromJSONFile, jsonPath: walletPath,)));
+                  }
+                  else{
+                    SnackBar invalidFileSnackBar = SnackBar(content: Text('Invalid File'));
+                    _scaffoldKey.currentState.showSnackBar(invalidFileSnackBar);
+
+                  }
 
                 },
                 child: Text('Import from JSON File',

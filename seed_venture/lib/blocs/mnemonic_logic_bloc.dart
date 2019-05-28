@@ -15,7 +15,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 class MnemonicLogicBloc implements BlocBase {
   PublishSubject subject = PublishSubject();
 
-  void deriveKeysFromMnemonic(String mnemonic, String password) async {
+  Future<Credentials> deriveKeysFromMnemonic(String mnemonic, String password) async {
     List deriveCredentialsParams = List(2);
     deriveCredentialsParams[0] = mnemonic;
     deriveCredentialsParams[1] = password;
@@ -23,7 +23,9 @@ class MnemonicLogicBloc implements BlocBase {
     Credentials credentials =
         await compute(_deriveCredentials, deriveCredentialsParams);
 
-    _saveJSONWalletFile(credentials, password);
+   // _saveJSONWalletFile(credentials, password);
+
+    return credentials;
   }
 
   void _saveJSONWalletFile(Credentials credentials, String password) async {

@@ -1,27 +1,57 @@
 import 'package:flutter/material.dart';
-import 'package:seed_venture/blocs/bloc_provider.dart';
-import 'package:seed_venture/blocs/mnemonic_logic_bloc.dart';
+import 'package:web3dart/web3dart.dart';
+import 'package:seed_venture/blocs/insert_password_import_bloc.dart';
 
 class InsertPasswordImportPage extends StatefulWidget {
+
+  static int fromJSONFile = 0;
+  static int fromPrivateKey = 1;
+  static int fromMnemonicWords = 2;
+
+  final int importMode;
+  final Credentials credentials;
+  final String privateKey;
+  final String jsonPath;
+  final String mnemonic;
+
+  InsertPasswordImportPage({this.importMode, this.credentials, this.privateKey, this.jsonPath, this.mnemonic});
+
+
   @override
-  State<StatefulWidget> createState() => _InsertPasswordImportPageState();
+  State<StatefulWidget> createState() => _InsertPasswordImportPageState(importMode: importMode, credentials: credentials, privateKey: privateKey, jsonPath: jsonPath, mnemonic: mnemonic);
 }
 
 class _InsertPasswordImportPageState extends State<InsertPasswordImportPage>{
 
   final TextEditingController passwordController = TextEditingController();
+  final _scaffoldKey = GlobalKey<ScaffoldState>();
+
+  final int importMode;
+  final Credentials credentials;
+  final String privateKey;
+  final String jsonPath;
+  final String mnemonic;
+
+
+  _InsertPasswordImportPageState({this.importMode, this.credentials, this.privateKey, this.jsonPath, this.mnemonic});
 
 
 
   @override
   Widget build(BuildContext context) {
 
-   /* final MnemonicLogicBloc mnemonicLogicBloc =
-    BlocProvider.of<MnemonicLogicBloc>(context);*/
+   final InsertPasswordImportBloc insertPasswordImportBloc =
+    InsertPasswordImportBloc(importMode: importMode, credentials: credentials, privateKey: privateKey, jsonPath: jsonPath, mnemonic: mnemonic);
+
+   insertPasswordImportBloc.wrongPasswordSubject.listen((data){
+     SnackBar wrongPasswordSnackBar = SnackBar(content: Text('Wrong Password For JSON Wallet'));
+     _scaffoldKey.currentState.showSnackBar(wrongPasswordSnackBar);
+   });
 
 
 
     return Scaffold(
+      key: _scaffoldKey,
         appBar: AppBar(
           title: Text('Insert Password'),
         ),
@@ -41,7 +71,7 @@ class _InsertPasswordImportPageState extends State<InsertPasswordImportPage>{
               ),
               RaisedButton(
                 onPressed: () {
-
+                  insertPasswordImportBloc.import(passwordController.text);
                 },
                 child: Text('Import', style: TextStyle(color: Colors.white)),
               ),

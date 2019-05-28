@@ -26,7 +26,7 @@ class MainActivity: FlutterActivity() {
       if(call.method == "getPermission"){
 
         try {
-          val PERMISSION = 100;
+          val PERMISSION = 100
 
           if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.WRITE_EXTERNAL_STORAGE)
                   != PackageManager.PERMISSION_GRANTED) {
