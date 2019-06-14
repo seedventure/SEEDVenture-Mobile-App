@@ -1,19 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:seed_venture/blocs/bloc_provider.dart';
-import 'package:seed_venture/blocs/application_bloc.dart';
-import 'package:seed_venture/blocs/homepage_bloc.dart';
 import 'package:seed_venture/pages/home_page.dart';
-import 'package:seed_venture/pages/grid_page.dart';
-import 'package:seed_venture/blocs/gridpage_bloc.dart';
+import 'package:seed_venture/pages/baskets_page.dart';
+import 'package:flutter/services.dart';
 
 void main() {
-  return runApp(BlocProvider<ApplicationBloc>(
-    bloc: ApplicationBloc(),
-    child: BlocProvider<HomePageBloc>(
-      bloc: HomePageBloc(),
-      child: SeedVentureApp(),
-    ),
-  ));
+  return runApp(SeedVentureApp());
 }
 
 class SeedVentureApp extends StatelessWidget {
@@ -45,11 +36,7 @@ class SeedVentureApp extends StatelessWidget {
         home: HomePage(),
         routes: <String, WidgetBuilder>{
           '/home': (BuildContext context) {
-            return BlocProvider<GridPageBloc>(
-              bloc: GridPageBloc(),
-              child: GridPage(
-              ),
-            );
+            return BasketsPage();
           },
         });
   }

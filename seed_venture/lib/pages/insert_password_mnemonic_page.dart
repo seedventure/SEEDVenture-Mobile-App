@@ -1,20 +1,55 @@
 import 'package:flutter/material.dart';
-import 'package:seed_venture/blocs/bloc_provider.dart';
 import 'package:seed_venture/blocs/mnemonic_logic_bloc.dart';
 import 'package:seed_venture/widgets/progress_bar_overlay.dart';
+import 'dart:async';
 
-class InsertPasswordMnemonicPage extends StatelessWidget {
-  final String mnemonic;
+class InsertPasswordMnemonicPage extends StatefulWidget {
+  @override
+  State<StatefulWidget> createState() => _InsertPasswordMnemonicPageState();
+}
+
+class _InsertPasswordMnemonicPageState
+    extends State<InsertPasswordMnemonicPage> {
   final TextEditingController passwordController = TextEditingController();
   final TextEditingController repeatPasswordController =
       TextEditingController();
+  StreamSubscription _streamSubscription;
+  Stream _previousStream;
 
-  InsertPasswordMnemonicPage({this.mnemonic});
+  void _listen(Stream<bool> stream) {
+    _streamSubscription = stream.listen((success) {
+      if (success) {
+        Navigator.pop(context);
+        Navigator.of(context)
+            .pushNamedAndRemoveUntil('/home', (Route<dynamic> route) => false);
+      }
+    });
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // final MnemonicLogicBloc mnemonicLogicBloc =
+    //    BlocProvider.of<MnemonicLogicBloc>(context);
+    if (mnemonicLogicBloc.outOnDoneCreateConfigurationFromMnemonic !=
+        _previousStream) {
+      _streamSubscription?.cancel();
+      _previousStream =
+          mnemonicLogicBloc.outOnDoneCreateConfigurationFromMnemonic;
+      _listen(mnemonicLogicBloc.outOnDoneCreateConfigurationFromMnemonic);
+    }
+  }
+
+  @override
+  void dispose() {
+    _streamSubscription.cancel();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    final MnemonicLogicBloc insertPasswordMnemonicBloc =
-        BlocProvider.of<MnemonicLogicBloc>(context);
+    //  final MnemonicLogicBloc mnemonicLogicBloc =
+    //    BlocProvider.of<MnemonicLogicBloc>(context);
 
     return Scaffold(
       appBar: AppBar(
@@ -45,7 +80,8 @@ class InsertPasswordMnemonicPage extends StatelessWidget {
                       border: InputBorder.none, hintText: 'Password...'),
                   controller: passwordController,
                 ),
-                margin: const EdgeInsets.only(left: 20.0, right: 20.0, top: 10.0, bottom: 10.0),
+                margin: const EdgeInsets.only(
+                    left: 20.0, right: 20.0, top: 10.0, bottom: 10.0),
               ),
               Container(
                 child: TextField(
@@ -54,25 +90,14 @@ class InsertPasswordMnemonicPage extends StatelessWidget {
                       border: InputBorder.none, hintText: 'Repeat Password...'),
                   controller: repeatPasswordController,
                 ),
-                margin: const EdgeInsets.only(left: 20.0, right: 20.0, top: 10.0, bottom: 20.0),
+                margin: const EdgeInsets.only(
+                    left: 20.0, right: 20.0, top: 10.0, bottom: 20.0),
               ),
               RaisedButton(
                 onPressed: () {
                   Navigator.of(context).push(ProgressBarOverlay());
-                  insertPasswordMnemonicBloc.deriveKeysFromMnemonic(
-                      mnemonic, passwordController.text);
-
-                  insertPasswordMnemonicBloc.subject.listen((success) {
-                    if (success) {
-                      Navigator.pop(context);
-
-
-                      Navigator.of(context).pushNamedAndRemoveUntil(
-                          '/home', (Route<dynamic> route) => false);
-
-
-                    }
-                  });
+                  mnemonicLogicBloc
+                      .deriveKeysFromMnemonic(passwordController.text);
                 },
                 child: Text('Continue', style: TextStyle(color: Colors.white)),
               )

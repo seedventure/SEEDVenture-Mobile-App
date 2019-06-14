@@ -1,17 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:seed_venture/blocs/createconfig_bloc.dart';
-import 'package:seed_venture/blocs/bloc_provider.dart';
 import 'package:seed_venture/pages/repeat_mnemonic_page.dart';
-import 'package:seed_venture/blocs/repeatmnemonic_bloc.dart';
+import 'package:seed_venture/blocs/mnemonic_logic_bloc.dart';
 
 class CreateConfigPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final CreateConfigBloc createConfigBloc =
-        BlocProvider.of<CreateConfigBloc>(context);
-
-    createConfigBloc.getRandomMnemonic();
-
+    //final MnemonicLogicBloc mnemonicLogicBloc =
+    //  BlocProvider.of<MnemonicLogicBloc>(context);
 
     return Scaffold(
         appBar: AppBar(
@@ -52,8 +47,8 @@ class CreateConfigPage extends StatelessWidget {
                         ),
                         RaisedButton(
                           onPressed: () {
-                            createConfigBloc
-                                .copyMnemonicToClipboard(snapshot.data);
+                            MnemonicLogicBloc.copyMnemonicToClipboard(
+                                snapshot.data);
 
                             final snackBar = SnackBar(
                                 content: Text('Mnemonic Words copied!'));
@@ -64,17 +59,10 @@ class CreateConfigPage extends StatelessWidget {
                         ),
                         RaisedButton(
                           onPressed: () {
-                            createConfigBloc.dispose();
                             Navigator.of(context).push(MaterialPageRoute(
                                 builder: (BuildContext context) {
-                              return BlocProvider<RepeatMnemonicBloc>(
-                                bloc: RepeatMnemonicBloc(),
-                                child: RepeatMnemonicPage(
-                                  rightMnemonic: snapshot.data,
-                                ),
-                              );
-                            })
-                            );
+                              return RepeatMnemonicPage();
+                            }));
                           },
                           child: Text('Continue',
                               style: TextStyle(color: Colors.white)),
@@ -85,7 +73,7 @@ class CreateConfigPage extends StatelessWidget {
                     return CircularProgressIndicator();
                   }
                 },
-                stream: createConfigBloc.subject,
+                stream: mnemonicLogicBloc.outRandomMnemonic,
               )
             ],
           ),

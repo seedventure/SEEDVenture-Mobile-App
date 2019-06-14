@@ -1,47 +1,59 @@
 import 'package:flutter/material.dart';
-import 'package:seed_venture/blocs/repeatmnemonic_bloc.dart';
-import 'package:seed_venture/blocs/bloc_provider.dart';
 import 'package:seed_venture/blocs/mnemonic_logic_bloc.dart';
 import 'package:seed_venture/pages/insert_password_mnemonic_page.dart';
+import 'dart:async';
 
 class RepeatMnemonicPage extends StatefulWidget {
-  final String rightMnemonic;
-
-  RepeatMnemonicPage({this.rightMnemonic});
-
   @override
-  State<StatefulWidget> createState() =>
-      _RepeatMnemonicPageState(rightMnemonic: rightMnemonic);
+  State<StatefulWidget> createState() => _RepeatMnemonicPageState();
 }
 
 class _RepeatMnemonicPageState extends State<RepeatMnemonicPage> {
   final TextEditingController mnemonicController = TextEditingController();
-  final String rightMnemonic;
   final _scaffoldKey = GlobalKey<ScaffoldState>();
+ // MnemonicLogicBloc mnemonicLogicBloc;
+  StreamSubscription _streamSubscription;
+  Stream _previousStream;
 
-  _RepeatMnemonicPageState({this.rightMnemonic});
-
-  @override
-  Widget build(BuildContext context) {
-    final RepeatMnemonicBloc repeatMnemonicBloc =
-        BlocProvider.of<RepeatMnemonicBloc>(context);
-
-    repeatMnemonicBloc.subject.listen((isCorrect) {
+  void _listen(Stream<bool> stream) {
+    _streamSubscription = stream.listen((isCorrect) {
       if (!isCorrect) {
         SnackBar copySnack = SnackBar(content: Text('Wrong Mnemonic!'));
         _scaffoldKey.currentState.showSnackBar(copySnack);
       } else {
         Navigator.of(context)
             .push(MaterialPageRoute(builder: (BuildContext context) {
-          return BlocProvider<MnemonicLogicBloc>(
-            bloc: MnemonicLogicBloc(),
-            child: InsertPasswordMnemonicPage(
-              mnemonic: rightMnemonic,
-            ),
-          );
+          /*return BlocProvider<MnemonicLogicBloc>(
+            bloc: mnemonicLogicBloc,
+            child: InsertPasswordMnemonicPage(),
+          );*/
+          return InsertPasswordMnemonicPage();
         }));
       }
     });
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    //final MnemonicLogicBloc mnemonicLogicBloc =
+   //     BlocProvider.of<MnemonicLogicBloc>(context);
+    if (mnemonicLogicBloc.outCheckMnemonic != _previousStream) {
+      _streamSubscription?.cancel();
+      _previousStream = mnemonicLogicBloc.outCheckMnemonic;
+      _listen(mnemonicLogicBloc.outCheckMnemonic);
+    }
+  }
+
+  @override
+  void dispose() {
+    _streamSubscription.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+  //  mnemonicLogicBloc = BlocProvider.of<MnemonicLogicBloc>(context);
 
     return Scaffold(
         key: _scaffoldKey,
@@ -75,11 +87,10 @@ class _RepeatMnemonicPageState extends State<RepeatMnemonicPage> {
               ),
               RaisedButton(
                 onPressed: () {
-                  repeatMnemonicBloc.checkMnemonic(
-                      rightMnemonic, mnemonicController.text);
+                  mnemonicLogicBloc.isMnemonicCorrect(mnemonicController.text);
                 },
                 child: Text('Check', style: TextStyle(color: Colors.white)),
-              )
+              ),
             ],
           ),
         ));

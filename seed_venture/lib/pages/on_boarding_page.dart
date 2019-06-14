@@ -1,17 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:seed_venture/pages/create_config_page.dart';
-import 'package:seed_venture/blocs/createconfig_bloc.dart';
-import 'package:seed_venture/blocs/bloc_provider.dart';
 import 'package:seed_venture/blocs/onboarding_bloc.dart';
 import 'package:seed_venture/pages/import_config_page.dart';
-import 'package:seed_venture/blocs/mnemonic_logic_bloc.dart';
 
 class OnBoardingPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-   // final OnBoardingBloc onBoardingBloc =
-   // BlocProvider.of<OnBoardingBloc>(context);
-
     return Scaffold(
         appBar: AppBar(
           title: Text('On Boarding'),
@@ -36,10 +30,8 @@ class OnBoardingPage extends StatelessWidget {
                 onPressed: () {
                   Navigator.of(context)
                       .push(MaterialPageRoute(builder: (BuildContext context) {
-                    return BlocProvider<CreateConfigBloc>(
-                      bloc: CreateConfigBloc(),
-                      child: CreateConfigPage(),
-                    );
+
+                    return CreateConfigPage();
                   }));
                 },
                 child: Text(
@@ -51,10 +43,7 @@ class OnBoardingPage extends StatelessWidget {
                 onPressed: () {
                   Navigator.of(context)
                       .push(MaterialPageRoute(builder: (BuildContext context) {
-                    return BlocProvider<MnemonicLogicBloc>(
-                      bloc: MnemonicLogicBloc(),
-                      child: ImportConfigPage(),
-                    );
+                      return ImportConfigPage();
                   }));
                 },
                 child: Text('Import Config',
@@ -65,7 +54,7 @@ class OnBoardingPage extends StatelessWidget {
                   child: RaisedButton(
                     color: Theme.of(context).accentColor,
                     onPressed: () {
-                      //onBoardingBloc.setOnBoardingDone();
+                      OnBoardingBloc.setOnBoardingDone();
                       Navigator.of(context).pushNamedAndRemoveUntil(
                           '/home', (Route<dynamic> route) => false);
                     },

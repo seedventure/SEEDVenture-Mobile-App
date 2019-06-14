@@ -46,7 +46,7 @@ class ProgressBarOverlay extends ModalRoute<void> {
       children: <Widget>[
         CircularProgressIndicator(),
         Container(
-          child: Text('Generating Keys and Wallet file...', style: TextStyle(color: Theme.of(context).accentColor, fontWeight: FontWeight.bold),),
+          child: Text('Generating Keys and Config file...', style: TextStyle(color: Theme.of(context).accentColor, fontWeight: FontWeight.bold),),
           margin: const EdgeInsets.only(top: 10.0),
         )
       ],

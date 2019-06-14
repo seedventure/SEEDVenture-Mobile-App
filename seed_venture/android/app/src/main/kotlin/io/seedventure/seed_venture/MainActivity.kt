@@ -15,6 +15,8 @@ class MainActivity: FlutterActivity() {
 
 
   private val CHANNEL_PERMISSIONS = "seedventure.io/permissions"
+  private val CHANNEL_AES = "seedventure.io/aes"
+
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
@@ -46,6 +48,48 @@ class MainActivity: FlutterActivity() {
             result.success(true);
 
           }
+
+
+        } catch (e: IOException) {
+          e.printStackTrace()
+        }
+
+
+
+      }
+    }
+
+    MethodChannel(flutterView, CHANNEL_AES).setMethodCallHandler { call, result ->
+      if(call.method == "encrypt"){
+
+        try {
+          val plainData = call.argument<String>("plainData")
+          val realPass = call.argument<String>("realPass")
+
+          val encryptedData = AES256.encrypt(plainData, realPass)
+
+          result.success(encryptedData)
+
+
+
+        } catch (e: IOException) {
+          e.printStackTrace()
+        }
+
+
+
+      }
+
+      if(call.method == "decrypt"){
+
+        try {
+          val encrypted = call.argument<String>("encrypted")
+          val pass = call.argument<String>("realPass")
+
+          val decryptedData = AES256.decrypt(encrypted, pass);
+
+          result.success(decryptedData)
+
 
 
         } catch (e: IOException) {

@@ -1,57 +1,49 @@
 import 'package:flutter/material.dart';
-import 'package:web3dart/web3dart.dart';
-import 'package:seed_venture/blocs/insert_password_import_bloc.dart';
+import 'package:seed_venture/blocs/import_logic_bloc.dart';
+import 'package:seed_venture/widgets/progress_bar_overlay.dart';
 
 class InsertPasswordImportPage extends StatefulWidget {
-
-  static int fromJSONFile = 0;
-  static int fromPrivateKey = 1;
-  static int fromMnemonicWords = 2;
-
-  final int importMode;
-  final Credentials credentials;
-  final String privateKey;
-  final String jsonPath;
-  final String mnemonic;
-
-  InsertPasswordImportPage({this.importMode, this.credentials, this.privateKey, this.jsonPath, this.mnemonic});
-
-
   @override
-  State<StatefulWidget> createState() => _InsertPasswordImportPageState(importMode: importMode, credentials: credentials, privateKey: privateKey, jsonPath: jsonPath, mnemonic: mnemonic);
+  State<StatefulWidget> createState() => _InsertPasswordImportPageState();
 }
 
-class _InsertPasswordImportPageState extends State<InsertPasswordImportPage>{
-
+class _InsertPasswordImportPageState extends State<InsertPasswordImportPage> {
   final TextEditingController passwordController = TextEditingController();
   final _scaffoldKey = GlobalKey<ScaffoldState>();
+  dynamic specificBloc;
 
-  final int importMode;
-  final Credentials credentials;
-  final String privateKey;
-  final String jsonPath;
-  final String mnemonic;
+  @override
+  void initState() {
 
 
-  _InsertPasswordImportPageState({this.importMode, this.credentials, this.privateKey, this.jsonPath, this.mnemonic});
+    specificBloc = importLogicBloc.getCurrentBloc();
 
+    importLogicBloc.outImportStatus.listen((done) {
+      if (done) {
+        Navigator.pop(context);
+        Navigator.of(context)
+            .pushNamedAndRemoveUntil('/home', (Route<dynamic> route) => false);
+      }
+    });
 
+    importLogicBloc.outWrongPassword.listen((wrong) {
+      if (wrong) {
+        Navigator.pop(context);
+        SnackBar wrongPasswordSnackBar =
+        SnackBar(content: Text('Wrong Password'));
+        _scaffoldKey.currentState.showSnackBar(wrongPasswordSnackBar);
+      }
+    });
+
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
 
-   final InsertPasswordImportBloc insertPasswordImportBloc =
-    InsertPasswordImportBloc(importMode: importMode, credentials: credentials, privateKey: privateKey, jsonPath: jsonPath, mnemonic: mnemonic);
-
-   insertPasswordImportBloc.wrongPasswordSubject.listen((data){
-     SnackBar wrongPasswordSnackBar = SnackBar(content: Text('Wrong Password For JSON Wallet'));
-     _scaffoldKey.currentState.showSnackBar(wrongPasswordSnackBar);
-   });
-
-
 
     return Scaffold(
-      key: _scaffoldKey,
+        key: _scaffoldKey,
         appBar: AppBar(
           title: Text('Insert Password'),
         ),
@@ -60,23 +52,23 @@ class _InsertPasswordImportPageState extends State<InsertPasswordImportPage>{
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: <Widget>[
-
               Container(
                 child: TextField(
+                  obscureText: true,
                   controller: passwordController,
                   decoration: InputDecoration(
                       border: InputBorder.none, hintText: 'Password...'),
                 ),
-                margin: const EdgeInsets.only(left: 20.0, right: 20.0, top: 10.0, bottom: 10.0),
+                margin: const EdgeInsets.only(
+                    left: 20.0, right: 20.0, top: 10.0, bottom: 10.0),
               ),
               RaisedButton(
                 onPressed: () {
-                  insertPasswordImportBloc.import(passwordController.text);
+                  Navigator.of(context).push(ProgressBarOverlay());
+                  importLogicBloc.import(passwordController.text);
                 },
                 child: Text('Import', style: TextStyle(color: Colors.white)),
               ),
-
-
             ],
           ),
         ));
