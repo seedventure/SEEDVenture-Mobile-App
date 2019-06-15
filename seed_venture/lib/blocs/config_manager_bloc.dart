@@ -133,7 +133,8 @@ class ConfigManagerBloc {
 
       bool success = await getFundingPanelDetails(
           fundingPanelItems[i].fundingPanelUpdates[0]['url'],
-          fundingPanelDetails);
+          fundingPanelDetails,
+          fundingPanelItems[i].fundingPanelAddress);
 
       if (success) {
         maps.add(map);
@@ -148,11 +149,16 @@ class ConfigManagerBloc {
     List<Map> fpDetailsListMap = List();
 
     for (int i = 0; i < fundingPanelDetails.length; i++) {
+      List<Map> members =
+          await getMembersOfFundingPanel(fundingPanelDetails[i].address);
+
       Map map = {
         'name': fundingPanelDetails[i].name,
         'description': fundingPanelDetails[i].description,
         'url': fundingPanelDetails[i].url,
-        'imgBase64': fundingPanelDetails[i].imgBase64
+        'imgBase64': fundingPanelDetails[i].imgBase64,
+        'funding_panel_address': fundingPanelDetails[i].address,
+        'members': members
       };
 
       fpDetailsListMap.add(map);
@@ -162,8 +168,173 @@ class ConfigManagerBloc {
         'funding_panels_details', jsonEncode(fpDetailsListMap));
   }
 
+  Future<List<Map>> getMembersOfFundingPanel(String fundingPanelAddress) async {
+    List<Map> members = List();
+    int membersLength = await getMembersLength(fundingPanelAddress);
+
+    for (int i = 0; i < membersLength; i++) {
+      String memberAddress =
+          await getMemberAddressByIndex(i, fundingPanelAddress);
+      List<String> memberData =
+          await getMemberDataByAddress(fundingPanelAddress, memberAddress);
+      List<String> memberJsonData = await getMemberJSONDataFromIPFS(memberData[0]);
+
+
+      Map member = {
+        'member_address': memberAddress,
+        'ipfsUrl': memberData[0],
+        'hash': memberData[1],
+        'name' : memberJsonData[0],
+        'description' : memberJsonData[1],
+        'url' : memberJsonData[2],
+        'imgBase64' : memberJsonData[3]
+      };
+
+      members.add(member);
+    }
+
+    return members;
+  }
+
+  Future<List<String>> getMemberJSONDataFromIPFS(String ipfsURL) async {
+    List<String> memberJsonData = List();
+    var response = await http.get(ipfsURL);
+    /*if (response.statusCode != 200) { // Gestire caso URL irraggiungibile?
+      return false;
+    }*/
+    Map responseMap = jsonDecode(response.body);
+
+    memberJsonData.add(responseMap['name']);
+    memberJsonData.add(responseMap['description']);
+    memberJsonData.add(responseMap['url']);
+    memberJsonData.add(responseMap['image']);
+
+    return memberJsonData;
+  }
+
+  Future<List<String>> getMemberDataByAddress(
+      String fundingPanelAddress, String memberAddress) async {
+    String data = "0xca87a8a1000000000000000000000000";
+
+    data = data + memberAddress.substring(2);
+
+    print(data);
+
+    var url = "https://ropsten.infura.io/v3/2f35010022614bcb9dd4c5fefa9a64fd";
+    Map callParams = {
+      "id": "1",
+      "jsonrpc": "2.0",
+      "method": "eth_call",
+      "params": [
+        {
+          "to": fundingPanelAddress,
+          "data": data,
+        },
+        "latest"
+      ]
+    };
+
+    var callResponse = await http.post(url,
+        body: jsonEncode(callParams),
+        headers: {'content-type': 'application/json'});
+
+    Map resMap = jsonDecode(callResponse.body);
+
+    String hash = resMap['result'].toString().substring(194, 258);
+
+    HexDecoder a = HexDecoder();
+    List byteArray = a.convert(resMap['result'].toString().substring(258));
+
+    String ipfsUrl = utf8.decode(byteArray);
+
+    for (int i = 0; i < ipfsUrl.length; i++) {
+      if (ipfsUrl.codeUnitAt(i) == 'h'.codeUnitAt(0)) {
+        for (int k = i; k < ipfsUrl.length; k++) {
+          if (ipfsUrl.codeUnitAt(k) == 0) {
+            ipfsUrl = ipfsUrl.substring(i, k);
+            break;
+          }
+        }
+
+        break;
+      }
+    }
+
+    List<String> memberData = List();
+    memberData.add(ipfsUrl);
+    memberData.add(hash);
+
+    return memberData;
+  }
+
+  Future<String> getMemberAddressByIndex(
+      int index, String fundingPanelAddress) async {
+    String data = "0x3c8c3ca6";
+
+    String indexHex = numbers.toHex(index);
+
+    for (int i = 0; i < 64 - indexHex.length; i++) {
+      data += "0";
+    }
+
+    data += indexHex;
+
+    print(data);
+
+    var url = "https://ropsten.infura.io/v3/2f35010022614bcb9dd4c5fefa9a64fd";
+    Map callParams = {
+      "id": "1",
+      "jsonrpc": "2.0",
+      "method": "eth_call",
+      "params": [
+        {
+          "to": fundingPanelAddress,
+          "data": data,
+        },
+        "latest"
+      ]
+    };
+
+    var callResponse = await http.post(url,
+        body: jsonEncode(callParams),
+        headers: {'content-type': 'application/json'});
+
+    Map resMap = jsonDecode(callResponse.body);
+
+    String address = EthereumAddress(resMap['result'].toString()).hex;
+
+    return address;
+  }
+
+  Future<int> getMembersLength(String fundingPanelAddress) async {
+    String data = "0x7351262f"; // get deployerListLength
+    var url = "https://ropsten.infura.io/v3/2f35010022614bcb9dd4c5fefa9a64fd";
+    Map callParams = {
+      "id": "1",
+      "jsonrpc": "2.0",
+      "method": "eth_call",
+      "params": [
+        {
+          "to": fundingPanelAddress,
+          "data": data,
+        },
+        "latest"
+      ]
+    };
+
+    var callResponse = await http.post(url,
+        body: jsonEncode(callParams),
+        headers: {'content-type': 'application/json'});
+
+    Map resMap = jsonDecode(callResponse.body);
+
+    return numbers.hexToInt(resMap['result']).toInt();
+  }
+
   Future<bool> getFundingPanelDetails(
-      String url, List<FundingPanelDetails> fundingPanelDetailsList) async {
+      String url,
+      List<FundingPanelDetails> fundingPanelDetailsList,
+      String fundingPanelAddress) async {
     try {
       var response = await http.get(url);
       if (response.statusCode != 200) {
@@ -174,7 +345,8 @@ class ConfigManagerBloc {
           responseMap['name'],
           responseMap['description'],
           responseMap['url'],
-          responseMap['image']));
+          responseMap['image'],
+          fundingPanelAddress));
       return true;
     } catch (e) {
       return false;
@@ -320,7 +492,6 @@ class ConfigManagerBloc {
     List byteArray = a.convert(resMap['result'].toString().substring(130));
 
     String ipfsUrl = utf8.decode(byteArray);
-
 
     for (int i = 0; i < ipfsUrl.length; i++) {
       if (ipfsUrl.codeUnitAt(i) == 'h'.codeUnitAt(0)) {

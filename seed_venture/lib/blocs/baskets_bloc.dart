@@ -7,7 +7,7 @@ final BasketsBloc basketsBloc = BasketsBloc();
 
 class BasketsBloc {
   PublishSubject<List<FundingPanelDetails>> _getFundingPanelsDetails =
-      PublishSubject <List<FundingPanelDetails>>();
+      PublishSubject<List<FundingPanelDetails>>();
 
   Stream<List<FundingPanelDetails>> get outFundingPanelsDetails =>
       _getFundingPanelsDetails.stream;
@@ -19,12 +19,12 @@ class BasketsBloc {
       List maps = jsonDecode(prefs.getString('funding_panels_details'));
       List<FundingPanelDetails> fundingPanelsDetails = List();
 
-      for(int i = 0; i < maps.length; i++){
-        fundingPanelsDetails.add(FundingPanelDetails(maps[i]['name'], maps[i]['description'], maps[i]['url'], maps[i]['imgBase64']));
+      for (int i = 0; i < maps.length; i++) {
+        fundingPanelsDetails.add(FundingPanelDetails(maps[i]['name'],
+            maps[i]['description'], maps[i]['url'], maps[i]['imgBase64'], maps[i]['funding_panel_address']));
       }
 
       _inFundingPanelsDetails.add(fundingPanelsDetails);
-
     });
   }
 

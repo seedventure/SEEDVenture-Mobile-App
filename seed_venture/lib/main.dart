@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:seed_venture/pages/home_page.dart';
 import 'package:seed_venture/pages/baskets_page.dart';
 import 'package:flutter/services.dart';
+import 'package:seed_venture/pages/members_page.dart';
 
 void main() {
   return runApp(SeedVentureApp());
@@ -37,6 +38,9 @@ class SeedVentureApp extends StatelessWidget {
         routes: <String, WidgetBuilder>{
           '/home': (BuildContext context) {
             return BasketsPage();
+          },
+          '/startups': (BuildContext context) {
+            return MembersPage();
           },
         });
   }

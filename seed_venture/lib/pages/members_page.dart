@@ -1,13 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
-import 'package:seed_venture/blocs/baskets_bloc.dart';
-import 'package:seed_venture/models/funding_panel_details.dart';
-import 'package:seed_venture/pages/members_page.dart';
 import 'package:seed_venture/blocs/members_bloc.dart';
+import 'package:seed_venture/models/member_item.dart';
 
-class BasketsPage extends StatelessWidget {
-  Widget _buildStaggeredGridView(
-      List<FundingPanelDetails> fundingPanelDetails) {
+class MembersPage extends StatelessWidget {
+  Widget _buildStaggeredGridView(List<MemberItem> members) {
     List<StaggeredTile> _staggeredTiles = <StaggeredTile>[
       /*const StaggeredTile.count(2, 2),
       const StaggeredTile.count(2, 2),
@@ -17,21 +14,16 @@ class BasketsPage extends StatelessWidget {
     ];
 
     List<Widget> _tiles = <Widget>[
-      /*const _Example01Tile(i: 1,),
-      const _Example01Tile(i: 2,),
-      const _Example01Tile(i: 3,),
-      const _Example01Tile(i: 4,),
-      const _Example01Tile(i: 5,),*/
+
     ];
 
-    for (int i = 0; i < fundingPanelDetails.length; i++) {
+    for (int i = 0; i < members.length; i++) {
       _staggeredTiles.add(StaggeredTile.count(2, 3));
       _tiles.add(_Example01Tile(
-        name: fundingPanelDetails[i].name,
-        description: fundingPanelDetails[i].description,
-        url: fundingPanelDetails[i].url,
-        imgBase64: fundingPanelDetails[i].imgBase64,
-        fpAddress: fundingPanelDetails[i].address,
+        name: members[i].name,
+        description: members[i].description,
+        url: members[i].url,
+        imgBase64: members[i].imgBase64,
       ));
     }
 
@@ -49,7 +41,7 @@ class BasketsPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return new Scaffold(
         appBar: new AppBar(
-          title: new Text('Baskets'),
+          title: new Text('Startups'),
         ),
         body: new Padding(
             padding: const EdgeInsets.only(top: 12.0),
@@ -61,41 +53,27 @@ class BasketsPage extends StatelessWidget {
                   return CircularProgressIndicator();
                 }
               },
-              stream: basketsBloc.outFundingPanelsDetails,
-            )
-
-            /* new StaggeredGridView.count(
-              crossAxisCount: 4,
-              staggeredTiles: _staggeredTiles,
-              children: _tiles,
-              mainAxisSpacing: 4.0,
-              crossAxisSpacing: 4.0,
-              padding: const EdgeInsets.all(4.0),
-            )*/
-            ));
+              stream: membersBloc.outMembers,
+            )));
   }
 }
 
 class _Example01Tile extends StatelessWidget {
-  const _Example01Tile({this.name, this.description, this.url, this.imgBase64, this.fpAddress});
+  const _Example01Tile({this.name, this.description, this.url, this.imgBase64});
 
-  final Color backgroundColor = Colors.greenAccent;
+  final Color backgroundColor = Colors.redAccent;
 
   final String name;
   final String description;
   final String url;
   final String imgBase64;
-  final String fpAddress;
 
   @override
   Widget build(BuildContext context) {
     return new Card(
       color: backgroundColor,
       child: new InkWell(
-        onTap: () {
-          membersBloc.setFundingPanelAddress(fpAddress);
-          Navigator.pushNamed(context, '/startups');
-        },
+        onTap: () {},
         child: Container(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -107,19 +85,9 @@ class _Example01Tile extends StatelessWidget {
               )),
               Expanded(
                   child: Container(
-                child: Text('Incubator: ' + name),
-                margin: const EdgeInsets.all(10.0),
-              )),
-              Expanded(
-                  child: Container(
                 child: Text('Description: ' + description),
                 margin: const EdgeInsets.all(10.0),
               )),
-              Expanded(
-                  child: Container(
-                child: Text('Latest Quotation: 0.001 SEED'),
-                margin: const EdgeInsets.all(10.0),
-              ))
             ],
           ),
         ),
