@@ -6,11 +6,7 @@ import 'package:seed_venture/models/member_item.dart';
 final MembersBloc membersBloc = MembersBloc();
 
 class MembersBloc {
-  String _fundingPanelAddress;
 
-  void setFundingPanelAddress(String fundingPanelAddress) {
-    this._fundingPanelAddress = fundingPanelAddress;
-  }
 
   BehaviorSubject<List<MemberItem>> _getMembers =
   BehaviorSubject<List<MemberItem>>();
@@ -18,13 +14,13 @@ class MembersBloc {
   Stream<List<MemberItem>> get outMembers => _getMembers.stream;
   Sink<List<MemberItem>> get _inMembers => _getMembers.sink;
 
-  MembersBloc() {
+  void getMembers(String fpAddress){
     SharedPreferences.getInstance().then((prefs) {
       List maps = jsonDecode(prefs.getString('funding_panels_details'));
       List<MemberItem> members = List();
 
       for (int i = 0; i < maps.length; i++) {
-        if (maps[i]['funding_panel_address'] == _fundingPanelAddress) {
+        if (maps[i]['funding_panel_address'] == fpAddress) {
           List membersMaps = maps[i]['members'];
           for (int j = 0; j < membersMaps.length; j++) {
             members.add(MemberItem(
@@ -45,7 +41,11 @@ class MembersBloc {
     });
   }
 
+
+
   void closeSubjects() {
-    _getMembers.close();
+    //_getMembers.close();
   }
+
+
 }

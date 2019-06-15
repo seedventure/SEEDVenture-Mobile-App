@@ -4,8 +4,14 @@ import 'package:seed_venture/blocs/baskets_bloc.dart';
 import 'package:seed_venture/models/funding_panel_details.dart';
 import 'package:seed_venture/pages/members_page.dart';
 import 'package:seed_venture/blocs/members_bloc.dart';
+import 'package:seed_venture/blocs/config_manager_bloc.dart';
 
-class BasketsPage extends StatelessWidget {
+class BasketsPage extends StatefulWidget {
+  @override
+  State<StatefulWidget> createState() => _BasketsPageState();
+}
+
+class _BasketsPageState extends State<BasketsPage> {
   Widget _buildStaggeredGridView(
       List<FundingPanelDetails> fundingPanelDetails) {
     List<StaggeredTile> _staggeredTiles = <StaggeredTile>[
@@ -46,6 +52,12 @@ class BasketsPage extends StatelessWidget {
   }
 
   @override
+  void initState() {
+    configManagerBloc.periodicUpdate();
+    super.initState();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return new Scaffold(
         appBar: new AppBar(
@@ -64,15 +76,8 @@ class BasketsPage extends StatelessWidget {
               stream: basketsBloc.outFundingPanelsDetails,
             )
 
-            /* new StaggeredGridView.count(
-              crossAxisCount: 4,
-              staggeredTiles: _staggeredTiles,
-              children: _tiles,
-              mainAxisSpacing: 4.0,
-              crossAxisSpacing: 4.0,
-              padding: const EdgeInsets.all(4.0),
-            )*/
-            ));
+
+        ));
   }
 }
 
@@ -93,7 +98,7 @@ class _Example01Tile extends StatelessWidget {
       color: backgroundColor,
       child: new InkWell(
         onTap: () {
-          membersBloc.setFundingPanelAddress(fpAddress);
+          membersBloc.getMembers(fpAddress);
           Navigator.pushNamed(context, '/startups');
         },
         child: Container(

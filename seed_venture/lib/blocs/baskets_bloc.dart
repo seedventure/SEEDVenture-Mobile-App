@@ -25,7 +25,27 @@ class BasketsBloc {
       }
 
       _inFundingPanelsDetails.add(fundingPanelsDetails);
-    });
+    }
+    );
+  }
+
+  void launchPeriodicUpdate(){
+
+  }
+
+  void updateBaskets() {
+    SharedPreferences.getInstance().then((prefs) {
+      List maps = jsonDecode(prefs.getString('funding_panels_details'));
+      List<FundingPanelDetails> fundingPanelsDetails = List();
+
+      for (int i = 0; i < maps.length; i++) {
+        fundingPanelsDetails.add(FundingPanelDetails(maps[i]['name'],
+            maps[i]['description'], maps[i]['url'], maps[i]['imgBase64'], maps[i]['funding_panel_address']));
+      }
+
+      _inFundingPanelsDetails.add(fundingPanelsDetails);
+    }
+    );
   }
 
   void closeSubjects() {

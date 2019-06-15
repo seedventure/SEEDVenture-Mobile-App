@@ -12,6 +12,8 @@ import 'dart:io';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:seed_venture/models/funding_panel_details.dart';
 import 'package:seed_venture/blocs/onboarding_bloc.dart';
+import 'dart:async';
+import 'package:seed_venture/blocs/baskets_bloc.dart';
 
 final ConfigManagerBloc configManagerBloc = ConfigManagerBloc();
 
@@ -177,17 +179,17 @@ class ConfigManagerBloc {
           await getMemberAddressByIndex(i, fundingPanelAddress);
       List<String> memberData =
           await getMemberDataByAddress(fundingPanelAddress, memberAddress);
-      List<String> memberJsonData = await getMemberJSONDataFromIPFS(memberData[0]);
-
+      List<String> memberJsonData =
+          await getMemberJSONDataFromIPFS(memberData[0]);
 
       Map member = {
         'member_address': memberAddress,
         'ipfsUrl': memberData[0],
         'hash': memberData[1],
-        'name' : memberJsonData[0],
-        'description' : memberJsonData[1],
-        'url' : memberJsonData[2],
-        'imgBase64' : memberJsonData[3]
+        'name': memberJsonData[0],
+        'description': memberJsonData[1],
+        'url': memberJsonData[2],
+        'imgBase64': memberJsonData[3]
       };
 
       members.add(member);
@@ -578,5 +580,63 @@ class ConfigManagerBloc {
     print(callResponse.body);
 
     return EthereumAddress(resMap['result']).hex;
+  }
+
+  Future<List<String>> getEncryptedParamsFromConfigFile() async {
+    final documentsDir = await getApplicationDocumentsDirectory();
+    String path = documentsDir.path;
+    String configFilePath = '$path/configuration.json';
+    File configFile = File(configFilePath);
+    String content = configFile.readAsStringSync();
+    Map configurationMap = jsonDecode(content);
+    List<String> encryptedParams = List();
+    encryptedParams.add(configurationMap['user']['data']);
+    encryptedParams.add(configurationMap['user']['hash']);
+    return encryptedParams;
+  }
+
+  void _update() async {
+    Map configurationMap = Map();
+    List<FundingPanelItem> fundingPanelItems = List();
+    List<FundingPanelDetails> fundingPanelDetails = List();
+
+    Map localMap = {
+      'lang_config_stuff': {'name': 'English (England)', 'code': 'en_EN'}
+    };
+    configurationMap.addAll(localMap);
+
+    int currentBlockNumber = await getCurrentBlockNumber();
+    Map lastCheckedBlockNumberMap = {
+      'lastCheckedBlockNumber': currentBlockNumber
+    };
+    configurationMap.addAll(lastCheckedBlockNumberMap);
+
+    await getFundingPanelItems(
+        fundingPanelItems, fundingPanelDetails, configurationMap);
+
+    List<String> encryptedParams = await getEncryptedParamsFromConfigFile();
+
+    // Da sostituire solo i campi dei fundingPanels in futuro
+    Map userMapEncrypted = {
+      'user' : {
+        'data' : encryptedParams[0],
+        'hash' : encryptedParams[1]
+      }
+    };
+
+    configurationMap.addAll(userMapEncrypted);
+
+    saveConfigurationFile(configurationMap);
+
+    basketsBloc.updateBaskets();
+
+    print('configuration updated!');
+
+
+  }
+
+  void periodicUpdate() {
+    const fiveSec = const Duration(seconds: 45);
+    Timer _timer = new Timer.periodic(fiveSec, (Timer t) => _update());
   }
 }
