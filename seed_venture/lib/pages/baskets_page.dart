@@ -5,6 +5,8 @@ import 'package:seed_venture/models/funding_panel_details.dart';
 import 'package:seed_venture/pages/members_page.dart';
 import 'package:seed_venture/blocs/members_bloc.dart';
 import 'package:seed_venture/blocs/config_manager_bloc.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:flutter/cupertino.dart';
 
 class BasketsPage extends StatefulWidget {
   @override
@@ -12,6 +14,9 @@ class BasketsPage extends StatefulWidget {
 }
 
 class _BasketsPageState extends State<BasketsPage> {
+
+  FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin;
+
   Widget _buildStaggeredGridView(
       List<FundingPanelDetails> fundingPanelDetails) {
     List<StaggeredTile> _staggeredTiles = <StaggeredTile>[
@@ -54,6 +59,31 @@ class _BasketsPageState extends State<BasketsPage> {
   @override
   void initState() {
     configManagerBloc.periodicUpdate();
+
+    basketsBloc.outNotificationsiOS.listen((notificationData) async {
+
+      String title = notificationData[0];
+      String body = notificationData[1];
+
+      await showDialog(
+        context: context,
+        builder: (BuildContext context) => CupertinoAlertDialog(
+          title: Text(title),
+          content: Text(body),
+          actions: [
+            CupertinoDialogAction(
+              isDefaultAction: true,
+              child: Text('Ok'),
+              onPressed: () async {
+                Navigator.of(context, rootNavigator: true).pop();
+
+              },
+            )
+          ],
+        ),
+      );
+    });
+
     super.initState();
   }
 

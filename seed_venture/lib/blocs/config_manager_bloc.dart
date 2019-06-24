@@ -18,6 +18,8 @@ import 'package:seed_venture/blocs/baskets_bloc.dart';
 final ConfigManagerBloc configManagerBloc = ConfigManagerBloc();
 
 class ConfigManagerBloc {
+  Map _previousConfigurationMap;
+
   Future createConfiguration(
       Credentials walletCredentials, String password) async {
     Map configurationMap = Map();
@@ -142,6 +144,7 @@ class ConfigManagerBloc {
         maps.add(map);
       }
     }
+
     Map FPListMap = {'list': maps};
 
     configurationMap.addAll(FPListMap);
@@ -182,17 +185,19 @@ class ConfigManagerBloc {
       List<String> memberJsonData =
           await getMemberJSONDataFromIPFS(memberData[0]);
 
-      Map member = {
-        'member_address': memberAddress,
-        'ipfsUrl': memberData[0],
-        'hash': memberData[1],
-        'name': memberJsonData[0],
-        'description': memberJsonData[1],
-        'url': memberJsonData[2],
-        'imgBase64': memberJsonData[3]
-      };
+      if (memberJsonData != null) {
+        Map member = {
+          'member_address': memberAddress,
+          'ipfsUrl': memberData[0],
+          'hash': memberData[1],
+          'name': memberJsonData[0],
+          'description': memberJsonData[1],
+          'url': memberJsonData[2],
+          'imgBase64': memberJsonData[3]
+        };
 
-      members.add(member);
+        members.add(member);
+      }
     }
 
     return members;
@@ -200,18 +205,23 @@ class ConfigManagerBloc {
 
   Future<List<String>> getMemberJSONDataFromIPFS(String ipfsURL) async {
     List<String> memberJsonData = List();
-    var response = await http.get(ipfsURL);
-    /*if (response.statusCode != 200) { // Gestire caso URL irraggiungibile?
-      return false;
-    }*/
-    Map responseMap = jsonDecode(response.body);
 
-    memberJsonData.add(responseMap['name']);
-    memberJsonData.add(responseMap['description']);
-    memberJsonData.add(responseMap['url']);
-    memberJsonData.add(responseMap['image']);
+    try {
+      var response = await http.get(ipfsURL).timeout(Duration(seconds: 10));
+      if (response.statusCode != 200) {
+        return null;
+      }
+      Map responseMap = jsonDecode(response.body);
 
-    return memberJsonData;
+      memberJsonData.add(responseMap['name']);
+      memberJsonData.add(responseMap['description']);
+      memberJsonData.add(responseMap['url']);
+      memberJsonData.add(responseMap['image']);
+
+      return memberJsonData;
+    } catch (e) {
+      return null;
+    }
   }
 
   Future<List<String>> getMemberDataByAddress(
@@ -338,7 +348,8 @@ class ConfigManagerBloc {
       List<FundingPanelDetails> fundingPanelDetailsList,
       String fundingPanelAddress) async {
     try {
-      var response = await http.get(url);
+      var response = await http.get(url).timeout(Duration(seconds: 10));
+
       if (response.statusCode != 200) {
         return false;
       }
@@ -351,6 +362,7 @@ class ConfigManagerBloc {
           fundingPanelAddress));
       return true;
     } catch (e) {
+      print('error http get' + e.toString());
       return false;
     }
   }
@@ -515,43 +527,6 @@ class ConfigManagerBloc {
     return latestDataUpdate;
   }
 
-  Future<String> getSingleFundingPanelContractAddress(int index) async {
-    String data = "0x384a0df9";
-
-    String indexHex = numbers.toHex(index);
-
-    for (int i = 0; i < 64 - indexHex.length; i++) {
-      data += "0";
-    }
-
-    data += indexHex;
-
-    print(data);
-
-    var url = "https://ropsten.infura.io/v3/2f35010022614bcb9dd4c5fefa9a64fd";
-    Map callParams = {
-      "id": "1",
-      "jsonrpc": "2.0",
-      "method": "eth_call",
-      "params": [
-        {
-          "to": FPFactoryContractAddress,
-          "data": data,
-        },
-        "latest"
-      ]
-    };
-
-    var callResponse = await http.post(url,
-        body: jsonEncode(callParams),
-        headers: {'content-type': 'application/json'});
-
-    Map resMap = jsonDecode(callResponse.body);
-
-    print(callResponse.body);
-
-    return EthereumAddress(resMap['result']).hex;
-  }
 
   Future<String> getSingleFundingPanelTokenAddress(
       String fundingPanelContractAddress) async {
@@ -595,7 +570,7 @@ class ConfigManagerBloc {
     return encryptedParams;
   }
 
-  void _update() async {
+  Future _update() async {
     Map configurationMap = Map();
     List<FundingPanelItem> fundingPanelItems = List();
     List<FundingPanelDetails> fundingPanelDetails = List();
@@ -618,10 +593,7 @@ class ConfigManagerBloc {
 
     // Da sostituire solo i campi dei fundingPanels in futuro
     Map userMapEncrypted = {
-      'user' : {
-        'data' : encryptedParams[0],
-        'hash' : encryptedParams[1]
-      }
+      'user': {'data': encryptedParams[0], 'hash': encryptedParams[1]}
     };
 
     configurationMap.addAll(userMapEncrypted);
@@ -632,11 +604,93 @@ class ConfigManagerBloc {
 
     print('configuration updated!');
 
+    if (_previousConfigurationMap != null) {
+      await checkDifferencesBetweenConfigurations(
+          _previousConfigurationMap, configurationMap);
+      //_previousConfigurationMap = configurationMap;
+    }
 
+    /* else {
+
+    }*/
+
+    _previousConfigurationMap = configurationMap;
   }
 
-  void periodicUpdate() {
-    const fiveSec = const Duration(seconds: 45);
-    Timer _timer = new Timer.periodic(fiveSec, (Timer t) => _update());
+  Future checkDifferencesBetweenConfigurations(Map previous, Map actual) async {
+    List previousFPList = previous['list'];
+    List actualFPList = actual['list'];
+
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+
+    List maps = jsonDecode(prefs.getString('funding_panels_details'));
+    List<FundingPanelDetails> fundingPanelsDetails = List();
+
+    for (int i = 0; i < maps.length; i++) {
+      fundingPanelsDetails.add(FundingPanelDetails(
+          maps[i]['name'],
+          maps[i]['description'],
+          maps[i]['url'],
+          maps[i]['imgBase64'],
+          maps[i]['funding_panel_address']));
+    }
+
+    for (int i = 0; i < previousFPList.length; i++) {
+      Map prevFP = previousFPList[i];
+      Map actualFP = actualFPList[i];
+
+      if (prevFP['fundingPanelUpdates'][0]['hash'] !=
+          actualFP['fundingPanelUpdates'][0]['hash']) {
+        String notificationData =
+            'Documents by ' + fundingPanelsDetails[i].name + ' is changed!';
+        basketsBloc.notification(notificationData);
+      }
+    }
+
+    if (actualFPList.length > previousFPList.length) {
+      for (int i = previousFPList.length; i < actualFPList.length; i++) {
+        String notificationData =
+            'Incubator ' + fundingPanelsDetails[i].name + ' added!';
+        basketsBloc.notification(notificationData);
+      }
+    }
+  }
+
+  void periodicUpdate() async {
+    await _update();
+    const secs = const Duration(seconds: 120);
+    Timer _timer = new Timer.periodic(secs, (Timer t) => _update());
+  }
+
+  // Used to contribute to a basket
+  Future<Credentials> checkConfigPassword(String password) async {
+    List<String> encryptedParams = await getEncryptedParamsFromConfigFile();
+    String encryptedData = encryptedParams[0];
+    String hash = encryptedParams[1];
+
+    var platform = MethodChannel('seedventure.io/aes');
+
+    var decryptedData = await platform.invokeMethod('decrypt', {
+      "encrypted": utf8.decode(base64.decode(encryptedData)),
+      "realPass":
+      crypto.md5.convert(utf8.encode(password)).toString().toUpperCase()
+    });
+
+    try {
+      Map configJson = jsonDecode(decryptedData);
+      Credentials credentials =
+      Credentials.fromPrivateKeyHex(configJson['user']['privateKey']);
+      if (crypto.sha256
+          .convert(utf8.encode(credentials.address.hex.toLowerCase()))
+          .toString() ==
+          hash) {
+        return credentials;
+      } else {
+        return null;
+      }
+    } catch (e) {
+      return null;
+    }
+
   }
 }

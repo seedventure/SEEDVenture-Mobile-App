@@ -6,6 +6,11 @@ import 'package:seed_venture/models/member_item.dart';
 final MembersBloc membersBloc = MembersBloc();
 
 class MembersBloc {
+  String _fundingPanelAddress;
+
+  String getFundingPanelAddress(){
+    return _fundingPanelAddress;
+  }
 
 
   BehaviorSubject<List<MemberItem>> _getMembers =
@@ -15,6 +20,7 @@ class MembersBloc {
   Sink<List<MemberItem>> get _inMembers => _getMembers.sink;
 
   void getMembers(String fpAddress){
+    this._fundingPanelAddress = fpAddress;
     SharedPreferences.getInstance().then((prefs) {
       List maps = jsonDecode(prefs.getString('funding_panels_details'));
       List<MemberItem> members = List();

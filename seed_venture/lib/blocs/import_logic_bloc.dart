@@ -32,18 +32,6 @@ class ImportLogicBloc {
 
   int _currentImportMode;
 
-  /*ImportLogicBloc()
-      : _mnemonicLogicBloc = MnemonicLogicBloc(),
-        _jsonWalletLogicBloc = JSONWalletLogicBloc(),
-        _importPrivateKeyLogicBloc = ImportPrivateKeyLogicBloc(),
-        _importFromConfigFileBloc = ImportFromConfigFileBloc();*/
-
-  /*MnemonicLogicBloc get mnemonicLogicBloc => mnemonicLogicBloc;
-  JSONWalletLogicBloc get jsonWalletLogicBloc => jsonWalletLogicBloc;
-  ImportPrivateKeyLogicBloc get importPrivateKeyLogicBloc =>
-      importPrivateKeyLogicBloc;
-  ImportFromConfigFileBloc get importFromConfigFileBloc =>
-      importFromConfigFileBloc;*/
 
   void dispose() {}
 
