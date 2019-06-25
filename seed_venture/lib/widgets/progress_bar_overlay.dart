@@ -3,6 +3,12 @@ import 'package:flutter/material.dart';
 class ProgressBarOverlay extends ModalRoute<void> {
   String title;
 
+  static const int generatingConfig = 0;
+  static const int sendingTransaction = 1;
+
+  int _mode;
+
+
   @override
   Duration get transitionDuration => Duration(milliseconds: 200);
 
@@ -21,7 +27,7 @@ class ProgressBarOverlay extends ModalRoute<void> {
   @override
   bool get maintainState => true;
 
-  ProgressBarOverlay();
+  ProgressBarOverlay(this._mode);
 
   @override
   Widget buildPage(
@@ -46,10 +52,21 @@ class ProgressBarOverlay extends ModalRoute<void> {
       children: <Widget>[
         CircularProgressIndicator(),
         Container(
-          child: Text('Generating Keys and Config file...', style: TextStyle(color: Theme.of(context).accentColor, fontWeight: FontWeight.bold),),
+          child: Text(getTextByMode(_mode), style: TextStyle(color: Theme.of(context).accentColor, fontWeight: FontWeight.bold),),
           margin: const EdgeInsets.only(top: 10.0),
         )
       ],
     ));
+  }
+
+  String getTextByMode(int mode){
+    switch(mode){
+      case ProgressBarOverlay.generatingConfig:
+        return 'Generating Keys and Config file...';
+        break;
+      case ProgressBarOverlay.sendingTransaction:
+        return 'Sending Transaction...';
+        break;
+    }
   }
 }

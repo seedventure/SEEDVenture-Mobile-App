@@ -3,6 +3,7 @@ import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:seed_venture/blocs/members_bloc.dart';
 import 'package:seed_venture/models/member_item.dart';
 import 'package:seed_venture/blocs/contribution_bloc.dart';
+import 'package:seed_venture/widgets/progress_bar_overlay.dart';
 
 class MembersPage extends StatefulWidget {
   @override
@@ -48,6 +49,8 @@ class _Example01Tile extends StatelessWidget {
 }
 
 class _MemberPageState extends State<MembersPage> {
+  final _scaffoldKey = GlobalKey<ScaffoldState>();
+
   Widget _buildStaggeredGridView(List<MemberItem> members) {
     List<StaggeredTile> _staggeredTiles = <StaggeredTile>[];
 
@@ -56,7 +59,7 @@ class _MemberPageState extends State<MembersPage> {
     for (int i = 0; i < members.length; i++) {
       _staggeredTiles.add(StaggeredTile.count(2, 3));
       _tiles.add(_Example01Tile(
-        name: members[i].name,
+         name: members[i].name,
         description: members[i].description,
         url: members[i].url,
         imgBase64: members[i].imgBase64,
@@ -71,6 +74,39 @@ class _MemberPageState extends State<MembersPage> {
       crossAxisSpacing: 4.0,
       padding: const EdgeInsets.all(4.0),
     );
+  }
+
+  @override
+  void initState() {
+    contributionBloc.outConfigurationWrongPassword.listen((wrong) {
+      if (wrong) {
+        Navigator.pop(context);
+        SnackBar wrongPasswordSnackBar =
+            SnackBar(content: Text('Wrong Password'));
+        _scaffoldKey.currentState.showSnackBar(wrongPasswordSnackBar);
+      }
+    });
+
+    contributionBloc.outErrorInContributionTransaction.listen((error) {
+      if (error) {
+        Navigator.pop(context);
+        SnackBar wrongPasswordSnackBar = SnackBar(
+            content: Text(
+                'There was an error in your transaction: check your funds!'));
+        _scaffoldKey.currentState.showSnackBar(wrongPasswordSnackBar);
+      }
+    });
+
+    contributionBloc.outTransactionSuccess.listen((success) {
+      if (success) {
+        Navigator.pop(context);
+        SnackBar wrongPasswordSnackBar =
+            SnackBar(content: Text('You have contributed to this project!'));
+        _scaffoldKey.currentState.showSnackBar(wrongPasswordSnackBar);
+      }
+    });
+
+    super.initState();
   }
 
   @override
@@ -102,7 +138,7 @@ class _MemberPageState extends State<MembersPage> {
                     child: TextField(
                       keyboardType: TextInputType.text,
                       decoration: InputDecoration(
-                          border: InputBorder.none, hintText: 'Amount...'),
+                          border: InputBorder.none, hintText: 'Password...'),
                       controller: passwordController,
                       obscureText: true,
                     ),
@@ -115,12 +151,14 @@ class _MemberPageState extends State<MembersPage> {
                         EdgeInsets.only(right: 20.0, left: 20.0, bottom: 20.0),
                     child: RaisedButton(
                       onPressed: () {
+                        Navigator.pop(context);
+                        Navigator.of(context).push(ProgressBarOverlay(
+                            ProgressBarOverlay.sendingTransaction));
                         contributionBloc.contribute(
                             seedAmount,
                             passwordController.text,
                             membersBloc.getFundingPanelAddress());
                       },
-                      color: Color(0xFFE0C798),
                       child: const Text(
                         'Contribute to Basket',
                         style: TextStyle(
@@ -157,8 +195,18 @@ class _MemberPageState extends State<MembersPage> {
             children: <Widget>[
               Column(
                 children: <Widget>[
-                  Text(
-                      'Remember that you have to be whitelisted to contribute to this basket!'),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                      Expanded(
+                        child: Container(
+                          child: Text(
+                              'Remember that you have to be whitelisted to contribute to this basket!'),
+                          margin: const EdgeInsets.only(left: 8.0, right: 8.0),
+                        ),
+                      )
+                    ],
+                  ),
                   Container(
                     child: TextField(
                       keyboardType: TextInputType.number,
@@ -178,7 +226,6 @@ class _MemberPageState extends State<MembersPage> {
                         Navigator.pop(context);
                         showConfigPasswordDialog(amountController.text);
                       },
-                      color: Color(0xFFE0C798),
                       child: const Text(
                         'Next',
                         style: TextStyle(
@@ -199,6 +246,7 @@ class _MemberPageState extends State<MembersPage> {
   @override
   Widget build(BuildContext context) {
     return new Scaffold(
+        key: _scaffoldKey,
         appBar: new AppBar(
           title: new Text('Startups'),
           actions: <Widget>[
@@ -216,7 +264,14 @@ class _MemberPageState extends State<MembersPage> {
             child: StreamBuilder(
               builder: (BuildContext context, AsyncSnapshot snapshot) {
                 if (snapshot.hasData) {
-                  return _buildStaggeredGridView(snapshot.data);
+                  if(snapshot.data.length > 0){
+                    return _buildStaggeredGridView(snapshot.data);
+                  }
+                  else{
+                    return Center(
+                      child: Text('This baskets does not have any startup'),
+                    );
+                  }
                 } else {
                   return CircularProgressIndicator();
                 }

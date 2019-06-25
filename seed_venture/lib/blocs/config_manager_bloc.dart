@@ -10,10 +10,11 @@ import 'package:crypto/crypto.dart' as crypto;
 import 'package:path_provider/path_provider.dart';
 import 'dart:io';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:seed_venture/models/funding_panel_details.dart';
 import 'package:seed_venture/blocs/onboarding_bloc.dart';
 import 'dart:async';
 import 'package:seed_venture/blocs/baskets_bloc.dart';
+import 'package:seed_venture/models/member_item.dart';
+import 'settings_bloc.dart';
 
 final ConfigManagerBloc configManagerBloc = ConfigManagerBloc();
 
@@ -24,7 +25,6 @@ class ConfigManagerBloc {
       Credentials walletCredentials, String password) async {
     Map configurationMap = Map();
     List<FundingPanelItem> fundingPanelItems = List();
-    List<FundingPanelDetails> fundingPanelDetails = List();
 
     Map localMap = {
       'lang_config_stuff': {'name': 'English (England)', 'code': 'en_EN'}
@@ -37,8 +37,7 @@ class ConfigManagerBloc {
     };
     configurationMap.addAll(lastCheckedBlockNumberMap);
 
-    await getFundingPanelItems(
-        fundingPanelItems, fundingPanelDetails, configurationMap);
+    await getFundingPanelItems(fundingPanelItems, configurationMap);
 
     Map userMapDecrypted = {
       'user': {
@@ -103,10 +102,11 @@ class ConfigManagerBloc {
   }
 
   Future getFundingPanelItems(
-      List<FundingPanelItem> fundingPanelItems,
-      List<FundingPanelDetails> fundingPanelDetails,
-      Map configurationMap) async {
+      List<FundingPanelItem> fundingPanelItems, Map configurationMap) async {
+    List<Map> fpMapsConfigFile = List();
+    List<Map> fpMapsSharedPrefs = List();
     int length = await getLastDeployersLength();
+
     for (int index = 0; index < length; index++) {
       List<String> basketContracts = await getBasketContractsByIndex(
           index); // 0: Deployer, 1: AdminTools, 2: Token, 3: FundingPanel
@@ -115,66 +115,96 @@ class ConfigManagerBloc {
       Map latestOwnerData = await getLatestOwnerData(basketContracts[3]);
       List<Map> fpData = List();
       fpData.add(latestOwnerData);
-      FundingPanelItem FPItem = FundingPanelItem(
-          basketContracts[1],
-          basketContracts[3],
-          basketContracts[2],
-          exchangeRateSeed.toString(),
-          fpData);
-      fundingPanelItems.add(FPItem);
-    }
 
-    List<Map> maps = List();
+      List fundingPanelVisualData =
+          await getFundingPanelDetails(latestOwnerData['url']);
 
-    for (int i = 0; i < fundingPanelItems.length; i++) {
-      Map map = {
-        'tokenAddress': fundingPanelItems[i].tokenAddress,
-        'fundingPanelAddress': fundingPanelItems[i].fundingPanelAddress,
-        'adminsToolsAddress': fundingPanelItems[i].adminToolsAddress,
-        'lastDEXPrice': fundingPanelItems[i].lastDEXPrice,
-        'fundingPanelUpdates': fundingPanelItems[i].fundingPanelUpdates
-      };
+      if (fundingPanelVisualData != null) {
+        List<MemberItem> members =
+            await getMembersOfFundingPanel(basketContracts[3]);
 
-      bool success = await getFundingPanelDetails(
-          fundingPanelItems[i].fundingPanelUpdates[0]['url'],
-          fundingPanelDetails,
-          fundingPanelItems[i].fundingPanelAddress);
+        FundingPanelItem FPItem = FundingPanelItem(
+            adminToolsAddress: basketContracts[1],
+            tokenAddress: basketContracts[2],
+            fundingPanelAddress: basketContracts[3],
+            fundingPanelUpdates: fpData,
+            latestDexQuotation: exchangeRateSeed.toString(),
+            name: fundingPanelVisualData[0],
+            description: fundingPanelVisualData[1],
+            url: fundingPanelVisualData[2],
+            imgBase64: fundingPanelVisualData[3],
+            members: members);
 
-      if (success) {
-        maps.add(map);
+        fundingPanelItems.add(FPItem);
+
+        List<Map> memberMapsConfigFile = List();
+        List<Map> membersMapsSharedPrefs = List();
+
+        for (int i = 0; i < members.length; i++) {
+          Map memberMapConfigFile = {
+            'memberAddress': members[i].memberAddress,
+            'latestIPFSUrl': members[i].ipfsUrl,
+            'latestHash': members[i].hash,
+          };
+
+          memberMapsConfigFile.add(memberMapConfigFile);
+
+          Map memberMapSP = {
+            'member_address': members[i].memberAddress,
+            'ipfsUrl': members[i].ipfsUrl,
+            'hash': members[i].hash,
+            'name': members[i].name,
+            'description': members[i].description,
+            'url': members[i].url,
+            'imgbase64': members[i].imgBase64
+          };
+
+          membersMapsSharedPrefs.add(memberMapSP);
+        }
+
+        Map fpMapConfig = {
+          'tokenAddress': FPItem.tokenAddress,
+          'fundingPanelAddress': FPItem.fundingPanelAddress,
+          'adminsToolsAddress': FPItem.adminToolsAddress,
+          'lastDEXPrice': FPItem.latestDexQuotation,
+          'fundingPanelUpdates': FPItem.fundingPanelUpdates,
+          'members': memberMapsConfigFile
+        };
+
+        fpMapsConfigFile.add(fpMapConfig);
+
+        Map fpMapSP = {
+          'name': FPItem.name,
+          'description': FPItem.description,
+          'url': FPItem.url,
+          'imgBase64': FPItem.imgBase64,
+          'funding_panel_address': FPItem.fundingPanelAddress,
+          'token_address' : FPItem.tokenAddress,
+          'admin_tools_address' : FPItem.adminToolsAddress,
+          'latest_owner_data' : FPItem.fundingPanelUpdates,
+          'imgbase64' : FPItem.imgBase64,
+          'latest_dex_price': FPItem.latestDexQuotation,
+          'members': membersMapsSharedPrefs
+        };
+
+        fpMapsSharedPrefs.add(fpMapSP);
       }
     }
 
-    Map FPListMap = {'list': maps};
+    Map FPListMap = {'list': fpMapsConfigFile};
 
     configurationMap.addAll(FPListMap);
 
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
 
-    List<Map> fpDetailsListMap = List();
-
-    for (int i = 0; i < fundingPanelDetails.length; i++) {
-      List<Map> members =
-          await getMembersOfFundingPanel(fundingPanelDetails[i].address);
-
-      Map map = {
-        'name': fundingPanelDetails[i].name,
-        'description': fundingPanelDetails[i].description,
-        'url': fundingPanelDetails[i].url,
-        'imgBase64': fundingPanelDetails[i].imgBase64,
-        'funding_panel_address': fundingPanelDetails[i].address,
-        'members': members
-      };
-
-      fpDetailsListMap.add(map);
-    }
 
     sharedPreferences.setString(
-        'funding_panels_details', jsonEncode(fpDetailsListMap));
+        'funding_panels_data', jsonEncode(fpMapsSharedPrefs));
   }
 
-  Future<List<Map>> getMembersOfFundingPanel(String fundingPanelAddress) async {
-    List<Map> members = List();
+  Future<List<MemberItem>> getMembersOfFundingPanel(
+      String fundingPanelAddress) async {
+    List<MemberItem> members = List();
     int membersLength = await getMembersLength(fundingPanelAddress);
 
     for (int i = 0; i < membersLength; i++) {
@@ -186,17 +216,15 @@ class ConfigManagerBloc {
           await getMemberJSONDataFromIPFS(memberData[0]);
 
       if (memberJsonData != null) {
-        Map member = {
-          'member_address': memberAddress,
-          'ipfsUrl': memberData[0],
-          'hash': memberData[1],
-          'name': memberJsonData[0],
-          'description': memberJsonData[1],
-          'url': memberJsonData[2],
-          'imgBase64': memberJsonData[3]
-        };
 
-        members.add(member);
+        members.add(MemberItem(
+            memberAddress: memberAddress,
+            ipfsUrl: memberData[0],
+            hash: memberData[1],
+            name: memberJsonData[0],
+            description: memberJsonData[1],
+            url: memberJsonData[2],
+            imgBase64: memberJsonData[3]));
       }
     }
 
@@ -343,27 +371,29 @@ class ConfigManagerBloc {
     return numbers.hexToInt(resMap['result']).toInt();
   }
 
-  Future<bool> getFundingPanelDetails(
-      String url,
-      List<FundingPanelDetails> fundingPanelDetailsList,
-      String fundingPanelAddress) async {
+  Future<List> getFundingPanelDetails(String ipfsUrl) async {
     try {
-      var response = await http.get(url).timeout(Duration(seconds: 10));
+
+      print('AAAAA IPFS: ' + ipfsUrl);
+      var response = await http.get(ipfsUrl).timeout(Duration(seconds: 10));
+      print('BBBBBBB');
 
       if (response.statusCode != 200) {
-        return false;
+        return null;
       }
       Map responseMap = jsonDecode(response.body);
-      fundingPanelDetailsList.add(FundingPanelDetails(
-          responseMap['name'],
-          responseMap['description'],
-          responseMap['url'],
-          responseMap['image'],
-          fundingPanelAddress));
-      return true;
+
+      List returnFpDetails = List();
+
+      returnFpDetails.add(responseMap['name']);
+      returnFpDetails.add(responseMap['description']);
+      returnFpDetails.add(responseMap['url']);
+      returnFpDetails.add(responseMap['image']);
+
+      return returnFpDetails;
     } catch (e) {
-      print('error http get' + e.toString());
-      return false;
+      print('error http get' + e.toString()  + ' FROM ' + ipfsUrl);
+      return null;
     }
   }
 
@@ -527,7 +557,6 @@ class ConfigManagerBloc {
     return latestDataUpdate;
   }
 
-
   Future<String> getSingleFundingPanelTokenAddress(
       String fundingPanelContractAddress) async {
     String data = "0x10fe9ae8";
@@ -570,10 +599,25 @@ class ConfigManagerBloc {
     return encryptedParams;
   }
 
+  Future<Map> loadPreviousConfigFile() async {
+    final documentsDir = await getApplicationDocumentsDirectory();
+    String path = documentsDir.path;
+    String configFilePath = '$path/configuration.json';
+    File configFile = File(configFilePath);
+    String content = configFile.readAsStringSync();
+    Map configurationMap = jsonDecode(content);
+    return configurationMap;
+  }
+
   Future _update() async {
+
+    if(_previousConfigurationMap == null) {
+      _previousConfigurationMap = await loadPreviousConfigFile();
+    }
+
+
     Map configurationMap = Map();
     List<FundingPanelItem> fundingPanelItems = List();
-    List<FundingPanelDetails> fundingPanelDetails = List();
 
     Map localMap = {
       'lang_config_stuff': {'name': 'English (England)', 'code': 'en_EN'}
@@ -587,7 +631,7 @@ class ConfigManagerBloc {
     configurationMap.addAll(lastCheckedBlockNumberMap);
 
     await getFundingPanelItems(
-        fundingPanelItems, fundingPanelDetails, configurationMap);
+        fundingPanelItems, configurationMap);
 
     List<String> encryptedParams = await getEncryptedParamsFromConfigFile();
 
@@ -604,15 +648,13 @@ class ConfigManagerBloc {
 
     print('configuration updated!');
 
-    if (_previousConfigurationMap != null) {
+    bool areNotificationsEnabled = await SettingsBloc.areNotificationsEnabled();
+
+    if(areNotificationsEnabled){
       await checkDifferencesBetweenConfigurations(
           _previousConfigurationMap, configurationMap);
-      //_previousConfigurationMap = configurationMap;
     }
 
-    /* else {
-
-    }*/
 
     _previousConfigurationMap = configurationMap;
   }
@@ -623,43 +665,78 @@ class ConfigManagerBloc {
 
     SharedPreferences prefs = await SharedPreferences.getInstance();
 
-    List maps = jsonDecode(prefs.getString('funding_panels_details'));
-    List<FundingPanelDetails> fundingPanelsDetails = List();
+    List maps = jsonDecode(prefs.getString('funding_panels_data'));
+    List<FundingPanelItem> fundingPanelItems = List();
 
     for (int i = 0; i < maps.length; i++) {
-      fundingPanelsDetails.add(FundingPanelDetails(
-          maps[i]['name'],
-          maps[i]['description'],
-          maps[i]['url'],
-          maps[i]['imgBase64'],
-          maps[i]['funding_panel_address']));
+
+      fundingPanelItems.add(FundingPanelItem( // I only need name for notifications
+        name: maps[i]['name'],
+        fundingPanelAddress: maps[i]['funding_panel_address']
+
+      ));
     }
+
+    List<int> actualListUsedIndexes = List(); // Contains used indexes; the unused indexes will represent new added Incubators
 
     for (int i = 0; i < previousFPList.length; i++) {
       Map prevFP = previousFPList[i];
-      Map actualFP = actualFPList[i];
+      Map actualFP;
 
-      if (prevFP['fundingPanelUpdates'][0]['hash'] !=
-          actualFP['fundingPanelUpdates'][0]['hash']) {
-        String notificationData =
-            'Documents by ' + fundingPanelsDetails[i].name + ' is changed!';
-        basketsBloc.notification(notificationData);
+      for(int k = 0; k < actualFPList.length; k++){
+        if(actualFPList[k]['fundingPanelAddress'].toString().toLowerCase() == prevFP['fundingPanelAddress'].toString().toLowerCase()){
+          actualFP = actualFPList[k];
+          actualListUsedIndexes.add(k);
+          break;
+        }
+      }
+
+      if(actualFP != null){ // check if the incubator disappeared from list on blockchain
+        if (prevFP['fundingPanelUpdates'][0]['hash'].toString().toLowerCase() !=
+            actualFP['fundingPanelUpdates'][0]['hash'].toString().toLowerCase()) {
+
+          for(int j = 0; j < fundingPanelItems.length; j++){
+            if(fundingPanelItems[j].fundingPanelAddress.toLowerCase() == actualFP['fundingPanelAddress'].toString().toLowerCase()){
+              String notificationData =
+                  'Documents by ' + fundingPanelItems[j].name + ' is changed!';
+              basketsBloc.notification(notificationData);
+              break;
+            }
+          }
+
+        }
+      }
+      else{
+        //String notificationData =
+       //     'Funding Panel ' + fundingPanelItems[i].name + ' removed';
+      //  basketsBloc.notification(notificationData); Add name to Config File?
+      }
+
+
+    }
+
+    if(actualListUsedIndexes.length < actualFPList.length){
+      for(int i = 0; i < actualFPList.length; i++){
+        if(!actualListUsedIndexes.contains(i)){
+          for(int j = 0; j < fundingPanelItems.length; j++){
+            if(fundingPanelItems[j].fundingPanelAddress.toLowerCase() == actualFPList[i]['fundingPaneladdress'].toString().toLowerCase()){
+              String notificationData =
+                  'Incubator ' + fundingPanelItems[j].name + ' added!';
+              basketsBloc.notification(notificationData);
+              break;
+            }
+          }
+        }
       }
     }
 
-    if (actualFPList.length > previousFPList.length) {
-      for (int i = previousFPList.length; i < actualFPList.length; i++) {
-        String notificationData =
-            'Incubator ' + fundingPanelsDetails[i].name + ' added!';
-        basketsBloc.notification(notificationData);
-      }
-    }
+
   }
 
   void periodicUpdate() async {
     await _update();
     const secs = const Duration(seconds: 120);
-    Timer _timer = new Timer.periodic(secs, (Timer t) => _update());
+    new Timer.periodic(secs, (Timer t) => _update());
   }
 
   // Used to contribute to a basket
@@ -673,16 +750,16 @@ class ConfigManagerBloc {
     var decryptedData = await platform.invokeMethod('decrypt', {
       "encrypted": utf8.decode(base64.decode(encryptedData)),
       "realPass":
-      crypto.md5.convert(utf8.encode(password)).toString().toUpperCase()
+          crypto.md5.convert(utf8.encode(password)).toString().toUpperCase()
     });
 
     try {
       Map configJson = jsonDecode(decryptedData);
       Credentials credentials =
-      Credentials.fromPrivateKeyHex(configJson['user']['privateKey']);
+          Credentials.fromPrivateKeyHex(configJson['user']['privateKey']);
       if (crypto.sha256
-          .convert(utf8.encode(credentials.address.hex.toLowerCase()))
-          .toString() ==
+              .convert(utf8.encode(credentials.address.hex.toLowerCase()))
+              .toString() ==
           hash) {
         return credentials;
       } else {
@@ -691,6 +768,5 @@ class ConfigManagerBloc {
     } catch (e) {
       return null;
     }
-
   }
 }

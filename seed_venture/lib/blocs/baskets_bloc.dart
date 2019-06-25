@@ -1,18 +1,18 @@
 import 'package:rxdart/rxdart.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
-import 'package:seed_venture/models/funding_panel_details.dart';
+import 'package:seed_venture/models/funding_panel_item.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 final BasketsBloc basketsBloc = BasketsBloc();
 
 class BasketsBloc {
-  PublishSubject<List<FundingPanelDetails>> _getFundingPanelsDetails =
-      PublishSubject<List<FundingPanelDetails>>();
+  PublishSubject<List<FundingPanelItem>> _getFundingPanelsDetails =
+      PublishSubject<List<FundingPanelItem>>();
 
-  Stream<List<FundingPanelDetails>> get outFundingPanelsDetails =>
+  Stream<List<FundingPanelItem>> get outFundingPanelsDetails =>
       _getFundingPanelsDetails.stream;
-  Sink<List<FundingPanelDetails>> get _inFundingPanelsDetails =>
+  Sink<List<FundingPanelItem>> get _inFundingPanelsDetails =>
       _getFundingPanelsDetails.sink;
 
   PublishSubject<List<String>> _notificationsiOS =
@@ -40,15 +40,24 @@ class BasketsBloc {
 
 
     SharedPreferences.getInstance().then((prefs) {
-      List maps = jsonDecode(prefs.getString('funding_panels_details'));
-      List<FundingPanelDetails> fundingPanelsDetails = List();
+      List maps = jsonDecode(prefs.getString('funding_panels_data'));
+      List<FundingPanelItem> fundingPanelItems = List();
 
       for (int i = 0; i < maps.length; i++) {
-        fundingPanelsDetails.add(FundingPanelDetails(maps[i]['name'],
-            maps[i]['description'], maps[i]['url'], maps[i]['imgBase64'], maps[i]['funding_panel_address']));
+        // no need for members in this case
+        fundingPanelItems.add(FundingPanelItem(
+          tokenAddress: maps[i]['token_address'],
+          fundingPanelAddress: maps[i]['funding_panel_address'],
+          adminToolsAddress: maps[i]['admin_tools_address'],
+          latestDexQuotation: maps[i]['latest_dex_price'],
+          imgBase64: maps[i]['imgbase64'],
+          name: maps[i]['name'],
+          description: maps[i]['description'],
+          url: maps[i]['url']
+        ));
       }
 
-      _inFundingPanelsDetails.add(fundingPanelsDetails);
+      _inFundingPanelsDetails.add(fundingPanelItems);
     }
     );
   }
@@ -92,15 +101,24 @@ class BasketsBloc {
 
   void updateBaskets() {
     SharedPreferences.getInstance().then((prefs) {
-      List maps = jsonDecode(prefs.getString('funding_panels_details'));
-      List<FundingPanelDetails> fundingPanelsDetails = List();
+      List maps = jsonDecode(prefs.getString('funding_panels_data'));
+      List<FundingPanelItem> fundingPanelItems = List();
 
       for (int i = 0; i < maps.length; i++) {
-        fundingPanelsDetails.add(FundingPanelDetails(maps[i]['name'],
-            maps[i]['description'], maps[i]['url'], maps[i]['imgBase64'], maps[i]['funding_panel_address']));
+        // no need for members in this case
+        fundingPanelItems.add(FundingPanelItem(
+            tokenAddress: maps[i]['token_address'],
+            fundingPanelAddress: maps[i]['funding_panel_address'],
+            adminToolsAddress: maps[i]['admin_tools_address'],
+            latestDexQuotation: maps[i]['latest_dex_price'],
+            imgBase64: maps[i]['imgbase64'],
+            name: maps[i]['name'],
+            description: maps[i]['description'],
+            url: maps[i]['url']
+        ));
       }
 
-      _inFundingPanelsDetails.add(fundingPanelsDetails);
+      _inFundingPanelsDetails.add(fundingPanelItems);
     }
     );
   }

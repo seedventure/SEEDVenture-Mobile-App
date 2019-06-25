@@ -8,15 +8,38 @@ import 'package:web3dart/web3dart.dart';
 import 'package:flutter/foundation.dart';
 import 'package:web3dart/src/io/rawtransaction.dart';
 import 'dart:async';
+import 'package:rxdart/rxdart.dart';
 
 final ContributionBloc contributionBloc = ContributionBloc();
 
 class ContributionBloc {
-  Future<bool> contribute(
+  PublishSubject<bool> _configurationWrongPassword = PublishSubject<bool>();
+
+  Stream<bool> get outConfigurationWrongPassword =>
+      _configurationWrongPassword.stream;
+  Sink<bool> get _inConfigurationWrongPassword =>
+      _configurationWrongPassword.sink;
+
+  PublishSubject<bool> _errorInContributionTransaction = PublishSubject<bool>();
+
+  Stream<bool> get outErrorInContributionTransaction =>
+      _errorInContributionTransaction.stream;
+  Sink<bool> get _inErrorInContributionTransaction =>
+      _errorInContributionTransaction.sink;
+
+  PublishSubject<bool> _transactionSuccess = PublishSubject<bool>();
+
+  Stream<bool> get outTransactionSuccess => _transactionSuccess.stream;
+  Sink<bool> get _inTransactionSuccess => _transactionSuccess.sink;
+
+  Future contribute(
       String seedAmount, String configPassword, String fpAddress) async {
     Credentials credentials =
         await configManagerBloc.checkConfigPassword(configPassword);
-    if (credentials == null) return false;
+    if (credentials == null) {
+      _inConfigurationWrongPassword.add(true);
+      return;
+    }
 
     String approveTxHash = await approve(credentials, seedAmount, fpAddress);
 
@@ -26,19 +49,24 @@ class ContributionBloc {
       Timer waitForApproveTimer = await waitForApproveTx(approveTxHash);
 
       const oneSec = const Duration(seconds: 1);
-      Timer.periodic(oneSec, (Timer thisTimer) async  {
+      Timer.periodic(oneSec, (Timer thisTimer) async {
         if (!waitForApproveTimer.isActive) {
           thisTimer.cancel();
-          String txHash = await holderSendSeeds(credentials, seedAmount, fpAddress);
-          print('txHash');
+          String txHash =
+              await holderSendSeeds(credentials, seedAmount, fpAddress);
+
+          if (txHash == null) {
+            _inErrorInContributionTransaction.add(true);
+          } else {
+            //  await waitForHolderSendSeedsTx(txHash); Da gestire track transaction HolderSendSeeds: notifica quando completata?
+
+            _inTransactionSuccess.add(true);
+          }
         }
       });
-
-
-
-
-    } else
-      print('approve nooooo');
+    } else {
+      _inErrorInContributionTransaction.add(true);
+    }
   }
 
   Future<String> _postNonce(String address) async {
@@ -167,8 +195,15 @@ class ContributionBloc {
     return response.body;
   }
 
+  Future<Timer> waitForHolderSendSeedsTx(String txHash) async {
+    const fiveSec = const Duration(seconds: 3);
+    return Timer.periodic(fiveSec, (Timer t) {
+      trackTransaction(txHash, t);
+    });
+  }
+
   Future<Timer> waitForApproveTx(String txHash) async {
-    const fiveSec = const Duration(seconds: 5);
+    const fiveSec = const Duration(seconds: 3);
     return Timer.periodic(fiveSec, (Timer t) {
       trackTransaction(txHash, t);
     });

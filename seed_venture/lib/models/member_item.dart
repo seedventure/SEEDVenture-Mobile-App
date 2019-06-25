@@ -9,5 +9,5 @@ class MemberItem {
   final String imgBase64;
 
 
-  MemberItem(this.memberAddress, this.ipfsUrl, this.hash, this.name, this.description, this.url, this.imgBase64);
+  MemberItem({this.memberAddress, this.ipfsUrl, this.hash, this.name, this.description, this.url, this.imgBase64});
 }

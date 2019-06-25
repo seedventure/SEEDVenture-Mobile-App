@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:seed_venture/blocs/baskets_bloc.dart';
-import 'package:seed_venture/models/funding_panel_details.dart';
-import 'package:seed_venture/pages/members_page.dart';
 import 'package:seed_venture/blocs/members_bloc.dart';
+import 'package:seed_venture/models/funding_panel_item.dart';
 import 'package:seed_venture/blocs/config_manager_bloc.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter/cupertino.dart';
@@ -14,26 +13,12 @@ class BasketsPage extends StatefulWidget {
 }
 
 class _BasketsPageState extends State<BasketsPage> {
-
   FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin;
 
-  Widget _buildStaggeredGridView(
-      List<FundingPanelDetails> fundingPanelDetails) {
-    List<StaggeredTile> _staggeredTiles = <StaggeredTile>[
-      /*const StaggeredTile.count(2, 2),
-      const StaggeredTile.count(2, 2),
-      const StaggeredTile.count(2, 2),
-      const StaggeredTile.count(2, 2),
-      const StaggeredTile.count(2, 2),*/
-    ];
+  Widget _buildStaggeredGridView(List<FundingPanelItem> fundingPanelDetails) {
+    List<StaggeredTile> _staggeredTiles = <StaggeredTile>[];
 
-    List<Widget> _tiles = <Widget>[
-      /*const _Example01Tile(i: 1,),
-      const _Example01Tile(i: 2,),
-      const _Example01Tile(i: 3,),
-      const _Example01Tile(i: 4,),
-      const _Example01Tile(i: 5,),*/
-    ];
+    List<Widget> _tiles = <Widget>[];
 
     for (int i = 0; i < fundingPanelDetails.length; i++) {
       _staggeredTiles.add(StaggeredTile.count(2, 3));
@@ -42,7 +27,8 @@ class _BasketsPageState extends State<BasketsPage> {
         description: fundingPanelDetails[i].description,
         url: fundingPanelDetails[i].url,
         imgBase64: fundingPanelDetails[i].imgBase64,
-        fpAddress: fundingPanelDetails[i].address,
+        fpAddress: fundingPanelDetails[i].fundingPanelAddress,
+        latestDexQuotation: fundingPanelDetails[i].latestDexQuotation,
       ));
     }
 
@@ -61,26 +47,24 @@ class _BasketsPageState extends State<BasketsPage> {
     configManagerBloc.periodicUpdate();
 
     basketsBloc.outNotificationsiOS.listen((notificationData) async {
-
       String title = notificationData[0];
       String body = notificationData[1];
 
       await showDialog(
         context: context,
         builder: (BuildContext context) => CupertinoAlertDialog(
-          title: Text(title),
-          content: Text(body),
-          actions: [
-            CupertinoDialogAction(
-              isDefaultAction: true,
-              child: Text('Ok'),
-              onPressed: () async {
-                Navigator.of(context, rootNavigator: true).pop();
-
-              },
-            )
-          ],
-        ),
+              title: Text(title),
+              content: Text(body),
+              actions: [
+                CupertinoDialogAction(
+                  isDefaultAction: true,
+                  child: Text('Ok'),
+                  onPressed: () async {
+                    Navigator.of(context, rootNavigator: true).pop();
+                  },
+                )
+              ],
+            ),
       );
     });
 
@@ -90,6 +74,25 @@ class _BasketsPageState extends State<BasketsPage> {
   @override
   Widget build(BuildContext context) {
     return new Scaffold(
+        drawer: Drawer(
+          child: ListView(
+            padding: EdgeInsets.zero,
+            children: <Widget>[
+              DrawerHeader(
+                child: Text('SeedVenture'),
+                decoration: BoxDecoration(
+                  color: Colors.blue,
+                ),
+              ),
+              ListTile(
+                title: Text('Settings'),
+                onTap: () {
+                  Navigator.pushNamed(context, '/settings');
+                },
+              ),
+            ],
+          ),
+        ),
         appBar: new AppBar(
           title: new Text('Baskets'),
         ),
@@ -104,15 +107,18 @@ class _BasketsPageState extends State<BasketsPage> {
                 }
               },
               stream: basketsBloc.outFundingPanelsDetails,
-            )
-
-
-        ));
+            )));
   }
 }
 
 class _Example01Tile extends StatelessWidget {
-  const _Example01Tile({this.name, this.description, this.url, this.imgBase64, this.fpAddress});
+  const _Example01Tile(
+      {this.name,
+      this.description,
+      this.url,
+      this.imgBase64,
+      this.fpAddress,
+      this.latestDexQuotation});
 
   final Color backgroundColor = Colors.greenAccent;
 
@@ -121,6 +127,7 @@ class _Example01Tile extends StatelessWidget {
   final String url;
   final String imgBase64;
   final String fpAddress;
+  final String latestDexQuotation;
 
   @override
   Widget build(BuildContext context) {
@@ -152,7 +159,7 @@ class _Example01Tile extends StatelessWidget {
               )),
               Expanded(
                   child: Container(
-                child: Text('Latest Quotation: 0.001 SEED'),
+                child: Text('Latest Quotation: ' + latestDexQuotation),
                 margin: const EdgeInsets.all(10.0),
               ))
             ],

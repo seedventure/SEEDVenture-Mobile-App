@@ -3,13 +3,13 @@ import 'package:seed_venture/pages/home_page.dart';
 import 'package:seed_venture/pages/baskets_page.dart';
 import 'package:flutter/services.dart';
 import 'package:seed_venture/pages/members_page.dart';
+import 'package:seed_venture/pages/settings_page.dart';
 
 void main() {
   return runApp(SeedVentureApp());
 }
 
 class SeedVentureApp extends StatelessWidget {
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -29,7 +29,7 @@ class SeedVentureApp extends StatelessWidget {
             textTheme: TextTheme(
                 headline:
                     TextStyle(fontSize: 72.0, fontWeight: FontWeight.bold),
-                title: TextStyle(fontSize: 36.0, fontStyle: FontStyle.italic),
+                title: TextStyle(fontSize: 20.0),
                 body1: TextStyle(fontSize: 14.0, fontFamily: 'Hind'),
                 button:
                     TextStyle(fontSize: 15.0, fontWeight: FontWeight.bold))),
@@ -42,6 +42,9 @@ class SeedVentureApp extends StatelessWidget {
           '/startups': (BuildContext context) {
             return MembersPage();
           },
+          '/settings' : (BuildContext context) {
+            return SettingsPage();
+          }
         });
   }
 }

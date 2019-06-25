@@ -1,10 +1,23 @@
+import 'package:seed_venture/models/member_item.dart';
 
 class FundingPanelItem {
+
+  // data for configuration file
   final String tokenAddress;
   final String fundingPanelAddress;
   final String adminToolsAddress;
-  final String lastDEXPrice;
   final List<Map> fundingPanelUpdates;
 
-  FundingPanelItem(this.tokenAddress, this.fundingPanelAddress, this.adminToolsAddress, this.lastDEXPrice, this.fundingPanelUpdates);
+  // data for SharedPreferences (visualization)
+  final String name;
+  final String description;
+  final String url;
+  final String imgBase64;
+
+  // shared
+  final String latestDexQuotation;
+  final List<MemberItem> members;
+
+  FundingPanelItem({this.tokenAddress, this.fundingPanelAddress, this.adminToolsAddress, this.fundingPanelUpdates,
+      this.name, this.description, this.url, this.imgBase64, this.latestDexQuotation, this.members});
 }

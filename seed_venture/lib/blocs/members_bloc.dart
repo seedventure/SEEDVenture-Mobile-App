@@ -8,21 +8,20 @@ final MembersBloc membersBloc = MembersBloc();
 class MembersBloc {
   String _fundingPanelAddress;
 
-  String getFundingPanelAddress(){
+  String getFundingPanelAddress() {
     return _fundingPanelAddress;
   }
 
-
   BehaviorSubject<List<MemberItem>> _getMembers =
-  BehaviorSubject<List<MemberItem>>();
+      BehaviorSubject<List<MemberItem>>();
 
   Stream<List<MemberItem>> get outMembers => _getMembers.stream;
   Sink<List<MemberItem>> get _inMembers => _getMembers.sink;
 
-  void getMembers(String fpAddress){
+  void getMembers(String fpAddress) {
     this._fundingPanelAddress = fpAddress;
     SharedPreferences.getInstance().then((prefs) {
-      List maps = jsonDecode(prefs.getString('funding_panels_details'));
+      List maps = jsonDecode(prefs.getString('funding_panels_data'));
       List<MemberItem> members = List();
 
       for (int i = 0; i < maps.length; i++) {
@@ -30,13 +29,13 @@ class MembersBloc {
           List membersMaps = maps[i]['members'];
           for (int j = 0; j < membersMaps.length; j++) {
             members.add(MemberItem(
-                membersMaps[j]['member_address'],
-                membersMaps[j]['ipfsUrl'],
-                membersMaps[j]['hash'],
-                membersMaps[j]['name'],
-                membersMaps[j]['description'],
-                membersMaps[j]['url'],
-                membersMaps[j]['imgBase64']));
+                memberAddress: membersMaps[j]['member_address'],
+                description: membersMaps[j]['description'],
+                hash: membersMaps[j]['hash'],
+                name: membersMaps[j]['name'],
+                imgBase64: membersMaps[j]['imgbase64'],
+                url: membersMaps[j]['url'],
+                ipfsUrl: membersMaps[j]['ipfsUrl']));
           }
 
           break;
@@ -47,11 +46,7 @@ class MembersBloc {
     });
   }
 
-
-
   void closeSubjects() {
     //_getMembers.close();
   }
-
-
 }

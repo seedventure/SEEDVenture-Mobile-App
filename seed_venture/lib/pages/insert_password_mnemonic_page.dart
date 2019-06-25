@@ -95,7 +95,7 @@ class _InsertPasswordMnemonicPageState
               ),
               RaisedButton(
                 onPressed: () {
-                  Navigator.of(context).push(ProgressBarOverlay());
+                  Navigator.of(context).push(ProgressBarOverlay(ProgressBarOverlay.generatingConfig));
                   mnemonicLogicBloc
                       .deriveKeysFromMnemonic(passwordController.text);
                 },

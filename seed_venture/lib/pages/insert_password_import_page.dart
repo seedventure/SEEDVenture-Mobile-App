@@ -64,7 +64,7 @@ class _InsertPasswordImportPageState extends State<InsertPasswordImportPage> {
               ),
               RaisedButton(
                 onPressed: () {
-                  Navigator.of(context).push(ProgressBarOverlay());
+                  Navigator.of(context).push(ProgressBarOverlay(ProgressBarOverlay.generatingConfig));
                   importLogicBloc.import(passwordController.text);
                 },
                 child: Text('Import', style: TextStyle(color: Colors.white)),
