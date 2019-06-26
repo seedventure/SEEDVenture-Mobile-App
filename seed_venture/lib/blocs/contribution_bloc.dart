@@ -58,9 +58,7 @@ class ContributionBloc {
           if (txHash == null) {
             _inErrorInContributionTransaction.add(true);
           } else {
-            //  await waitForHolderSendSeedsTx(txHash); Da gestire track transaction HolderSendSeeds: notifica quando completata?
-
-            _inTransactionSuccess.add(true);
+            waitForHolderSendSeedsTx(txHash);
           }
         }
       });
@@ -96,8 +94,6 @@ class ContributionBloc {
 
   Future<String> _sendApproveTransaction(Credentials credentials,
       String fpAddress, String amountToApprove, BigInt nonce) async {
-
-
     amountToApprove = amountToApprove.replaceAll(',', '.');
 
     if (amountToApprove.contains('.')) {
@@ -170,7 +166,6 @@ class ContributionBloc {
 
   Future<String> _holderSendSeedsTransaction(Credentials credentials,
       String fpAddress, String seed, BigInt nonce) async {
-
     seed = seed.replaceAll(',', '.');
 
     if (seed.contains('.')) {
@@ -227,18 +222,19 @@ class ContributionBloc {
   Future<Timer> waitForHolderSendSeedsTx(String txHash) async {
     const fiveSec = const Duration(seconds: 3);
     return Timer.periodic(fiveSec, (Timer t) {
-      trackTransaction(txHash, t);
+      trackTransaction(txHash, t, sendSeeds: true);
     });
   }
 
   Future<Timer> waitForApproveTx(String txHash) async {
     const fiveSec = const Duration(seconds: 3);
     return Timer.periodic(fiveSec, (Timer t) {
-      trackTransaction(txHash, t);
+      trackTransaction(txHash, t, sendSeeds: false);
     });
   }
 
-  Future<void> trackTransaction(String txHash, Timer t) async {
+  Future<void> trackTransaction(String txHash, Timer t,
+      {bool sendSeeds}) async {
     var url = "https://ropsten.infura.io/v3/2f35010022614bcb9dd4c5fefa9a64fd";
     Map sendParams = {
       "id": "1",
@@ -253,6 +249,19 @@ class ContributionBloc {
 
     if (jsonResponse['result'] != null) {
       t.cancel();
+
+      if (sendSeeds) {
+        try {
+          if (jsonResponse['result']['status'] == '0x1') {
+            _inTransactionSuccess.add(true);
+            configManagerBloc.updateHoldings();
+          } else {
+            _inErrorInContributionTransaction.add(true);
+          }
+        } catch (e) {
+          _inErrorInContributionTransaction.add(true);
+        }
+      }
     }
   }
 

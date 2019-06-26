@@ -22,6 +22,7 @@ final ConfigManagerBloc configManagerBloc = ConfigManagerBloc();
 
 class ConfigManagerBloc {
   Map _previousConfigurationMap;
+  List<FundingPanelItem> _fundingPanelItems;
 
   void _saveCryptoAccountInfo(Credentials credentials){
     SharedPreferences.getInstance().then((prefs){
@@ -79,7 +80,9 @@ class ConfigManagerBloc {
 
     saveConfigurationFile(configurationMap);
 
-    _getBasketTokensBalances(fundingPanelItems);
+    this._fundingPanelItems = fundingPanelItems;
+
+    await _getBasketTokensBalances(fundingPanelItems);
 
     OnBoardingBloc.setOnBoardingDone();
   }
@@ -659,6 +662,8 @@ class ConfigManagerBloc {
 
     saveConfigurationFile(configurationMap);
 
+    this._fundingPanelItems = fundingPanelItems;
+
     _getBasketTokensBalances(fundingPanelItems);
 
     basketsBloc.updateBaskets();
@@ -839,8 +844,14 @@ class ConfigManagerBloc {
     }
   }
 
+  void updateHoldings(){
+    if(_fundingPanelItems != null) {
+      _getBasketTokensBalances(_fundingPanelItems);
+    }
+  }
 
-  void _getBasketTokensBalances(List<FundingPanelItem> fundingPanels) async {
+
+  Future _getBasketTokensBalances(List<FundingPanelItem> fundingPanels) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
 
     String userAddress = prefs.getString('address');
