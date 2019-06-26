@@ -123,13 +123,13 @@ class BasketsBloc {
   String _getValueFromHex(String hexValue, int decimals) {
     hexValue = hexValue.substring(2);
     if (hexValue == '' || hexValue == '0')
-      return null;
+      return '0.00';
 
     BigInt bigInt = BigInt.parse(hexValue, radix: 16);
     Decimal dec = Decimal.parse(bigInt.toString());
     Decimal x = dec / Decimal.fromInt(pow(10, decimals));
     String value = x.toString();
-    if (value == '0') return null;
+    if (value == '0') return '0.00';
 
     double doubleValue = double.parse(value);
     return doubleValue

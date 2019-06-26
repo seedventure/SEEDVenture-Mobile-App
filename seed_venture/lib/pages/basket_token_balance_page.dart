@@ -7,7 +7,6 @@ class BasketTokenBalance extends StatefulWidget {
 }
 
 class _BasketTokenBalanceState extends State<BasketTokenBalance> {
-
   @override
   void initState() {
     membersBloc.getSpecificBasketBalance();
@@ -19,7 +18,6 @@ class _BasketTokenBalanceState extends State<BasketTokenBalance> {
     return new Scaffold(
         appBar: new AppBar(
           title: new Text('Basket Token Balance'),
-
         ),
         body: StreamBuilder(
           builder: (BuildContext context, AsyncSnapshot snapshot) {
@@ -36,25 +34,18 @@ class _BasketTokenBalanceState extends State<BasketTokenBalance> {
                         Row(
                           children: <Widget>[
                             Text('Balance: $tokenBalance $tokenSymbol'),
-
                           ],
-
                         )
                       ],
-                    )
-                ),
+                    )),
               );
             } else {
-              return Container();
+              return Center(
+                  child:
+                      Text('Balances are being loaded from the blockchain...'));
             }
           },
           stream: membersBloc.outBasketBalanceAndSymbol,
-
-
-
-        )
-
-
-    );
+        ));
   }
 }

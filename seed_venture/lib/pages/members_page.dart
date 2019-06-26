@@ -90,19 +90,19 @@ class _MemberPageState extends State<MembersPage> {
     contributionBloc.outErrorInContributionTransaction.listen((error) {
       if (error) {
         Navigator.pop(context);
-        SnackBar wrongPasswordSnackBar = SnackBar(
+        SnackBar txErrorSnackBar = SnackBar(
             content: Text(
                 'There was an error in your transaction: check your funds!'));
-        _scaffoldKey.currentState.showSnackBar(wrongPasswordSnackBar);
+        _scaffoldKey.currentState.showSnackBar(txErrorSnackBar);
       }
     });
 
     contributionBloc.outTransactionSuccess.listen((success) {
       if (success) {
         Navigator.pop(context);
-        SnackBar wrongPasswordSnackBar =
-            SnackBar(content: Text('You have contributed to this project!'));
-        _scaffoldKey.currentState.showSnackBar(wrongPasswordSnackBar);
+        SnackBar contributedSnackBar =
+            SnackBar(content: Text('You have contributed to this project! Your balance is being updated...'));
+        _scaffoldKey.currentState.showSnackBar(contributedSnackBar);
       }
     });
 

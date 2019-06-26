@@ -135,6 +135,10 @@ class ConfigManagerBloc {
       List fundingPanelVisualData =
           await getFundingPanelDetails(latestOwnerData['url']);
 
+      if(fundingPanelVisualData == null){ // IPFS error, check if data is available in previous saved data (shared_prefs)
+        fundingPanelVisualData = await loadFundingPanelVisualDataFromPreviousSharedPref(basketContracts[3]);
+      }
+
       if (fundingPanelVisualData != null) {
         List<MemberItem> members =
             await getMembersOfFundingPanel(basketContracts[3]);
@@ -627,6 +631,28 @@ class ConfigManagerBloc {
     return configurationMap;
   }
 
+  Future<List<String>> loadFundingPanelVisualDataFromPreviousSharedPref(String fundingPanelAddress) async {
+
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+
+    if(prefs.getString('funding_panels_data') == null) return null;
+
+    List maps = jsonDecode(prefs.getString('funding_panels_data'));
+
+    for(int i = 0; i < maps.length; i++){
+      if(maps[i]['funding_panel_address'].toString().toLowerCase() == fundingPanelAddress.toLowerCase()){
+        List ret = List();
+        ret.add(maps[i]['name']);
+        ret.add(maps[i]['description']);
+        ret.add(maps[i]['url']);
+        ret.add(maps[i]['imgBase64']);
+        return ret;
+      }
+    }
+
+    return null;
+
+  }
   Future _update() async {
 
     if(_previousConfigurationMap == null) {
@@ -763,10 +789,10 @@ class ConfigManagerBloc {
           }
           else{
 
-            String notificationData =
+            /*String notificationData =
                 'member' + prevMember['memberName'] +
                     ' removed! (Incubator ' + incubatorName + ' )';
-            basketsBloc.notification(notificationData);
+            basketsBloc.notification(notificationData);*/
           }
 
         }
@@ -784,9 +810,9 @@ class ConfigManagerBloc {
 
       }
       else {
-        String notificationData =
+       /* String notificationData =
             'Incubator ' + prevFP['fundingPanelName'] +  ' removed!';
-        basketsBloc.notification(notificationData);
+        basketsBloc.notification(notificationData);*/
       }
 
 
