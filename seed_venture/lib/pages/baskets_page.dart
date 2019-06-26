@@ -79,7 +79,24 @@ class _BasketsPageState extends State<BasketsPage> {
             padding: EdgeInsets.zero,
             children: <Widget>[
               DrawerHeader(
-                child: Text('SeedVenture'),
+                child: Column(
+                  children: <Widget>[
+                    Text('SeedVenture'),
+                    StreamBuilder(
+                      builder: (BuildContext context, AsyncSnapshot snapshot) {
+                        if (snapshot.hasData) {
+                          return Container(
+                            child: Text('Balance: ' + snapshot.data + ' SEED'),
+                            margin: const EdgeInsets.all(12.0),
+                          );
+                        } else {
+                          return Container();
+                        }
+                      },
+                      stream: basketsBloc.outSeedBalance,
+                    )
+                  ],
+                ),
                 decoration: BoxDecoration(
                   color: Colors.blue,
                 ),
@@ -107,7 +124,8 @@ class _BasketsPageState extends State<BasketsPage> {
                 }
               },
               stream: basketsBloc.outFundingPanelsDetails,
-            )));
+            )
+        ));
   }
 }
 

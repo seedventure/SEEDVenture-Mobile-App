@@ -1,22 +1,31 @@
 import 'package:flutter/material.dart';
-import 'package:seed_venture/blocs/settings_bloc.dart';
+import 'package:seed_venture/blocs/members_bloc.dart';
 
-class SettingsPage extends StatefulWidget {
+class BasketTokenBalance extends StatefulWidget {
   @override
-  State<StatefulWidget> createState() => _SettingsStatePage();
+  State<StatefulWidget> createState() => _BasketTokenBalanceState();
 }
 
-class _SettingsStatePage extends State<SettingsPage> {
+class _BasketTokenBalanceState extends State<BasketTokenBalance> {
+
+  @override
+  void initState() {
+    membersBloc.getSpecificBasketBalance();
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     return new Scaffold(
         appBar: new AppBar(
-          title: new Text('Settings'),
+          title: new Text('Basket Token Balance'),
 
         ),
         body: StreamBuilder(
           builder: (BuildContext context, AsyncSnapshot snapshot) {
             if (snapshot.hasData) {
+              String tokenSymbol = snapshot.data[0];
+              String tokenBalance = snapshot.data[1];
               return SingleChildScrollView(
                 child: Container(
                     margin: const EdgeInsets.all(12),
@@ -26,12 +35,7 @@ class _SettingsStatePage extends State<SettingsPage> {
                       children: <Widget>[
                         Row(
                           children: <Widget>[
-                            Text('Notifications '),
-                            Checkbox(
-                              value: snapshot.data,
-                              onChanged: (newValue) => settingsBloc.onChangeNotificationSettings(newValue),
-                            )
-
+                            Text('Balance: $tokenBalance $tokenSymbol'),
 
                           ],
 
@@ -44,7 +48,7 @@ class _SettingsStatePage extends State<SettingsPage> {
               return Container();
             }
           },
-          stream: settingsBloc.outNotificationSettings,
+          stream: membersBloc.outBasketBalanceAndSymbol,
 
 
 

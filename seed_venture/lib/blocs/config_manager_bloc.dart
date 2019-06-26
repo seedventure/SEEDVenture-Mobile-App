@@ -15,14 +15,25 @@ import 'dart:async';
 import 'package:seed_venture/blocs/baskets_bloc.dart';
 import 'package:seed_venture/models/member_item.dart';
 import 'settings_bloc.dart';
+import 'package:decimal/decimal.dart';
+import 'dart:math';
 
 final ConfigManagerBloc configManagerBloc = ConfigManagerBloc();
 
 class ConfigManagerBloc {
   Map _previousConfigurationMap;
 
+  void _saveCryptoAccountInfo(Credentials credentials){
+    SharedPreferences.getInstance().then((prefs){
+      prefs.setString('address', credentials.address.hex);
+    });
+  }
+
   Future createConfiguration(
       Credentials walletCredentials, String password) async {
+
+    _saveCryptoAccountInfo(walletCredentials);
+
     Map configurationMap = Map();
     List<FundingPanelItem> fundingPanelItems = List();
 
@@ -67,6 +78,8 @@ class ConfigManagerBloc {
     configurationMap.addAll(userMapEncrypted);
 
     saveConfigurationFile(configurationMap);
+
+    _getBasketTokensBalances(fundingPanelItems);
 
     OnBoardingBloc.setOnBoardingDone();
   }
@@ -143,6 +156,7 @@ class ConfigManagerBloc {
         for (int i = 0; i < members.length; i++) {
           Map memberMapConfigFile = {
             'memberAddress': members[i].memberAddress,
+            'memberName' : members[i].name,
             'latestIPFSUrl': members[i].ipfsUrl,
             'latestHash': members[i].hash,
           };
@@ -166,6 +180,7 @@ class ConfigManagerBloc {
           'tokenAddress': FPItem.tokenAddress,
           'fundingPanelAddress': FPItem.fundingPanelAddress,
           'adminsToolsAddress': FPItem.adminToolsAddress,
+          'fundingPanelName' : FPItem.name,
           'lastDEXPrice': FPItem.latestDexQuotation,
           'fundingPanelUpdates': FPItem.fundingPanelUpdates,
           'members': memberMapsConfigFile
@@ -644,6 +659,8 @@ class ConfigManagerBloc {
 
     saveConfigurationFile(configurationMap);
 
+    _getBasketTokensBalances(fundingPanelItems);
+
     basketsBloc.updateBaskets();
 
     print('configuration updated!');
@@ -655,11 +672,13 @@ class ConfigManagerBloc {
           _previousConfigurationMap, configurationMap);
     }
 
-
     _previousConfigurationMap = configurationMap;
   }
 
   Future checkDifferencesBetweenConfigurations(Map previous, Map actual) async {
+
+    // Search for FundingPanels changes
+
     List previousFPList = previous['list'];
     List actualFPList = actual['list'];
 
@@ -670,7 +689,7 @@ class ConfigManagerBloc {
 
     for (int i = 0; i < maps.length; i++) {
 
-      fundingPanelItems.add(FundingPanelItem( // I only need name for notifications
+      fundingPanelItems.add(FundingPanelItem( // I only need name + fpAddress for notifications
         name: maps[i]['name'],
         fundingPanelAddress: maps[i]['funding_panel_address']
 
@@ -695,21 +714,74 @@ class ConfigManagerBloc {
         if (prevFP['fundingPanelUpdates'][0]['hash'].toString().toLowerCase() !=
             actualFP['fundingPanelUpdates'][0]['hash'].toString().toLowerCase()) {
 
-          for(int j = 0; j < fundingPanelItems.length; j++){
-            if(fundingPanelItems[j].fundingPanelAddress.toLowerCase() == actualFP['fundingPanelAddress'].toString().toLowerCase()){
-              String notificationData =
-                  'Documents by ' + fundingPanelItems[j].name + ' is changed!';
-              basketsBloc.notification(notificationData);
+          String notificationData =
+              'Documents by incubator' + prevFP['fundingPanelName'] + ' changed!';
+          basketsBloc.notification(notificationData);
+
+        }
+
+        // checks for fp's specific members
+
+        List<int> actualListUsedIndexesForMembers = List();
+
+        List previousMemberList = prevFP['members'];
+        List actualMemberList = actualFP['members'];
+
+        String incubatorName = fundingPanelItems[i].name;
+
+        for(int i = 0 ; i < previousMemberList.length; i++) {
+          Map prevMember = previousMemberList[i];
+          Map actualMember;
+
+          for(int k = 0; k < actualMemberList.length; k++){
+            if(actualMemberList[k]['memberAddress'].toString().toLowerCase() == prevMember['memberAddress'].toString().toLowerCase()){
+              actualMember = actualMemberList[k];
+              actualListUsedIndexesForMembers.add(k);
               break;
             }
           }
 
+          if(actualMember != null) { // check if the member disappeared from list on blockchain
+            if (prevMember['latestHash']
+                .toString()
+                .toLowerCase() !=
+                actualMember['latestHash']
+                    .toString()
+                    .toLowerCase()) {
+
+
+              String notificationData =
+                  'Documents by member' + prevMember['memberName'] +
+                      ' is changed! (Incubator '  + incubatorName + ')';
+              basketsBloc.notification(notificationData);
+            }
+          }
+          else{
+
+            String notificationData =
+                'member' + prevMember['memberName'] +
+                    ' removed! (Incubator ' + incubatorName + ' )';
+            basketsBloc.notification(notificationData);
+          }
+
         }
+
+        if(actualListUsedIndexesForMembers.length < actualMemberList.length){
+
+          for(int i = 0; i < actualMemberList.length; i++){
+            if(!actualListUsedIndexesForMembers.contains(i)){
+              String notificationData =
+                  'Member ' + actualMemberList[i]['memberName'] + ' added! (Incubator ' + incubatorName + ')';
+              basketsBloc.notification(notificationData);
+            }
+          }
+        }
+
       }
-      else{
-        //String notificationData =
-       //     'Funding Panel ' + fundingPanelItems[i].name + ' removed';
-      //  basketsBloc.notification(notificationData); Add name to Config File?
+      else {
+        String notificationData =
+            'Incubator ' + prevFP['fundingPanelName'] +  ' removed!';
+        basketsBloc.notification(notificationData);
       }
 
 
@@ -718,17 +790,14 @@ class ConfigManagerBloc {
     if(actualListUsedIndexes.length < actualFPList.length){
       for(int i = 0; i < actualFPList.length; i++){
         if(!actualListUsedIndexes.contains(i)){
-          for(int j = 0; j < fundingPanelItems.length; j++){
-            if(fundingPanelItems[j].fundingPanelAddress.toLowerCase() == actualFPList[i]['fundingPaneladdress'].toString().toLowerCase()){
-              String notificationData =
-                  'Incubator ' + fundingPanelItems[j].name + ' added!';
-              basketsBloc.notification(notificationData);
-              break;
-            }
-          }
+
+          String notificationData =
+              'Incubator ' + actualFPList[i]['fundingPanelName'] + ' added!';
+          basketsBloc.notification(notificationData);
         }
       }
     }
+
 
 
   }
@@ -769,4 +838,146 @@ class ConfigManagerBloc {
       return null;
     }
   }
+
+
+  void _getBasketTokensBalances(List<FundingPanelItem> fundingPanels) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+
+    String userAddress = prefs.getString('address');
+
+    List<Map> userBasketsBalances = List();
+
+    for(int i = 0; i < fundingPanels.length; i++){
+      String tokenAddress = fundingPanels[i].tokenAddress;
+      int decimals = await _getTokenDecimals(tokenAddress);
+      String symbol = await _getTokenSymbol(tokenAddress);
+      String balance = await _getTokenBalance(userAddress, tokenAddress, decimals);
+
+      Map basketBalance = {
+        'funding_panel_address' : fundingPanels[i].fundingPanelAddress,
+        'token_address' : tokenAddress,
+        'token_symbol' : symbol,
+        'token_balance' : balance
+      };
+
+      userBasketsBalances.add(basketBalance);
+
+    }
+
+    prefs.setString('user_baskets_balances', jsonEncode(userBasketsBalances));
+  }
+
+  Future<int> _getTokenDecimals(String tokenAddress) async {
+    String data = "0x313ce567";
+    var url = "https://ropsten.infura.io/v3/2f35010022614bcb9dd4c5fefa9a64fd";
+    Map callParams = {
+      "id": "1",
+      "jsonrpc": "2.0",
+      "method": "eth_call",
+      "params": [
+        {
+          "to": tokenAddress,
+          "data": data,
+        },
+        "latest"
+      ]
+    };
+
+    var callResponse = await http.post(url,
+        body: jsonEncode(callParams),
+        headers: {'content-type': 'application/json'});
+
+    Map resMap = jsonDecode(callResponse.body);
+
+    return numbers.hexToInt(resMap['result']).toInt();
+  }
+
+  Future<String> _getTokenSymbol(String tokenAddress) async {
+
+    String data = "0x95d89b41";
+    var url = "https://ropsten.infura.io/v3/2f35010022614bcb9dd4c5fefa9a64fd";
+    Map callParams = {
+      "id": "1",
+      "jsonrpc": "2.0",
+      "method": "eth_call",
+      "params": [
+        {
+          "to": tokenAddress,
+          "data": data,
+        },
+        "latest"
+      ]
+    };
+
+    var callResponse = await http.post(url,
+        body: jsonEncode(callParams),
+        headers: {'content-type': 'application/json'});
+
+    Map resMap = jsonDecode(callResponse.body);
+
+    HexDecoder a = HexDecoder();
+    List byteArray = a.convert(resMap['result'].toString().substring(2));
+
+    String res = utf8.decode(byteArray);
+
+    return res.replaceAll(new RegExp('[^A-Za-z0-9]'), ''); // replace all non-alphanumeric characters from res string
+
+  }
+
+  Future<String> _getTokenBalance(String userAddress, String tokenAddress, int decimals) async {
+
+  userAddress = userAddress.substring(2);
+
+    String data = "0x70a08231";
+
+    while (userAddress.length != 64) {
+      userAddress = '0' + userAddress;
+    }
+
+    data = data + userAddress;
+
+    var url = "https://ropsten.infura.io/v3/2f35010022614bcb9dd4c5fefa9a64fd";
+    Map callParams = {
+      "id": "1",
+      "jsonrpc": "2.0",
+      "method": "eth_call",
+      "params": [
+        {
+          "to": tokenAddress,
+          "data": data,
+        },
+        "latest"
+      ]
+    };
+
+    var callResponse = await http.post(url,
+        body: jsonEncode(callParams),
+        headers: {'content-type': 'application/json'});
+
+    Map resMap = jsonDecode(callResponse.body);
+
+    String tokenBalance = _getValueFromHex(resMap['result'].toString(), decimals);
+
+    return tokenBalance;
+
+
+  }
+
+  String _getValueFromHex(String hexValue, int decimals) {
+    hexValue = hexValue.substring(2);
+    if (hexValue == '' || hexValue == '0')
+      return '0.00';
+
+    BigInt bigInt = BigInt.parse(hexValue, radix: 16);
+    Decimal dec = Decimal.parse(bigInt.toString());
+    Decimal x = dec / Decimal.fromInt(pow(10, decimals));
+    String value = x.toString();
+    if (value == '0') return '0.00';
+
+    double doubleValue = double.parse(value);
+    return doubleValue
+        .toStringAsFixed(doubleValue.truncateToDouble() == doubleValue ? 0 : 2);
+  }
+
+
 }

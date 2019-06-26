@@ -4,6 +4,7 @@ import 'package:seed_venture/pages/baskets_page.dart';
 import 'package:flutter/services.dart';
 import 'package:seed_venture/pages/members_page.dart';
 import 'package:seed_venture/pages/settings_page.dart';
+import 'package:seed_venture/pages/basket_token_balance_page.dart';
 
 void main() {
   return runApp(SeedVentureApp());
@@ -42,7 +43,10 @@ class SeedVentureApp extends StatelessWidget {
           '/startups': (BuildContext context) {
             return MembersPage();
           },
-          '/settings' : (BuildContext context) {
+          '/basket_balance': (BuildContext context) {
+            return BasketTokenBalance();
+          },
+          '/settings': (BuildContext context) {
             return SettingsPage();
           }
         });

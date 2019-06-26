@@ -18,6 +18,32 @@ class MembersBloc {
   Stream<List<MemberItem>> get outMembers => _getMembers.stream;
   Sink<List<MemberItem>> get _inMembers => _getMembers.sink;
 
+  BehaviorSubject<List<String>> _basketBalanceAndSymbol =
+  BehaviorSubject<List<String>>();
+
+  Stream<List<String>> get outBasketBalanceAndSymbol => _basketBalanceAndSymbol.stream;
+  Sink<List<String>> get _inBasketBalanceAndSymbol => _basketBalanceAndSymbol.sink;
+
+
+
+  void getSpecificBasketBalance(){
+    SharedPreferences.getInstance().then((prefs){
+      List balancesMaps = jsonDecode(prefs.getString('user_baskets_balances'));
+
+      for(int i = 0; i < balancesMaps.length; i++){
+        Map basketBalanceMap = balancesMaps[i];
+        if(basketBalanceMap['funding_panel_address'].toString().toLowerCase() == _fundingPanelAddress){
+          List<String> paramsToPass = List();
+          paramsToPass.add(basketBalanceMap['token_symbol']);
+          paramsToPass.add(basketBalanceMap['token_balance']);
+          _inBasketBalanceAndSymbol.add(paramsToPass);
+          break;
+        }
+      }
+
+    });
+  }
+
   void getMembers(String fpAddress) {
     this._fundingPanelAddress = fpAddress;
     SharedPreferences.getInstance().then((prefs) {

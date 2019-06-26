@@ -32,6 +32,11 @@ class SettingsBloc {
 
   static Future<bool> areNotificationsEnabled() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    return prefs.getBool('notifications_enabled');
+    bool notificationsEnabled = prefs.getBool('notifications_enabled');
+    if(notificationsEnabled == null) {
+      prefs.setBool('notifications_enabled', true);
+      notificationsEnabled = true;
+    }
+    return notificationsEnabled;
   }
 }

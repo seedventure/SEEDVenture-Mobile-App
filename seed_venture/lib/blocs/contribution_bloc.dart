@@ -96,12 +96,26 @@ class ContributionBloc {
 
   Future<String> _sendApproveTransaction(Credentials credentials,
       String fpAddress, String amountToApprove, BigInt nonce) async {
-    String approveValuePowed =
-        (double.parse(amountToApprove.replaceAll(',', '.')) * pow(10, 18))
-            .toString();
 
-    approveValuePowed =
-        approveValuePowed.substring(0, approveValuePowed.length - 2);
+
+    amountToApprove = amountToApprove.replaceAll(',', '.');
+
+    if (amountToApprove.contains('.')) {
+      int i;
+      for (i = 0; i != amountToApprove.indexOf('.'); i++) {}
+
+      amountToApprove = amountToApprove.replaceAll('.', '');
+
+      int amountToApproveLength = amountToApprove.length;
+
+      for (int k = 0; k < 18 - (amountToApproveLength - i); k++) {
+        amountToApprove += '0';
+      }
+    } else {
+      amountToApprove = amountToApprove + '000000000000000000';
+    }
+
+    String approveValuePowed = amountToApprove;
 
     String hex = BigInt.parse(approveValuePowed).toRadixString(16);
 
@@ -156,10 +170,25 @@ class ContributionBloc {
 
   Future<String> _holderSendSeedsTransaction(Credentials credentials,
       String fpAddress, String seed, BigInt nonce) async {
-    String seedPowed =
-        (double.parse(seed.replaceAll(',', '.')) * pow(10, 18)).toString();
 
-    seedPowed = seedPowed.substring(0, seedPowed.length - 2);
+    seed = seed.replaceAll(',', '.');
+
+    if (seed.contains('.')) {
+      int i;
+      for (i = 0; i != seed.indexOf('.'); i++) {}
+
+      seed = seed.replaceAll('.', '');
+
+      int amountToApproveLength = seed.length;
+
+      for (int k = 0; k < 18 - (amountToApproveLength - i); k++) {
+        seed += '0';
+      }
+    } else {
+      seed = seed + '000000000000000000';
+    }
+
+    String seedPowed = seed;
 
     String hex = BigInt.parse(seedPowed).toRadixString(16);
 

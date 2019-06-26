@@ -257,6 +257,13 @@ class _MemberPageState extends State<MembersPage> {
               ),
               onTap: () => showContributeDialog(),
             ),
+            InkWell(
+              child: Padding(
+                child: Icon(Icons.account_balance_wallet),
+                padding: const EdgeInsets.only(right: 16.0, left: 32.0),
+              ),
+              onTap: () => Navigator.pushNamed(context, '/basket_balance'),
+            )
           ],
         ),
         body: new Padding(
