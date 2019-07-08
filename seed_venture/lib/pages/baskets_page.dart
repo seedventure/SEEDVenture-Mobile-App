@@ -6,6 +6,7 @@ import 'package:seed_venture/models/funding_panel_item.dart';
 import 'package:seed_venture/blocs/config_manager_bloc.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter_html/flutter_html.dart';
 
 class BasketsPage extends StatefulWidget {
   @override
@@ -44,29 +45,6 @@ class _BasketsPageState extends State<BasketsPage> {
 
   @override
   void initState() {
-    configManagerBloc.periodicUpdate();
-
-    basketsBloc.outNotificationsiOS.listen((notificationData) async {
-      String title = notificationData[0];
-      String body = notificationData[1];
-
-      await showDialog(
-        context: context,
-        builder: (BuildContext context) => CupertinoAlertDialog(
-              title: Text(title),
-              content: Text(body),
-              actions: [
-                CupertinoDialogAction(
-                  isDefaultAction: true,
-                  child: Text('Ok'),
-                  onPressed: () async {
-                    Navigator.of(context, rootNavigator: true).pop();
-                  },
-                )
-              ],
-            ),
-      );
-    });
 
     super.initState();
   }
@@ -74,42 +52,7 @@ class _BasketsPageState extends State<BasketsPage> {
   @override
   Widget build(BuildContext context) {
     return new Scaffold(
-        drawer: Drawer(
-          child: ListView(
-            padding: EdgeInsets.zero,
-            children: <Widget>[
-              DrawerHeader(
-                child: Column(
-                  children: <Widget>[
-                    Text('SeedVenture'),
-                    StreamBuilder(
-                      builder: (BuildContext context, AsyncSnapshot snapshot) {
-                        if (snapshot.hasData) {
-                          return Container(
-                            child: Text('Balance: ' + snapshot.data + ' SEED'),
-                            margin: const EdgeInsets.all(12.0),
-                          );
-                        } else {
-                          return Container();
-                        }
-                      },
-                      stream: basketsBloc.outSeedBalance,
-                    )
-                  ],
-                ),
-                decoration: BoxDecoration(
-                  color: Colors.blue,
-                ),
-              ),
-              ListTile(
-                title: Text('Settings'),
-                onTap: () {
-                  Navigator.pushNamed(context, '/settings');
-                },
-              ),
-            ],
-          ),
-        ),
+
         appBar: new AppBar(
           title: new Text('Baskets'),
         ),
@@ -172,9 +115,12 @@ class _Example01Tile extends StatelessWidget {
               )),
               Expanded(
                   child: Container(
-                child: Text('Description: ' + description),
+                child: Html(
+                  data: description,
+                ),
                 margin: const EdgeInsets.all(10.0),
-              )),
+              )
+              ),
               Expanded(
                   child: Container(
                 child: Text('Latest Quotation: ' + latestDexQuotation),

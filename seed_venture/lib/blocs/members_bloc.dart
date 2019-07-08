@@ -18,15 +18,15 @@ class MembersBloc {
   Stream<List<MemberItem>> get outMembers => _getMembers.stream;
   Sink<List<MemberItem>> get _inMembers => _getMembers.sink;
 
-  BehaviorSubject<List<String>> _basketBalanceAndSymbol =
+ /* BehaviorSubject<List<String>> _basketBalanceAndSymbol =
   BehaviorSubject<List<String>>();
 
   Stream<List<String>> get outBasketBalanceAndSymbol => _basketBalanceAndSymbol.stream;
-  Sink<List<String>> get _inBasketBalanceAndSymbol => _basketBalanceAndSymbol.sink;
+  Sink<List<String>> get _inBasketBalanceAndSymbol => _basketBalanceAndSymbol.sink;*/
 
 
 
-  void getSpecificBasketBalance(){
+  /*void getSpecificBasketBalance(){
     SharedPreferences.getInstance().then((prefs){
       List balancesMaps = jsonDecode(prefs.getString('user_baskets_balances'));
 
@@ -42,7 +42,7 @@ class MembersBloc {
       }
 
     });
-  }
+  }*/
 
   void getMembers(String fpAddress) {
     this._fundingPanelAddress = fpAddress;
@@ -59,7 +59,7 @@ class MembersBloc {
                 description: membersMaps[j]['description'],
                 hash: membersMaps[j]['hash'],
                 name: membersMaps[j]['name'],
-                imgBase64: membersMaps[j]['imgbase64'],
+                imgBase64: membersMaps[j]['imgBase64'],
                 url: membersMaps[j]['url'],
                 ipfsUrl: membersMaps[j]['ipfsUrl']));
           }

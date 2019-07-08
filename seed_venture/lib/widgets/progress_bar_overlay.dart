@@ -5,6 +5,7 @@ class ProgressBarOverlay extends ModalRoute<void> {
 
   static const int generatingConfig = 0;
   static const int sendingTransaction = 1;
+  static const int loadingBasketsData = 2; // used for onboarding's 'continue without config' option
 
   int _mode;
 
@@ -52,7 +53,9 @@ class ProgressBarOverlay extends ModalRoute<void> {
       children: <Widget>[
         CircularProgressIndicator(),
         Container(
-          child: Text(getTextByMode(_mode), style: TextStyle(color: Theme.of(context).accentColor, fontWeight: FontWeight.bold),),
+          child: Center(
+            child: Text(getTextByMode(_mode), style: TextStyle(color: Theme.of(context).accentColor, fontWeight: FontWeight.bold),),
+          ),
           margin: const EdgeInsets.only(top: 10.0),
         )
       ],
@@ -65,8 +68,12 @@ class ProgressBarOverlay extends ModalRoute<void> {
         return 'Generating Keys and Config file...';
         break;
       case ProgressBarOverlay.sendingTransaction:
-        return 'Sending Transaction...';
+        return 'Sending Transaction...It may take 2-3 minutes';
         break;
+      case ProgressBarOverlay.loadingBasketsData:
+        return 'Downloading Baskets and Startups...';
+      default:
+        return '';
     }
   }
 }

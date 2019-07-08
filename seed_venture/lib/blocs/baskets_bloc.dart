@@ -3,17 +3,18 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import 'package:seed_venture/models/funding_panel_item.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:seed_venture/utils/address_constants.dart';
+import 'package:seed_venture/utils/constants.dart';
 import 'package:http/http.dart' as http;
 import 'dart:math';
 import 'package:decimal/decimal.dart';
-
+import 'package:seed_venture/models/basket_token_balance_item.dart';
+import 'package:flutter/material.dart';
 
 final BasketsBloc basketsBloc = BasketsBloc();
 
 class BasketsBloc {
-  PublishSubject<List<FundingPanelItem>> _getFundingPanelsDetails =
-      PublishSubject<List<FundingPanelItem>>();
+  BehaviorSubject<List<FundingPanelItem>> _getFundingPanelsDetails =
+      BehaviorSubject<List<FundingPanelItem>>();
 
   Stream<List<FundingPanelItem>> get outFundingPanelsDetails =>
       _getFundingPanelsDetails.stream;
@@ -26,14 +27,36 @@ class BasketsBloc {
   Stream<List<String>> get outNotificationsiOS => _notificationsiOS.stream;
   Sink<List<String>> get _inNotificationsiOS => _notificationsiOS.sink;
 
-  BehaviorSubject<String> _seedBalance = BehaviorSubject<String>();
+  BehaviorSubject<List<String>> _seedEthBalances =
+      BehaviorSubject<List<String>>();
 
-  Stream<String> get outSeedBalance => _seedBalance.stream;
-  Sink<String> get _inSeedBalance => _seedBalance.sink;
+  Stream<List<String>> get outSeedEthBalance => _seedEthBalances.stream;
+  Sink<List<String>> get _inSeedEthBalances => _seedEthBalances.sink;
+
+  BehaviorSubject<List<BasketTokenBalanceItem>> _basketsTokenBalances =
+      BehaviorSubject<List<BasketTokenBalanceItem>>();
+
+  Stream<List<BasketTokenBalanceItem>> get outBasketTokenBalances =>
+      _basketsTokenBalances.stream;
+  Sink<List<BasketTokenBalanceItem>> get _inBasketTokenBalances =>
+      _basketsTokenBalances.sink;
 
   FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin;
 
   BasketsBloc() {
+    getBasketsTokenBalances();
+
+    // SEED and ETH balances fetching
+    _getOldBalances();
+    getCurrentBalances();
+
+    // pre-load data for Baskets Page
+    getBaskets();
+
+    _initNotifications();
+  }
+
+  void _initNotifications() {
     flutterLocalNotificationsPlugin = new FlutterLocalNotificationsPlugin();
     var initializationSettingsAndroid =
         new AndroidInitializationSettings('ic_launcher');
@@ -43,44 +66,65 @@ class BasketsBloc {
         initializationSettingsAndroid, initializationSettingsIOS);
     flutterLocalNotificationsPlugin.initialize(initializationSettings,
         onSelectNotification: onSelectNotification);
-
-    SharedPreferences.getInstance().then((prefs) {
-      List maps = jsonDecode(prefs.getString('funding_panels_data'));
-      List<FundingPanelItem> fundingPanelItems = List();
-
-      for (int i = 0; i < maps.length; i++) {
-        // no need for members in this case
-        fundingPanelItems.add(FundingPanelItem(
-            tokenAddress: maps[i]['token_address'],
-            fundingPanelAddress: maps[i]['funding_panel_address'],
-            adminToolsAddress: maps[i]['admin_tools_address'],
-            latestDexQuotation: maps[i]['latest_dex_price'],
-            imgBase64: maps[i]['imgbase64'],
-            name: maps[i]['name'],
-            description: maps[i]['description'],
-            url: maps[i]['url']));
-      }
-
-      _inFundingPanelsDetails.add(fundingPanelItems);
-    });
-
-    _getOldSeedBalance();
-    _getCurrentSeedBalance();
   }
 
-
-  // Send old balance if not first start
-  void _getOldSeedBalance() async {
+  Future<String> _getOldEthBalance() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
+    return prefs.getString('eth_balance');
+  }
 
-    if(prefs.getString('seed_balance') != null){
-      _inSeedBalance.add(prefs.getString('seed_balance'));
+  void _getOldBalances() async {
+    String oldSeedBalance = await _getOldSeedBalance();
+    String oldEthBalance = await _getOldEthBalance();
+    if (oldSeedBalance != null && oldEthBalance != null) {
+      List<String> balances = List();
+      balances.add(oldSeedBalance);
+      balances.add(oldEthBalance);
+      _inSeedEthBalances.add(balances);
     }
   }
 
-  void _getCurrentSeedBalance() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
+  void getCurrentBalances() async {
+    String seedBalance = await _getCurrentSeedBalance();
+    String ethBalance = await _getCurrentEthBalance();
+    List<String> balances = List();
+    balances.add(seedBalance);
+    balances.add(ethBalance);
+    _inSeedEthBalances.add(balances);
+  }
 
+  Future<String> _getCurrentEthBalance() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String address = prefs.getString('address');
+
+    Map callParams = {
+      "id": "1",
+      "jsonrpc": "2.0",
+      "method": "eth_getBalance",
+      "params": [address, "latest"]
+    };
+
+    var callResponse = await http.post(infuraHTTP,
+        body: jsonEncode(callParams),
+        headers: {'content-type': 'application/json'});
+
+    Map resMap = jsonDecode(callResponse.body);
+
+    String ethBalanceToShow = _getValueFromHex(resMap['result'].toString(), 18);
+
+    prefs.setString('eth_balance', ethBalanceToShow);
+
+    return ethBalanceToShow;
+  }
+
+  // Send old balance if not first start
+  Future<String> _getOldSeedBalance() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    return prefs.getString('seed_balance');
+  }
+
+  Future<String> _getCurrentSeedBalance() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
 
     String address = prefs.getString('address').substring(2);
 
@@ -112,18 +156,17 @@ class BasketsBloc {
 
     Map resMap = jsonDecode(callResponse.body);
 
-    String seedBalanceToShow = _getValueFromHex(resMap['result'].toString(), 18);
+    String seedBalanceToShow =
+        _getValueFromHex(resMap['result'].toString(), 18);
 
     prefs.setString('seed_balance', seedBalanceToShow);
 
-    _inSeedBalance.add(seedBalanceToShow);
-
+    return seedBalanceToShow;
   }
 
   String _getValueFromHex(String hexValue, int decimals) {
     hexValue = hexValue.substring(2);
-    if (hexValue == '' || hexValue == '0')
-      return '0.00';
+    if (hexValue == '' || hexValue == '0') return '0.00';
 
     BigInt bigInt = BigInt.parse(hexValue, radix: 16);
     Decimal dec = Decimal.parse(bigInt.toString());
@@ -167,7 +210,7 @@ class BasketsBloc {
     _inNotificationsiOS.add(params);
   }
 
-  void updateBaskets() {
+  void getBaskets() {
     SharedPreferences.getInstance().then((prefs) {
       List maps = jsonDecode(prefs.getString('funding_panels_data'));
       List<FundingPanelItem> fundingPanelItems = List();
@@ -179,7 +222,7 @@ class BasketsBloc {
             fundingPanelAddress: maps[i]['funding_panel_address'],
             adminToolsAddress: maps[i]['admin_tools_address'],
             latestDexQuotation: maps[i]['latest_dex_price'],
-            imgBase64: maps[i]['imgbase64'],
+            imgBase64: maps[i]['imgBase64'],
             name: maps[i]['name'],
             description: maps[i]['description'],
             url: maps[i]['url']));
@@ -189,9 +232,45 @@ class BasketsBloc {
     });
   }
 
+  void getBasketsTokenBalances() {
+    List<BasketTokenBalanceItem> basketTokenBalances = List();
+
+    SharedPreferences.getInstance().then((prefs) {
+      List balancesMaps = jsonDecode(prefs.getString('user_baskets_balances'));
+
+      for (int i = 0; i < balancesMaps.length; i++) {
+        Map basketBalanceMap = balancesMaps[i];
+
+        String balance = basketBalanceMap['token_balance'];
+        String symbol = basketBalanceMap['token_symbol'];
+        bool isWhitelisted = basketBalanceMap['is_whitelisted'];
+
+        Image tokenLogo;
+
+        if (basketBalanceMap['imgBase64'] != '') {
+          tokenLogo = Image.memory(base64Decode(basketBalanceMap['imgBase64']),
+              width: 35.0, height: 35.0);
+        } else {
+          tokenLogo = Image.asset(
+            'assets/watermelon.png',
+            height: 35.0,
+            width: 35.0,
+          );
+        }
+
+        basketTokenBalances.add(BasketTokenBalanceItem(
+            symbol: symbol,
+            balance: balance,
+            tokenLogo: tokenLogo,
+            isWhitelisted: isWhitelisted));
+      }
+
+      _inBasketTokenBalances.add(basketTokenBalances);
+    });
+  }
+
   void closeSubjects() {
     _getFundingPanelsDetails.close();
     _notificationsiOS.close();
-    _seedBalance.close();
   }
 }

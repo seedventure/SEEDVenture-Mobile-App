@@ -4,6 +4,7 @@ import 'package:seed_venture/blocs/members_bloc.dart';
 import 'package:seed_venture/models/member_item.dart';
 import 'package:seed_venture/blocs/contribution_bloc.dart';
 import 'package:seed_venture/widgets/progress_bar_overlay.dart';
+import 'package:flutter_html/flutter_html.dart';
 
 class MembersPage extends StatefulWidget {
   @override
@@ -37,7 +38,9 @@ class _Example01Tile extends StatelessWidget {
               )),
               Expanded(
                   child: Container(
-                child: Text('Description: ' + description),
+                child: Html(
+                  data: description,
+                ),
                 margin: const EdgeInsets.all(10.0),
               )),
             ],
@@ -257,13 +260,7 @@ class _MemberPageState extends State<MembersPage> {
               ),
               onTap: () => showContributeDialog(),
             ),
-            InkWell(
-              child: Padding(
-                child: Icon(Icons.account_balance_wallet),
-                padding: const EdgeInsets.only(right: 16.0, left: 32.0),
-              ),
-              onTap: () => Navigator.pushNamed(context, '/basket_balance'),
-            )
+
           ],
         ),
         body: new Padding(

@@ -13,7 +13,7 @@
     <application
         android:name="io.flutter.app.FlutterApplication"
         android:label="SeedVenture"
-        android:icon="@drawable/seed_icon">
+        android:icon="@drawable/ic_seed">
         <activity
             android:name=".MainActivity"
             android:launchMode="singleTop"

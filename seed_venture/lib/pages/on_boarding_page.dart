@@ -49,7 +49,7 @@ class OnBoardingPage extends StatelessWidget {
                 child: Text('Import Config',
                     style: TextStyle(color: Colors.white)),
               ),
-              Container(
+              /*Container(
                   margin: const EdgeInsets.only(top: 25.0),
                   child: RaisedButton(
                     color: Theme.of(context).accentColor,
@@ -60,7 +60,7 @@ class OnBoardingPage extends StatelessWidget {
                     },
                     child: Text('Continue without Config',
                         style: TextStyle(color: Colors.white)),
-                  ))
+                  ))*/
             ],
           ),
         ));

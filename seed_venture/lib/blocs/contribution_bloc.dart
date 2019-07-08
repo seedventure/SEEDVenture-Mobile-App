@@ -1,6 +1,6 @@
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'package:seed_venture/utils/address_constants.dart';
+import 'package:seed_venture/utils/constants.dart';
 import "package:web3dart/src/utils/numbers.dart" as numbers;
 import 'dart:math';
 import 'package:seed_venture/blocs/config_manager_bloc.dart';
