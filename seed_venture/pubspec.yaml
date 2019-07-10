@@ -37,7 +37,6 @@ dependencies:
   url_launcher: ^5.0.2
 
 
-
   flutter:
     sdk: flutter
 

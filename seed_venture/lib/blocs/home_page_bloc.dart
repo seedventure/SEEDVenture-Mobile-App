@@ -12,10 +12,12 @@ class HomePageBloc  {
 
   HomePageBloc() {
     SharedPreferences.getInstance().then((prefs) {
-      if (prefs.getBool('on_boarding_done') != null) {
-        _inFirstLaunch.add(1);
-      } else {
+      bool isOnBoardingDone = prefs.getBool('on_boarding_done');
+      if(isOnBoardingDone == null || isOnBoardingDone == false){
         _inFirstLaunch.add(0);
+      }
+      else {
+        _inFirstLaunch.add(1);
       }
     });
   }

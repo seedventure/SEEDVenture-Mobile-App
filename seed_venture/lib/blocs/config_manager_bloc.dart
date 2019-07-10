@@ -14,7 +14,7 @@ import 'package:seed_venture/blocs/onboarding_bloc.dart';
 import 'dart:async';
 import 'package:seed_venture/blocs/baskets_bloc.dart';
 import 'package:seed_venture/models/member_item.dart';
-import 'settings_bloc.dart';
+import 'package:seed_venture/blocs/settings_bloc.dart';
 import 'package:decimal/decimal.dart';
 import 'dart:math';
 
@@ -24,16 +24,24 @@ class ConfigManagerBloc {
   Map _previousConfigurationMap;
   List<FundingPanelItem> _fundingPanelItems;
 
-  void _saveCryptoAccountInfo(Credentials credentials) {
+  void _saveAddress(Credentials credentials) {
     SharedPreferences.getInstance().then((prefs) {
       prefs.setString('address', credentials.address.hex);
+    });
+  }
+
+  void _saveSHA256Pass(String password){
+    SharedPreferences.getInstance().then((prefs) {
+      prefs.setString('sha256_pass', crypto.sha256
+          .convert(utf8.encode(password)).toString());
     });
   }
 
   Future createConfiguration(
       Credentials walletCredentials, String password) async {
 
-    _saveCryptoAccountInfo(walletCredentials);
+    _saveAddress(walletCredentials);
+    _saveSHA256Pass(password);
 
     Map configurationMap = Map();
     List<FundingPanelItem> fundingPanelItems = List();

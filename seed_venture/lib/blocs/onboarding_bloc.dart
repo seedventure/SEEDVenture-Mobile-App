@@ -6,4 +6,10 @@ class OnBoardingBloc {
       prefs.setBool('on_boarding_done', true);
     });
   }
+
+  static void setOnBoardingToBeDone() {
+    SharedPreferences.getInstance().then((prefs) {
+      prefs.setBool('on_boarding_done', false);
+    });
+  }
 }

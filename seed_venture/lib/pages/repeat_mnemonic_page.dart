@@ -53,7 +53,6 @@ class _RepeatMnemonicPageState extends State<RepeatMnemonicPage> {
 
   @override
   Widget build(BuildContext context) {
-  //  mnemonicLogicBloc = BlocProvider.of<MnemonicLogicBloc>(context);
 
     return Scaffold(
         key: _scaffoldKey,

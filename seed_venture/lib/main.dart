@@ -6,6 +6,8 @@ import 'package:seed_venture/pages/members_page.dart';
 import 'package:seed_venture/pages/settings_page.dart';
 import 'package:seed_venture/pages/home_baskets_token_balances_page.dart';
 import 'package:seed_venture/pages/wallet_info_page.dart';
+import 'package:seed_venture/pages/unlock_account_page.dart';
+import 'package:seed_venture/pages/on_boarding_page.dart';
 
 void main() {
   return runApp(SeedVentureApp());
@@ -38,6 +40,13 @@ class SeedVentureApp extends StatelessWidget {
         title: 'SeedVenture',
         home: HomePage(),
         routes: <String, WidgetBuilder>{
+
+          '/unlock_account': (BuildContext context) {
+            return UnlockAccountPage();
+          },
+          '/on_boarding': (BuildContext context) {
+            return OnBoardingPage();
+          },
           '/home': (BuildContext context) {
             return HomeBasketsTokenBalancesPage();
           },
