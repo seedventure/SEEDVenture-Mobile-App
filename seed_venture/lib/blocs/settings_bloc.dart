@@ -1,5 +1,7 @@
 import 'package:rxdart/rxdart.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter/services.dart';
+import 'package:path_provider/path_provider.dart';
 
 final SettingsBloc settingsBloc = SettingsBloc();
 
@@ -24,6 +26,26 @@ class SettingsBloc {
 
       _inNotificationSettings.add(newValue);
     });
+  }
+
+
+  Future exportConfigurationFile() async {
+
+    final documentsDir = await getApplicationDocumentsDirectory();
+    String path = documentsDir.path;
+    String configFilePath = '$path/configuration.json';
+
+
+    var platform = MethodChannel(
+        'seedventure.io/export_config');
+
+
+    var result = await platform
+        .invokeMethod('exportConfig', {
+      "path": configFilePath,
+    });
+
+
   }
 
   void dispose() {

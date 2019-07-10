@@ -12,7 +12,6 @@ class _SettingsStatePage extends State<SettingsPage> {
     return new Scaffold(
         appBar: new AppBar(
           title: new Text('Settings'),
-
         ),
         body: StreamBuilder(
           builder: (BuildContext context, AsyncSnapshot snapshot) {
@@ -29,28 +28,33 @@ class _SettingsStatePage extends State<SettingsPage> {
                             Text('Notifications '),
                             Checkbox(
                               value: snapshot.data,
-                              onChanged: (newValue) => settingsBloc.onChangeNotificationSettings(newValue),
+                              onChanged: (newValue) => settingsBloc
+                                  .onChangeNotificationSettings(newValue),
                             )
-
-
                           ],
-
+                        ),
+                        Container(
+                          margin: const EdgeInsets.only(top: 8.0),
+                          child: InkWell(
+                              onTap: () async {
+                                await settingsBloc.exportConfigurationFile();
+                              },
+                              child: Row(
+                                children: <Widget>[
+                                  Expanded(
+                                    child: Text('Export Configuration File'),
+                                  ),
+                                ],
+                              )),
                         )
                       ],
-                    )
-                ),
+                    )),
               );
             } else {
               return Container();
             }
           },
           stream: settingsBloc.outNotificationSettings,
-
-
-
-        )
-
-
-    );
+        ));
   }
 }

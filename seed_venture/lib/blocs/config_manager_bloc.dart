@@ -37,6 +37,7 @@ class ConfigManagerBloc {
     });
   }
 
+
   Future createConfiguration(
       Credentials walletCredentials, String password) async {
 

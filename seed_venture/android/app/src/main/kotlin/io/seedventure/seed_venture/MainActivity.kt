@@ -2,12 +2,15 @@ package io.seedventure.seed_venture
 
 import android.content.pm.PackageManager
 import android.os.Bundle
+import android.os.Environment
+import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 
 import io.flutter.app.FlutterActivity
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugins.GeneratedPluginRegistrant
+import java.io.File
 import java.io.IOException
 
 
@@ -16,6 +19,7 @@ class MainActivity: FlutterActivity() {
 
   private val CHANNEL_PERMISSIONS = "seedventure.io/permissions"
   private val CHANNEL_AES = "seedventure.io/aes"
+  private val CHANNEL_EXPORT = "seedventure.io/export_config"
 
 
   override fun onCreate(savedInstanceState: Bundle?) {
@@ -45,6 +49,12 @@ class MainActivity: FlutterActivity() {
 
           }
           else{
+
+            var mainDir = File(Environment.getExternalStorageDirectory().getPath() + File.separator + "SeedVenture")
+            if(!mainDir.exists()) {
+              mainDir.mkdirs()
+            }
+
             result.success(true);
 
           }
@@ -92,6 +102,35 @@ class MainActivity: FlutterActivity() {
 
 
 
+        } catch (e: IOException) {
+          e.printStackTrace()
+        }
+
+
+
+      }
+    }
+
+    MethodChannel(flutterView, CHANNEL_EXPORT).setMethodCallHandler { call, result ->
+      if(call.method == "exportConfig"){
+
+        try {
+
+          var seedVentureDir = File(Environment.getExternalStorageDirectory().getPath() + File.separator + "SeedVenture")
+
+
+          var path = call.argument<String>("path")
+
+          val input = File(path)
+
+          val output = File(seedVentureDir.path + File.separator + "configuration.json")
+
+          input.copyTo(output)
+
+          Toast.makeText(this, "Config File exported to /SeedVenture folder", Toast.LENGTH_LONG).show()
+
+
+          result.success(true);
         } catch (e: IOException) {
           e.printStackTrace()
         }
