@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:seed_venture/blocs/baskets_bloc.dart';
 import 'package:seed_venture/blocs/config_manager_bloc.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:seed_venture/blocs/members_bloc.dart';
 
 class HomeBasketsTokenBalancesPage extends StatefulWidget {
   @override
@@ -21,18 +22,18 @@ class _HomeBasketsTokenBalancesPageState
       await showDialog(
         context: context,
         builder: (BuildContext context) => CupertinoAlertDialog(
-          title: Text(title),
-          content: Text(body),
-          actions: [
-            CupertinoDialogAction(
-              isDefaultAction: true,
-              child: Text('Ok'),
-              onPressed: () async {
-                Navigator.of(context, rootNavigator: true).pop();
-              },
-            )
-          ],
-        ),
+              title: Text(title),
+              content: Text(body),
+              actions: [
+                CupertinoDialogAction(
+                  isDefaultAction: true,
+                  child: Text('Ok'),
+                  onPressed: () async {
+                    Navigator.of(context, rootNavigator: true).pop();
+                  },
+                )
+              ],
+            ),
       );
     });
     super.initState();
@@ -121,19 +122,6 @@ class _HomeBasketsTokenBalancesPageState
                       },
                       stream: basketsBloc.outSeedEthBalance,
                     ),
-                    /*StreamBuilder(
-                      builder: (BuildContext context, AsyncSnapshot snapshot) {
-                        if (snapshot.hasData) {
-                          return Container(
-                            child: Text(snapshot.data + ' SEED'),
-                            margin: const EdgeInsets.all(15.0),
-                          );
-                        } else {
-                          return Container();
-                        }
-                      },
-                      stream: basketsBloc.outSeedBalance,
-                    ),*/
                   ],
                 ),
                 StreamBuilder(
@@ -148,58 +136,67 @@ class _HomeBasketsTokenBalancesPageState
                               margin: EdgeInsets.only(bottom: 20.0),
                               child: Column(
                                 children: <Widget>[
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.start,
-                                    children: <Widget>[
-                                      Container(
-                                        margin:
-                                            const EdgeInsets.only(left: 8.0),
-                                        child:
-                                            snapshot.data[position].tokenLogo,
-                                      ),
-                                      Container(
-                                        child: Text(
-                                            snapshot.data[position].symbol,
-                                            maxLines: 1,
-                                            overflow: TextOverflow.ellipsis,
-                                            softWrap: false,
-                                            style: TextStyle(
-                                                color: Color(0xFF333333),
-                                                fontSize: 14.0,
-                                                fontFamily: 'SF-Pro-Bold')),
-                                        margin: EdgeInsets.only(left: 15.0),
-                                        width: 60,
-                                      ),
-                                      Container(
-                                        child: Text(
-                                            snapshot.data[position].balance,
-                                            maxLines: 1,
-                                            overflow: TextOverflow.ellipsis,
-                                            softWrap: false,
-                                            style: TextStyle(
-                                                color: Color(0xFF333333),
-                                                fontSize: 14.0,
-                                                fontFamily: 'SF-Pro-Regular')),
-                                        margin: EdgeInsets.only(left: 32.0),
-                                      ),
-                                      Spacer(),
-                                      Container(
-                                        // controvalore
-                                        child: Text('0.00 EUR'),
-                                      ),
-                                      Spacer(),
-                                      Container(
-                                        margin:
-                                            const EdgeInsets.only(right: 8.0),
-                                        child: ClipOval(
-                                          child: Container(
-                                            color: snapshot.data[position].getWhitelistingColor(),
-                                            height: 20.0,
-                                            width: 20.0,
-                                          ),
+                                  InkWell(
+                                    onTap: () {
+                                      membersBloc.getMembers(snapshot.data[position].fpAddress);
+                                      Navigator.pushNamed(context, '/startups');
+                                    },
+                                    child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.start,
+                                      children: <Widget>[
+                                        Container(
+                                          margin:
+                                              const EdgeInsets.only(left: 8.0),
+                                          child:
+                                              snapshot.data[position].tokenLogo,
                                         ),
-                                      )
-                                    ],
+                                        Container(
+                                          child: Text(
+                                              snapshot.data[position].symbol,
+                                              maxLines: 1,
+                                              overflow: TextOverflow.ellipsis,
+                                              softWrap: false,
+                                              style: TextStyle(
+                                                  color: Color(0xFF333333),
+                                                  fontSize: 14.0,
+                                                  fontFamily: 'SF-Pro-Bold')),
+                                          margin: EdgeInsets.only(left: 15.0),
+                                          width: 60,
+                                        ),
+                                        Container(
+                                          child: Text(
+                                              snapshot.data[position].balance,
+                                              maxLines: 1,
+                                              overflow: TextOverflow.ellipsis,
+                                              softWrap: false,
+                                              style: TextStyle(
+                                                  color: Color(0xFF333333),
+                                                  fontSize: 14.0,
+                                                  fontFamily:
+                                                      'SF-Pro-Regular')),
+                                          margin: EdgeInsets.only(left: 32.0),
+                                        ),
+                                        Spacer(),
+                                        Container(
+                                          // controvalore
+                                          child: Text('0.00 EUR'),
+                                        ),
+                                        Spacer(),
+                                        Container(
+                                          margin:
+                                              const EdgeInsets.only(right: 8.0),
+                                          child: ClipOval(
+                                            child: Container(
+                                              color: snapshot.data[position]
+                                                  .getWhitelistingColor(),
+                                              height: 20.0,
+                                              width: 20.0,
+                                            ),
+                                          ),
+                                        )
+                                      ],
+                                    ),
                                   ),
                                   Container(
                                     margin:
@@ -223,5 +220,4 @@ class _HomeBasketsTokenBalancesPageState
               ],
             )));
   }
-
 }

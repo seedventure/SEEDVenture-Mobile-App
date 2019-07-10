@@ -45,7 +45,6 @@ class _BasketsPageState extends State<BasketsPage> {
 
   @override
   void initState() {
-
     super.initState();
   }
 

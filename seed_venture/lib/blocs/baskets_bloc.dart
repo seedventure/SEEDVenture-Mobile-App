@@ -244,6 +244,7 @@ class BasketsBloc {
         String balance = basketBalanceMap['token_balance'];
         String symbol = basketBalanceMap['token_symbol'];
         bool isWhitelisted = basketBalanceMap['is_whitelisted'];
+        String fundingPanelAddress = basketBalanceMap['funding_panel_address'];
 
         Image tokenLogo;
 
@@ -262,7 +263,8 @@ class BasketsBloc {
             symbol: symbol,
             balance: balance,
             tokenLogo: tokenLogo,
-            isWhitelisted: isWhitelisted));
+            isWhitelisted: isWhitelisted,
+        fpAddress: fundingPanelAddress));
       }
 
       _inBasketTokenBalances.add(basketTokenBalances);
