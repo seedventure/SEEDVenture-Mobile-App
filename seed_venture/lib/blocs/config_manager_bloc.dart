@@ -108,8 +108,34 @@ class ConfigManagerBloc {
     return crypto.md5.convert(utf8.encode(input)).toString();
   }
 
+  Future<String> _getSeedMaxSupply(String fundingPanelAddress) async {
+    String data = "0x8f8361ea";
+
+    Map callParams = {
+      "id": "1",
+      "jsonrpc": "2.0",
+      "method": "eth_call",
+      "params": [
+        {
+          "to": fundingPanelAddress,
+          "data": data,
+        },
+        "latest"
+      ]
+    };
+
+    var callResponse = await http.post(infuraHTTP,
+        body: jsonEncode(callParams),
+        headers: {'content-type': 'application/json'});
+
+    Map resMap = jsonDecode(callResponse.body);
+
+    String seedMaxSupply = _getValueFromHex(resMap['result'].toString(), 18);
+
+    return seedMaxSupply;
+  }
+
   Future<int> getCurrentBlockNumber() async {
-    var url = "https://ropsten.infura.io/v3/2f35010022614bcb9dd4c5fefa9a64fd";
     Map callParams = {
       "id": "1",
       "jsonrpc": "2.0",
@@ -117,7 +143,7 @@ class ConfigManagerBloc {
       "params": []
     };
 
-    var callResponse = await http.post(url,
+    var callResponse = await http.post(infuraHTTP,
         body: jsonEncode(callParams),
         headers: {'content-type': 'application/json'});
 
@@ -133,8 +159,15 @@ class ConfigManagerBloc {
     int length = await getLastDeployersLength();
 
     for (int index = 0; index < length; index++) {
+
       List<String> basketContracts = await getBasketContractsByIndex(
           index); // 0: Deployer, 1: AdminTools, 2: Token, 3: FundingPanel
+
+     String seedMaxSupply =  await _getSeedMaxSupply(basketContracts[3]);
+
+     if(seedMaxSupply == '0.00')
+       continue; // skip zero-supply funding panels
+
       int exchangeRateSeed =
           await getBasketSeedExchangeRate(basketContracts[3]);
       Map latestOwnerData = await getLatestOwnerData(basketContracts[3]);
@@ -298,7 +331,6 @@ class ConfigManagerBloc {
 
     print(data);
 
-    var url = "https://ropsten.infura.io/v3/2f35010022614bcb9dd4c5fefa9a64fd";
     Map callParams = {
       "id": "1",
       "jsonrpc": "2.0",
@@ -312,7 +344,7 @@ class ConfigManagerBloc {
       ]
     };
 
-    var callResponse = await http.post(url,
+    var callResponse = await http.post(infuraHTTP,
         body: jsonEncode(callParams),
         headers: {'content-type': 'application/json'});
 
@@ -359,7 +391,6 @@ class ConfigManagerBloc {
 
     print(data);
 
-    var url = "https://ropsten.infura.io/v3/2f35010022614bcb9dd4c5fefa9a64fd";
     Map callParams = {
       "id": "1",
       "jsonrpc": "2.0",
@@ -373,7 +404,7 @@ class ConfigManagerBloc {
       ]
     };
 
-    var callResponse = await http.post(url,
+    var callResponse = await http.post(infuraHTTP,
         body: jsonEncode(callParams),
         headers: {'content-type': 'application/json'});
 
@@ -386,7 +417,6 @@ class ConfigManagerBloc {
 
   Future<int> getMembersLength(String fundingPanelAddress) async {
     String data = "0x7351262f"; // get deployerListLength
-    var url = "https://ropsten.infura.io/v3/2f35010022614bcb9dd4c5fefa9a64fd";
     Map callParams = {
       "id": "1",
       "jsonrpc": "2.0",
@@ -400,7 +430,7 @@ class ConfigManagerBloc {
       ]
     };
 
-    var callResponse = await http.post(url,
+    var callResponse = await http.post(infuraHTTP,
         body: jsonEncode(callParams),
         headers: {'content-type': 'application/json'});
 
@@ -445,7 +475,6 @@ class ConfigManagerBloc {
 
   Future<int> getLastDeployersLength() async {
     String data = "0xe0118a53";
-    var url = "https://ropsten.infura.io/v3/2f35010022614bcb9dd4c5fefa9a64fd";
     Map callParams = {
       "id": "1",
       "jsonrpc": "2.0",
@@ -459,7 +488,7 @@ class ConfigManagerBloc {
       ]
     };
 
-    var callResponse = await http.post(url,
+    var callResponse = await http.post(infuraHTTP,
         body: jsonEncode(callParams),
         headers: {'content-type': 'application/json'});
 
@@ -481,7 +510,6 @@ class ConfigManagerBloc {
 
     print(data);
 
-    var url = "https://ropsten.infura.io/v3/2f35010022614bcb9dd4c5fefa9a64fd";
     Map callParams = {
       "id": "1",
       "jsonrpc": "2.0",
@@ -495,7 +523,7 @@ class ConfigManagerBloc {
       ]
     };
 
-    var callResponse = await http.post(url,
+    var callResponse = await http.post(infuraHTTP,
         body: jsonEncode(callParams),
         headers: {'content-type': 'application/json'});
 
@@ -529,7 +557,6 @@ class ConfigManagerBloc {
 
   Future<int> getBasketSeedExchangeRate(String fundingPanelAddress) async {
     String data = "0x18bf6abc"; // get exchangeRateSeed
-    var url = "https://ropsten.infura.io/v3/2f35010022614bcb9dd4c5fefa9a64fd";
     Map callParams = {
       "id": "1",
       "jsonrpc": "2.0",
@@ -543,7 +570,7 @@ class ConfigManagerBloc {
       ]
     };
 
-    var callResponse = await http.post(url,
+    var callResponse = await http.post(infuraHTTP,
         body: jsonEncode(callParams),
         headers: {'content-type': 'application/json'});
 
@@ -554,7 +581,6 @@ class ConfigManagerBloc {
 
   Future<Map> getLatestOwnerData(String fundingPanelAddress) async {
     String data = "0xe4b85399"; // getOwnerData
-    var url = "https://ropsten.infura.io/v3/2f35010022614bcb9dd4c5fefa9a64fd";
     Map callParams = {
       "id": "1",
       "jsonrpc": "2.0",
@@ -568,7 +594,7 @@ class ConfigManagerBloc {
       ]
     };
 
-    var callResponse = await http.post(url,
+    var callResponse = await http.post(infuraHTTP,
         body: jsonEncode(callParams),
         headers: {'content-type': 'application/json'});
 
@@ -607,7 +633,6 @@ class ConfigManagerBloc {
       String fundingPanelContractAddress) async {
     String data = "0x10fe9ae8";
 
-    var url = "https://ropsten.infura.io/v3/2f35010022614bcb9dd4c5fefa9a64fd";
     Map callParams = {
       "id": "1",
       "jsonrpc": "2.0",
@@ -621,7 +646,7 @@ class ConfigManagerBloc {
       ]
     };
 
-    var callResponse = await http.post(url,
+    var callResponse = await http.post(infuraHTTP,
         body: jsonEncode(callParams),
         headers: {'content-type': 'application/json'});
 
@@ -764,7 +789,7 @@ class ConfigManagerBloc {
         }
       }
 
-      if (actualFP != null) { // check if the incubator disappeared from list on blockchain
+      if (actualFP != null) { // check if the basket is being disabled (set to zero-supply)
 
         if (prevFP['fundingPanelUpdates'][0]['hash'].toString().toLowerCase() !=
             actualFP['fundingPanelUpdates'][0]['hash']
@@ -860,9 +885,9 @@ class ConfigManagerBloc {
           }
         }
       } else {
-        /* String notificationData =
-            'Incubator ' + prevFP['fundingPanelName'] +  ' removed!';
-        basketsBloc.notification(notificationData);*/
+        String notificationData =
+            'Basket ' + prevFP['fundingPanelName'] +  ' disabled (zero-supply)!';
+        basketsBloc.notification(notificationData);
       }
     }
 
@@ -987,7 +1012,6 @@ class ConfigManagerBloc {
 
   Future<int> _getTokenDecimals(String tokenAddress) async {
     String data = "0x313ce567";
-    var url = "https://ropsten.infura.io/v3/2f35010022614bcb9dd4c5fefa9a64fd";
     Map callParams = {
       "id": "1",
       "jsonrpc": "2.0",
@@ -1001,7 +1025,7 @@ class ConfigManagerBloc {
       ]
     };
 
-    var callResponse = await http.post(url,
+    var callResponse = await http.post(infuraHTTP,
         body: jsonEncode(callParams),
         headers: {'content-type': 'application/json'});
 
@@ -1012,7 +1036,6 @@ class ConfigManagerBloc {
 
   Future<String> _getTokenSymbol(String tokenAddress) async {
     String data = "0x95d89b41";
-    var url = "https://ropsten.infura.io/v3/2f35010022614bcb9dd4c5fefa9a64fd";
     Map callParams = {
       "id": "1",
       "jsonrpc": "2.0",
@@ -1026,7 +1049,7 @@ class ConfigManagerBloc {
       ]
     };
 
-    var callResponse = await http.post(url,
+    var callResponse = await http.post(infuraHTTP,
         body: jsonEncode(callParams),
         headers: {'content-type': 'application/json'});
 
@@ -1053,7 +1076,6 @@ class ConfigManagerBloc {
 
     data = data + userAddress;
 
-    var url = "https://ropsten.infura.io/v3/2f35010022614bcb9dd4c5fefa9a64fd";
     Map callParams = {
       "id": "1",
       "jsonrpc": "2.0",
@@ -1067,7 +1089,7 @@ class ConfigManagerBloc {
       ]
     };
 
-    var callResponse = await http.post(url,
+    var callResponse = await http.post(infuraHTTP,
         body: jsonEncode(callParams),
         headers: {'content-type': 'application/json'});
 

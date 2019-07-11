@@ -136,7 +136,6 @@ class BasketsBloc {
 
     data = data + address;
 
-    var url = "https://ropsten.infura.io/v3/2f35010022614bcb9dd4c5fefa9a64fd";
     Map callParams = {
       "id": "1",
       "jsonrpc": "2.0",
@@ -150,7 +149,7 @@ class BasketsBloc {
       ]
     };
 
-    var callResponse = await http.post(url,
+    var callResponse = await http.post(infuraHTTP,
         body: jsonEncode(callParams),
         headers: {'content-type': 'application/json'});
 

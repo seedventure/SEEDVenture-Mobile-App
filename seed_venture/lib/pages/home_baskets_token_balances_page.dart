@@ -138,7 +138,8 @@ class _HomeBasketsTokenBalancesPageState
                                 children: <Widget>[
                                   InkWell(
                                     onTap: () {
-                                      membersBloc.getMembers(snapshot.data[position].fpAddress);
+                                      membersBloc.getMembers(
+                                          snapshot.data[position].fpAddress);
                                       Navigator.pushNamed(context, '/startups');
                                     },
                                     child: Row(
@@ -178,10 +179,11 @@ class _HomeBasketsTokenBalancesPageState
                                           margin: EdgeInsets.only(left: 32.0),
                                         ),
                                         Spacer(),
-                                        Container(
+                                        Spacer(),
+                                        /*Container(
                                           // controvalore
                                           child: Text('0.00 EUR'),
-                                        ),
+                                        ),*/
                                         Spacer(),
                                         Container(
                                           margin:

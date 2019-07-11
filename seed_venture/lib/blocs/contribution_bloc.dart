@@ -68,7 +68,6 @@ class ContributionBloc {
   }
 
   Future<String> _postNonce(String address) async {
-    var url = "https://ropsten.infura.io/v3/2f35010022614bcb9dd4c5fefa9a64fd";
 
     Map txCountParams = {
       "id": "1",
@@ -77,7 +76,7 @@ class ContributionBloc {
       "params": ["$address", "latest"]
     };
 
-    var response = await http.post(url,
+    var response = await http.post(infuraHTTP,
         body: jsonEncode(txCountParams),
         headers: {'content-type': 'application/json'});
 
@@ -119,7 +118,6 @@ class ContributionBloc {
       hex = '0' + hex;
     }
 
-    var url = "https://ropsten.infura.io/v3/2f35010022614bcb9dd4c5fefa9a64fd";
     String data = "0x095ea7b3000000000000000000000000";
 
     data = data + fpAddress.substring(2);
@@ -143,7 +141,7 @@ class ContributionBloc {
       "method": "eth_sendRawTransaction",
       "params": [numbers.bytesToHex(signed, include0x: true)]
     };
-    var response = await http.post(url,
+    var response = await http.post(infuraHTTP,
         body: jsonEncode(sendParams),
         headers: {'content-type': 'application/json'});
     return response.body;
@@ -191,7 +189,6 @@ class ContributionBloc {
       hex = '0' + hex;
     }
 
-    var url = "https://ropsten.infura.io/v3/2f35010022614bcb9dd4c5fefa9a64fd";
     String data = "0x05f5c1b1";
 
     data = data + hex;
@@ -213,7 +210,7 @@ class ContributionBloc {
       "method": "eth_sendRawTransaction",
       "params": [numbers.bytesToHex(signed, include0x: true)]
     };
-    var response = await http.post(url,
+    var response = await http.post(infuraHTTP,
         body: jsonEncode(sendParams),
         headers: {'content-type': 'application/json'});
     return response.body;
@@ -235,14 +232,13 @@ class ContributionBloc {
 
   Future<void> trackTransaction(String txHash, Timer t,
       {bool sendSeeds}) async {
-    var url = "https://ropsten.infura.io/v3/2f35010022614bcb9dd4c5fefa9a64fd";
     Map sendParams = {
       "id": "1",
       "jsonrpc": "2.0",
       "method": "eth_getTransactionReceipt",
       "params": [txHash]
     };
-    var response = await http.post(url,
+    var response = await http.post(infuraHTTP,
         body: jsonEncode(sendParams),
         headers: {'content-type': 'application/json'});
     Map jsonResponse = jsonDecode(response.body);
