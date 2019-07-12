@@ -48,8 +48,7 @@ class _InsertPasswordMnemonicPageState
 
   @override
   Widget build(BuildContext context) {
-    //  final MnemonicLogicBloc mnemonicLogicBloc =
-    //    BlocProvider.of<MnemonicLogicBloc>(context);
+
 
     return Scaffold(
       appBar: AppBar(

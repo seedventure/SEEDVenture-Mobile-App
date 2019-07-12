@@ -28,7 +28,7 @@ dependencies:
   encrypt: ^3.1.0
   flutter_local_notifications: ^0.7.0
   decimal: ^0.3.0
-  flutter_html: ^0.8.2
+  flutter_html: ^0.10.4
   qr_flutter:
     git:
       url: git://github.com/lukef/qr.flutter.git
@@ -59,6 +59,11 @@ flutter:
   # included with your application, so that you can use the icons in
   # the material Icons class.
   uses-material-design: true
+
+  fonts:
+    - family: Poppins-Regular
+      fonts:
+        - asset: fonts/poppins-v6-latin-regular.ttf
 
   assets:
     - assets/

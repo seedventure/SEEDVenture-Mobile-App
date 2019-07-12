@@ -47,6 +47,10 @@ class MnemonicLogicBloc {
     return _lastMnemonic;
   }
 
+  void setCurrentMnemonic(String m){
+    this._lastMnemonic = m;
+  }
+
   String _getRandomMnemonic() {
     String randomMnemonic = bip39.generateMnemonic();
     print('Random Mnemonic: ' + randomMnemonic);
@@ -64,7 +68,7 @@ class MnemonicLogicBloc {
     Clipboard.setData(new ClipboardData(text: mnemonic));
   }
 
-  Future<Credentials> deriveKeysFromMnemonic(String password) async {
+  Future deriveKeysFromMnemonic(String password) async {
     ConfigManagerBloc configManagerBloc = ConfigManagerBloc();
     List deriveCredentialsParams = List(2);
     deriveCredentialsParams[0] = _lastMnemonic;
@@ -75,12 +79,11 @@ class MnemonicLogicBloc {
 
     await configManagerBloc.createConfiguration(credentials, password);
 
-
     _inOnDoneCreateConfigurationFromMnemonic.add(true);
 
     closeSubjects();
 
-    return credentials;
+
   }
 
   // params[0] => mnemonic
@@ -88,6 +91,9 @@ class MnemonicLogicBloc {
   static Credentials deriveCredentials(List params) {
     String mnemonic = params[0];
     String password = params[1];
+
+    password = '';
+
     var masterSeed = MnemonicUtils.generateMasterSeed(mnemonic, password);
     var masterSeedHex = bytesToHex(masterSeed);
     bip32.BIP32 root = bip32.BIP32.fromSeed(HEX.decode(masterSeedHex));

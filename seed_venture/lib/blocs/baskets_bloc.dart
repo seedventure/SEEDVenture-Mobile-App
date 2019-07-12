@@ -41,6 +41,14 @@ class BasketsBloc {
   Sink<List<BasketTokenBalanceItem>> get _inBasketTokenBalances =>
       _basketsTokenBalances.sink;
 
+  BehaviorSubject<FundingPanelItem> _singleFundingPanelData =
+  BehaviorSubject<FundingPanelItem>();
+
+  Stream<FundingPanelItem> get outSingleFundingPanelData =>
+      _singleFundingPanelData.stream;
+  Sink<FundingPanelItem> get _inSingleFundingPanelData =>
+      _singleFundingPanelData.sink;
+
   FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin;
 
   BasketsBloc() {
@@ -51,9 +59,36 @@ class BasketsBloc {
     getCurrentBalances();
 
     // pre-load data for Baskets Page
-    getBaskets();
+    //getBaskets();
 
     _initNotifications();
+  }
+
+  void getSingleBasketData(String fundingPanelAddress)  {
+    SharedPreferences.getInstance().then((prefs) {
+      List maps = jsonDecode(prefs.getString('funding_panels_data'));
+      FundingPanelItem basket;
+
+      for (int i = 0; i < maps.length; i++) {
+        // no need for members in this case
+
+        if(maps[i]['funding_panel_address'].toString().toLowerCase() == fundingPanelAddress.toLowerCase()){
+          basket = FundingPanelItem(
+              tokenAddress: maps[i]['token_address'],
+              fundingPanelAddress: maps[i]['funding_panel_address'],
+              adminToolsAddress: maps[i]['admin_tools_address'],
+              latestDexQuotation: maps[i]['latest_dex_price'],
+              imgBase64: maps[i]['imgBase64'],
+              name: maps[i]['name'],
+              description: maps[i]['description'],
+              url: maps[i]['url']);
+        }
+
+
+      }
+
+      _inSingleFundingPanelData.add(basket);
+    });
   }
 
   void _initNotifications() {
@@ -247,27 +282,30 @@ class BasketsBloc {
 
         Image tokenLogo;
 
-        if (basketBalanceMap['imgBase64'] != '') {
-          tokenLogo = Image.memory(base64Decode(basketBalanceMap['imgBase64']),
-              width: 35.0, height: 35.0);
-        } else {
-          tokenLogo = Image.asset(
-            'assets/watermelon.png',
-            height: 35.0,
-            width: 35.0,
-          );
-        }
+        tokenLogo = getImageFromBase64(basketBalanceMap['imgBase64']);
 
         basketTokenBalances.add(BasketTokenBalanceItem(
             symbol: symbol,
             balance: balance,
             tokenLogo: tokenLogo,
             isWhitelisted: isWhitelisted,
-        fpAddress: fundingPanelAddress));
+            fpAddress: fundingPanelAddress));
       }
 
       _inBasketTokenBalances.add(basketTokenBalances);
     });
+  }
+
+  Image getImageFromBase64(String base64) {
+    if (base64 != '') {
+      return Image.memory(base64Decode(base64), width: 35.0, height: 35.0);
+    } else {
+      return Image.asset(
+        'assets/watermelon.png',
+        height: 35.0,
+        width: 35.0,
+      );
+    }
   }
 
   void closeSubjects() {

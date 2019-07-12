@@ -13,11 +13,12 @@ class FundingPanelItem {
   final String description;
   final String url;
   final String imgBase64;
+  final bool favorite;
 
   // shared
   final String latestDexQuotation;
   final List<MemberItem> members;
 
   FundingPanelItem({this.tokenAddress, this.fundingPanelAddress, this.adminToolsAddress, this.fundingPanelUpdates,
-      this.name, this.description, this.url, this.imgBase64, this.latestDexQuotation, this.members});
+      this.name, this.description, this.url, this.imgBase64, this.favorite, this.latestDexQuotation, this.members});
 }

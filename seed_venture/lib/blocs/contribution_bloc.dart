@@ -2,13 +2,13 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:seed_venture/utils/constants.dart';
 import "package:web3dart/src/utils/numbers.dart" as numbers;
-import 'dart:math';
 import 'package:seed_venture/blocs/config_manager_bloc.dart';
 import 'package:web3dart/web3dart.dart';
 import 'package:flutter/foundation.dart';
 import 'package:web3dart/src/io/rawtransaction.dart';
 import 'dart:async';
 import 'package:rxdart/rxdart.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 final ContributionBloc contributionBloc = ContributionBloc();
 
@@ -31,6 +31,24 @@ class ContributionBloc {
 
   Stream<bool> get outTransactionSuccess => _transactionSuccess.stream;
   Sink<bool> get _inTransactionSuccess => _transactionSuccess.sink;
+
+  SharedPreferences _prefs;
+
+  bool hasEnoughFunds(String seedAmount) {
+    seedAmount = seedAmount.replaceAll(',', '.');
+    double seedBalance = double.parse(_prefs.getString('seed_balance'));
+    double seedToSend = double.parse(seedAmount);
+
+    if(seedBalance >= seedToSend)
+      return true;
+    return false;
+  }
+
+  ContributionBloc(){
+    SharedPreferences.getInstance().then((sp){
+      _prefs = sp;
+    });
+  }
 
   Future contribute(
       String seedAmount, String configPassword, String fpAddress) async {

@@ -3,7 +3,6 @@ import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:seed_venture/blocs/baskets_bloc.dart';
 import 'package:seed_venture/blocs/members_bloc.dart';
 import 'package:seed_venture/models/funding_panel_item.dart';
-import 'package:seed_venture/blocs/config_manager_bloc.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_html/flutter_html.dart';
@@ -23,7 +22,7 @@ class _BasketsPageState extends State<BasketsPage> {
 
     for (int i = 0; i < fundingPanelDetails.length; i++) {
       _staggeredTiles.add(StaggeredTile.count(2, 3));
-      _tiles.add(_Example01Tile(
+      _tiles.add(_BasketTile(
         name: fundingPanelDetails[i].name,
         description: fundingPanelDetails[i].description,
         url: fundingPanelDetails[i].url,
@@ -51,7 +50,6 @@ class _BasketsPageState extends State<BasketsPage> {
   @override
   Widget build(BuildContext context) {
     return new Scaffold(
-
         appBar: new AppBar(
           title: new Text('Baskets'),
         ),
@@ -66,13 +64,12 @@ class _BasketsPageState extends State<BasketsPage> {
                 }
               },
               stream: basketsBloc.outFundingPanelsDetails,
-            )
-        ));
+            )));
   }
 }
 
-class _Example01Tile extends StatelessWidget {
-  const _Example01Tile(
+class _BasketTile extends StatelessWidget {
+  const _BasketTile(
       {this.name,
       this.description,
       this.url,
@@ -80,7 +77,7 @@ class _Example01Tile extends StatelessWidget {
       this.fpAddress,
       this.latestDexQuotation});
 
-  final Color backgroundColor = Colors.greenAccent;
+  final Color backgroundColor = Colors.white;
 
   final String name;
   final String description;
@@ -103,28 +100,65 @@ class _Example01Tile extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
               Expanded(
+                  flex: 1,
                   child: Container(
-                child: Text('Name: ' + name),
-                margin: const EdgeInsets.all(10.0),
-              )),
+                    child: Row(
+                      children: <Widget>[
+                        Expanded(
+                          flex: 1,
+                        child: basketsBloc.getImageFromBase64(imgBase64),
+                    ),
+                        Expanded(
+                          flex: 2,
+                          child: Container(
+                            child: Text(
+                              name,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              softWrap: false,
+                            ),
+                            margin: EdgeInsets.only(left: 8.0),
+                            //width: 100,
+                          ),
+                        ),
+
+                        Expanded(
+                          flex: 1,
+                          child: IconButton(
+                            icon: Icon(
+                              Icons.star_border,
+                              color: Colors.blue,
+                              size: 20.0,
+                            ),
+
+                            onPressed: () => print('pressed'),
+
+                          ),
+                        )
+
+
+                      ],
+                    ),
+                    margin:
+                        const EdgeInsets.only(left: 8.0, bottom: 8.0, top: 8.0),
+                  )),
               Expanded(
+                  flex: 2,
                   child: Container(
-                child: Text('Incubator: ' + name),
-                margin: const EdgeInsets.all(10.0),
-              )),
-              Expanded(
-                  child: Container(
-                child: Html(
-                  data: description,
-                ),
-                margin: const EdgeInsets.all(10.0),
-              )
+                    child: SingleChildScrollView(
+                        child: Html(
+                      useRichText: true,
+                      data: description,
+                    )),
+                    margin: const EdgeInsets.all(8.0),
+                  )
               ),
               Expanded(
+                  flex: 1,
                   child: Container(
-                child: Text('Latest Quotation: ' + latestDexQuotation),
-                margin: const EdgeInsets.all(10.0),
-              ))
+                    child: Text('Latest Quotation: ' + latestDexQuotation),
+                    margin: const EdgeInsets.all(8.0),
+                  ))
             ],
           ),
         ),

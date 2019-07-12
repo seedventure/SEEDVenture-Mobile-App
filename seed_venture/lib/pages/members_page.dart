@@ -95,7 +95,7 @@ class _MemberPageState extends State<MembersPage> {
         Navigator.pop(context);
         SnackBar txErrorSnackBar = SnackBar(
             content: Text(
-                'There was an error in your transaction: check your funds!'));
+                'There was an error in your transaction: check your funds or whitelisting!'));
         _scaffoldKey.currentState.showSnackBar(txErrorSnackBar);
       }
     });
@@ -212,7 +212,7 @@ class _MemberPageState extends State<MembersPage> {
                   ),
                   Container(
                     child: TextField(
-                      keyboardType: TextInputType.number,
+                      keyboardType: TextInputType.numberWithOptions(decimal: true),
                       decoration: InputDecoration(
                           border: InputBorder.none, hintText: 'Amount...'),
                       controller: amountController,
@@ -227,7 +227,17 @@ class _MemberPageState extends State<MembersPage> {
                     child: RaisedButton(
                       onPressed: () {
                         Navigator.pop(context);
-                        showConfigPasswordDialog(amountController.text);
+
+                        if(contributionBloc.hasEnoughFunds(amountController.text)){
+                          showConfigPasswordDialog(amountController.text);
+                        }
+                        else {
+                          SnackBar error = SnackBar(
+                              content: Text(
+                                  'Insufficient Funds'));
+                          _scaffoldKey.currentState.showSnackBar(error);
+                        }
+
                       },
                       child: const Text(
                         'Next',

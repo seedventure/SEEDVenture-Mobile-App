@@ -8,10 +8,14 @@ import 'package:seed_venture/pages/home_baskets_token_balances_page.dart';
 import 'package:seed_venture/pages/wallet_info_page.dart';
 import 'package:seed_venture/pages/unlock_account_page.dart';
 import 'package:seed_venture/pages/on_boarding_page.dart';
+import 'package:seed_venture/pages/single_basket_page.dart';
+import 'package:seed_venture/blocs/mnemonic_logic_bloc.dart';
 
 void main() {
   return runApp(SeedVentureApp());
 }
+
+
 
 class SeedVentureApp extends StatelessWidget {
   @override
@@ -26,7 +30,7 @@ class SeedVentureApp extends StatelessWidget {
             buttonColor: Colors.lightBlue[800],
 
             // Define the default Font Family
-            fontFamily: 'Montserrat',
+            fontFamily: 'Poppins-Regular',
 
             // Define the default TextTheme. Use this to specify the default
             // text styling for headlines, titles, bodies of text, and more.
@@ -49,6 +53,9 @@ class SeedVentureApp extends StatelessWidget {
           },
           '/home': (BuildContext context) {
             return HomeBasketsTokenBalancesPage();
+          },
+          '/single_basket': (BuildContext context) {
+            return SingleBasketPage();
           },
           '/baskets': (BuildContext context) {
             return BasketsPage();

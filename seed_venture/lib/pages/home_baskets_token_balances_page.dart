@@ -13,7 +13,8 @@ class _HomeBasketsTokenBalancesPageState
     extends State<HomeBasketsTokenBalancesPage> {
   @override
   void initState() {
-    configManagerBloc.periodicUpdate();
+    configManagerBloc.configurationPeriodicUpdate();
+    configManagerBloc.balancesPeriodicUpdate();
 
     basketsBloc.outNotificationsiOS.listen((notificationData) async {
       String title = notificationData[0];
@@ -94,10 +95,12 @@ class _HomeBasketsTokenBalancesPageState
                 Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: <Widget>[
-                    FlatButton(
+                    /*FlatButton(
                         child: Text('Baskets'),
                         onPressed: () =>
-                            Navigator.pushNamed(context, '/baskets')),
+                            Navigator.pushNamed(context, '/baskets')),*/
+                    FlatButton(
+                        child: Text('Tokens'),),
                     Spacer(),
                     StreamBuilder(
                       builder: (BuildContext context, AsyncSnapshot snapshot) {
@@ -138,9 +141,12 @@ class _HomeBasketsTokenBalancesPageState
                                 children: <Widget>[
                                   InkWell(
                                     onTap: () {
-                                      membersBloc.getMembers(
+                                      /*membersBloc.getMembers(
                                           snapshot.data[position].fpAddress);
-                                      Navigator.pushNamed(context, '/startups');
+                                      Navigator.pushNamed(context, '/startups');*/
+                                      basketsBloc.getSingleBasketData(snapshot.data[position].fpAddress);
+                                      Navigator.pushNamed(context, '/single_basket');
+
                                     },
                                     child: Row(
                                       mainAxisAlignment:

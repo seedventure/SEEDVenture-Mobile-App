@@ -703,9 +703,32 @@ class ConfigManagerBloc {
     return null;
   }
 
+  // Used in _update to load fundingPanelItems from previous sp before actually updating, so that updateHoldings() can be called
+  Future<List<FundingPanelItem>> _getFundingPanelItemsFromPrevSharedPref() async {
+    List<FundingPanelItem> fundingPanelItems = List();
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    if(prefs.getString('funding_panels_data') == null) return null;
+
+    List maps = jsonDecode(prefs.getString('funding_panels_data'));
+    for(int i = 0; i < maps.length; i++) {
+      // I only set parameters used by updateHoldings()
+      fundingPanelItems.add(FundingPanelItem(
+        tokenAddress: maps[i]['token_address'],
+        adminToolsAddress: maps[i]['admin_tools_address'],
+        fundingPanelAddress: maps[i]['funding_panel_address'],
+        imgBase64: maps[i]['imgBase64']
+
+      ));
+    }
+
+    return fundingPanelItems;
+
+  }
+
   Future _update() async {
     if (_previousConfigurationMap == null) {
       _previousConfigurationMap = await loadPreviousConfigFile();
+      this._fundingPanelItems = await _getFundingPanelItemsFromPrevSharedPref();
     }
 
     Map configurationMap = Map();
@@ -737,11 +760,12 @@ class ConfigManagerBloc {
 
     this._fundingPanelItems = fundingPanelItems;
 
-    await _getBasketTokensBalances(fundingPanelItems);
+    //await _getBasketTokensBalances(fundingPanelItems);
 
     // init data for Baskets Page and Token Balances Page
-    basketsBloc.getBaskets();
-    basketsBloc.getBasketsTokenBalances();
+
+   // basketsBloc.getBaskets();
+   // basketsBloc.getBasketsTokenBalances();
 
     print('configuration updated!');
 
@@ -902,10 +926,15 @@ class ConfigManagerBloc {
     }
   }
 
-  void periodicUpdate() async {
+  void configurationPeriodicUpdate() async {
     await _update();
     const secs = const Duration(seconds: 120);
     new Timer.periodic(secs, (Timer t) => _update());
+  }
+
+  void balancesPeriodicUpdate() async {
+    const secs = const Duration(seconds: 5);
+    new Timer.periodic(secs, (Timer t) => updateHoldings());
   }
 
   // Used to contribute to a basket
@@ -941,6 +970,7 @@ class ConfigManagerBloc {
 
   void updateHoldings() async {
     if (_fundingPanelItems != null) {
+      print('updating holdings...');
       await _getBasketTokensBalances(_fundingPanelItems);
       basketsBloc.getBasketsTokenBalances();
       basketsBloc.getCurrentBalances();
