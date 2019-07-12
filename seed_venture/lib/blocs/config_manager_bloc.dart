@@ -152,6 +152,170 @@ class ConfigManagerBloc {
     return numbers.hexToInt(resMap['result']).toInt();
   }
 
+  Future<String> _getPrevFundingPanelHash(String fundingPanelAddress) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    List maps = jsonDecode(prefs.getString('funding_panels_data'));
+
+    for(int i = 0; i < maps.length; i++) {
+      if(maps[i]['funding_panel_address'].toString().toLowerCase() == fundingPanelAddress.toLowerCase()){
+        List ownerData = maps[i]['latest_owner_data'];
+        return ownerData[0]['hash'];
+      }
+    }
+    return null;
+  }
+
+  Future<String> _getPrevMemberHash(String fundingPanelAddress, String memberAddress) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    List maps = jsonDecode(prefs.getString('funding_panels_data'));
+
+    for(int i = 0; i < maps.length; i++) {
+      if(maps[i]['funding_panel_address'].toString().toLowerCase() == fundingPanelAddress.toLowerCase()){
+        List members = maps[i]['members'];
+
+        for(int j = 0; j < members.length; j++) {
+          if(members[j]['member_address'].toString().toLowerCase() == memberAddress.toLowerCase()) {
+            return members[j]['hash'];
+          }
+        }
+      }
+    }
+    return null;
+  }
+
+
+
+  Future getFundingPanelItemsForUpdate(
+      List<FundingPanelItem> fundingPanelItems, Map configurationMap) async {
+    List<Map> fpMapsConfigFile = List();
+    List<Map> fpMapsSharedPrefs = List();
+    int length = await getLastDeployersLength();
+
+    for (int index = 0; index < length; index++) {
+
+      List<String> basketContracts = await getBasketContractsByIndex(
+          index); // 0: Deployer, 1: AdminTools, 2: Token, 3: FundingPanel
+
+      String seedMaxSupply =  await _getSeedMaxSupply(basketContracts[3]);
+
+      if(seedMaxSupply == '0.00')
+        continue; // skip zero-supply funding panels
+
+      int exchangeRateSeed =
+      await getBasketSeedExchangeRate(basketContracts[3]);
+      Map latestOwnerData = await getLatestOwnerData(basketContracts[3]);
+      List<Map> fpData = List();
+      fpData.add(latestOwnerData);
+
+      String prevHash = await _getPrevFundingPanelHash(basketContracts[3]);
+
+      List fundingPanelVisualData;
+
+      // Avoid downloading documents from IPFS if hash hasn't changed
+      if(prevHash != null && prevHash.toLowerCase() == fpData[0]['hash'].toString().toLowerCase()){
+        fundingPanelVisualData =
+        await loadFundingPanelVisualDataFromPreviousSharedPref(
+            basketContracts[3]);
+      }
+
+      else {
+         fundingPanelVisualData =
+        await getFundingPanelDetails(latestOwnerData['url']);
+
+        if (fundingPanelVisualData == null) {
+          // IPFS error, check if data is available in previous saved data (shared_prefs)
+          fundingPanelVisualData =
+          await loadFundingPanelVisualDataFromPreviousSharedPref(
+              basketContracts[3]);
+        }
+      }
+
+      if (fundingPanelVisualData != null) {
+
+
+
+        List<MemberItem> members =
+        await getMembersOfFundingPanelForUpdate(basketContracts[3]);
+
+        FundingPanelItem FPItem = FundingPanelItem(
+            adminToolsAddress: basketContracts[1],
+            tokenAddress: basketContracts[2],
+            fundingPanelAddress: basketContracts[3],
+            fundingPanelUpdates: fpData,
+            latestDexQuotation: exchangeRateSeed.toString(),
+            name: fundingPanelVisualData[0],
+            description: fundingPanelVisualData[1],
+            url: fundingPanelVisualData[2],
+            imgBase64: fundingPanelVisualData[3],
+            members: members);
+
+        fundingPanelItems.add(FPItem);
+
+        List<Map> memberMapsConfigFile = List();
+        List<Map> membersMapsSharedPrefs = List();
+
+        for (int i = 0; i < members.length; i++) {
+          Map memberMapConfigFile = {
+            'memberAddress': members[i].memberAddress,
+            'memberName': members[i].name,
+            'latestIPFSUrl': members[i].ipfsUrl,
+            'latestHash': members[i].hash,
+          };
+
+          memberMapsConfigFile.add(memberMapConfigFile);
+
+          Map memberMapSP = {
+            'member_address': members[i].memberAddress,
+            'ipfsUrl': members[i].ipfsUrl,
+            'hash': members[i].hash,
+            'name': members[i].name,
+            'description': members[i].description,
+            'url': members[i].url,
+            'imgBase64': members[i].imgBase64
+          };
+
+          membersMapsSharedPrefs.add(memberMapSP);
+        }
+
+        Map fpMapConfig = {
+          'tokenAddress': FPItem.tokenAddress,
+          'fundingPanelAddress': FPItem.fundingPanelAddress,
+          'adminsToolsAddress': FPItem.adminToolsAddress,
+          'fundingPanelName': FPItem.name,
+          'lastDEXPrice': FPItem.latestDexQuotation,
+          'fundingPanelUpdates': FPItem.fundingPanelUpdates,
+          'members': memberMapsConfigFile
+        };
+
+        fpMapsConfigFile.add(fpMapConfig);
+
+        Map fpMapSP = {
+          'name': FPItem.name,
+          'description': FPItem.description,
+          'url': FPItem.url,
+          'imgBase64': FPItem.imgBase64,
+          'funding_panel_address': FPItem.fundingPanelAddress,
+          'token_address': FPItem.tokenAddress,
+          'admin_tools_address': FPItem.adminToolsAddress,
+          'latest_owner_data': FPItem.fundingPanelUpdates,
+          'latest_dex_price': FPItem.latestDexQuotation,
+          'members': membersMapsSharedPrefs
+        };
+
+        fpMapsSharedPrefs.add(fpMapSP);
+      }
+    }
+
+    Map FPListMap = {'list': fpMapsConfigFile};
+
+    configurationMap.addAll(FPListMap);
+
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+
+    sharedPreferences.setString(
+        'funding_panels_data', jsonEncode(fpMapsSharedPrefs));
+  }
+
   Future getFundingPanelItems(
       List<FundingPanelItem> fundingPanelItems, Map configurationMap) async {
     List<Map> fpMapsConfigFile = List();
@@ -267,6 +431,80 @@ class ConfigManagerBloc {
         'funding_panels_data', jsonEncode(fpMapsSharedPrefs));
   }
 
+
+  Future<List<String>> loadMemberDataFromPreviousSharedPref(
+      String fundingPanelAddress, String memberAddress) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+
+    if (prefs.getString('funding_panels_data') == null) return null;
+
+    List maps = jsonDecode(prefs.getString('funding_panels_data'));
+
+    for (int i = 0; i < maps.length; i++) {
+      if (maps[i]['funding_panel_address'].toString().toLowerCase() ==
+          fundingPanelAddress.toLowerCase()) {
+        List members = maps[i]['members'];
+
+        for(int j = 0; j < members.length; j++) {
+          if(members[j]['member_address'].toString().toLowerCase() == memberAddress.toLowerCase()){
+            List<String> ret = List();
+            ret.add(members[j]['name']);
+            ret.add(members[j]['description']);
+            ret.add(members[j]['url']);
+            ret.add(members[j]['imgBase64']);
+            return ret;
+          }
+        }
+
+
+      }
+    }
+
+    return null;
+  }
+
+
+  Future<List<MemberItem>> getMembersOfFundingPanelForUpdate(
+      String fundingPanelAddress) async {
+    List<MemberItem> members = List();
+    int membersLength = await getMembersLength(fundingPanelAddress);
+
+    for (int i = 0; i < membersLength; i++) {
+      String memberAddress =
+      await getMemberAddressByIndex(i, fundingPanelAddress);
+      List<String> memberData =
+      await getMemberDataByAddress(fundingPanelAddress, memberAddress);
+
+      String prevHash = await _getPrevMemberHash(fundingPanelAddress, memberAddress);
+
+      List<String> memberJsonData;
+
+      // prev documents hash for member hasn't changed, there is no need for re-download data
+      if(prevHash != null && prevHash.toLowerCase() == memberData[1].toLowerCase()){
+        memberJsonData = await loadMemberDataFromPreviousSharedPref(fundingPanelAddress, memberAddress);
+      }
+
+      else {
+        memberJsonData =
+        await getMemberJSONDataFromIPFS(memberData[0]);
+      }
+
+
+      if (memberJsonData != null) {
+        members.add(MemberItem(
+            memberAddress: memberAddress,
+            ipfsUrl: memberData[0],
+            hash: memberData[1],
+            name: memberJsonData[0],
+            description: memberJsonData[1],
+            url: memberJsonData[2],
+            imgBase64: memberJsonData[3]));
+      }
+    }
+
+    return members;
+  }
+
   Future<List<MemberItem>> getMembersOfFundingPanel(
       String fundingPanelAddress) async {
     List<MemberItem> members = List();
@@ -299,6 +537,7 @@ class ConfigManagerBloc {
     List<String> memberJsonData = List();
 
     try {
+      print('STARTUPPPPP');
       var response = await http.get(ipfsURL).timeout(Duration(seconds: 10));
       if (response.statusCode != 200) {
         return null;
@@ -745,7 +984,8 @@ class ConfigManagerBloc {
     };
     configurationMap.addAll(lastCheckedBlockNumberMap);
 
-    await getFundingPanelItems(fundingPanelItems, configurationMap);
+    await getFundingPanelItemsForUpdate(fundingPanelItems, configurationMap); // Optimized (hash-based checks)
+    //await getFundingPanelItems(fundingPanelItems, configurationMap);
 
     List<String> encryptedParams = await getEncryptedParamsFromConfigFile();
 
@@ -760,12 +1000,6 @@ class ConfigManagerBloc {
 
     this._fundingPanelItems = fundingPanelItems;
 
-    //await _getBasketTokensBalances(fundingPanelItems);
-
-    // init data for Baskets Page and Token Balances Page
-
-   // basketsBloc.getBaskets();
-   // basketsBloc.getBasketsTokenBalances();
 
     print('configuration updated!');
 
@@ -928,7 +1162,7 @@ class ConfigManagerBloc {
 
   void configurationPeriodicUpdate() async {
     await _update();
-    const secs = const Duration(seconds: 120);
+    const secs = const Duration(seconds: 60);
     new Timer.periodic(secs, (Timer t) => _update());
   }
 
