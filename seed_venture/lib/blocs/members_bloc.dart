@@ -6,46 +6,53 @@ import 'package:seed_venture/models/member_item.dart';
 final MembersBloc membersBloc = MembersBloc();
 
 class MembersBloc {
-  String _fundingPanelAddress;
-
-  String getFundingPanelAddress() {
-    return _fundingPanelAddress;
-  }
-
   BehaviorSubject<List<MemberItem>> _getMembers =
       BehaviorSubject<List<MemberItem>>();
 
   Stream<List<MemberItem>> get outMembers => _getMembers.stream;
   Sink<List<MemberItem>> get _inMembers => _getMembers.sink;
 
- /* BehaviorSubject<List<String>> _basketBalanceAndSymbol =
-  BehaviorSubject<List<String>>();
+  BehaviorSubject<MemberItem> _singleMemberData = BehaviorSubject<MemberItem>();
 
-  Stream<List<String>> get outBasketBalanceAndSymbol => _basketBalanceAndSymbol.stream;
-  Sink<List<String>> get _inBasketBalanceAndSymbol => _basketBalanceAndSymbol.sink;*/
+  Stream<MemberItem> get outSingleMemberData => _singleMemberData.stream;
+  Sink<MemberItem> get _inSingleMemberData => _singleMemberData.sink;
 
+  void getSingleMemberData(String fundingPanelAddress, String memberAddress) {
+    SharedPreferences.getInstance().then((prefs) {
+      List maps = jsonDecode(prefs.getString('funding_panels_data'));
+      MemberItem startup;
 
+      for (int i = 0; i < maps.length; i++) {
+        if (maps[i]['funding_panel_address'].toString().toLowerCase() ==
+            fundingPanelAddress.toLowerCase()) {
+          List members = maps[i]['members'];
 
-  /*void getSpecificBasketBalance(){
-    SharedPreferences.getInstance().then((prefs){
-      List balancesMaps = jsonDecode(prefs.getString('user_baskets_balances'));
+          for (int j = 0; j < members.length; j++) {
+            if (members[j]['member_address'].toString().toLowerCase() ==
+                memberAddress.toLowerCase()) {
+              startup = MemberItem(
+                  memberAddress: members[j]['members_address'],
+                  fundingPanelAddress: fundingPanelAddress,
+                  ipfsUrl: members[j]['ipfsUrl'],
+                  hash: members[j]['hash'],
+                  name: members[j]['name'],
+                  description: members[j]['description'],
+                  imgBase64: members[j]['imgBase64'],
+                  url: members[j]['url']);
 
-      for(int i = 0; i < balancesMaps.length; i++){
-        Map basketBalanceMap = balancesMaps[i];
-        if(basketBalanceMap['funding_panel_address'].toString().toLowerCase() == _fundingPanelAddress){
-          List<String> paramsToPass = List();
-          paramsToPass.add(basketBalanceMap['token_symbol']);
-          paramsToPass.add(basketBalanceMap['token_balance']);
-          _inBasketBalanceAndSymbol.add(paramsToPass);
+              break;
+            }
+          }
+
           break;
         }
       }
 
+      _inSingleMemberData.add(startup);
     });
-  }*/
+  }
 
   void getMembers(String fpAddress) {
-    this._fundingPanelAddress = fpAddress;
     SharedPreferences.getInstance().then((prefs) {
       List maps = jsonDecode(prefs.getString('funding_panels_data'));
       List<MemberItem> members = List();
@@ -56,6 +63,7 @@ class MembersBloc {
           for (int j = 0; j < membersMaps.length; j++) {
             members.add(MemberItem(
                 memberAddress: membersMaps[j]['member_address'],
+                fundingPanelAddress: fpAddress,
                 description: membersMaps[j]['description'],
                 hash: membersMaps[j]['hash'],
                 name: membersMaps[j]['name'],
@@ -72,7 +80,8 @@ class MembersBloc {
     });
   }
 
-  void closeSubjects() {
-    //_getMembers.close();
+  void dispose() {
+    _getMembers.close();
+    _singleMemberData.close();
   }
 }

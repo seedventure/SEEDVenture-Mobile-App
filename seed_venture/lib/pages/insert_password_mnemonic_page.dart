@@ -29,8 +29,6 @@ class _InsertPasswordMnemonicPageState
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    // final MnemonicLogicBloc mnemonicLogicBloc =
-    //    BlocProvider.of<MnemonicLogicBloc>(context);
     if (mnemonicLogicBloc.outOnDoneCreateConfigurationFromMnemonic !=
         _previousStream) {
       _streamSubscription?.cancel();
@@ -48,8 +46,6 @@ class _InsertPasswordMnemonicPageState
 
   @override
   Widget build(BuildContext context) {
-
-
     return Scaffold(
       appBar: AppBar(
         title: Text('Password'),
@@ -94,7 +90,8 @@ class _InsertPasswordMnemonicPageState
               ),
               RaisedButton(
                 onPressed: () {
-                  Navigator.of(context).push(ProgressBarOverlay(ProgressBarOverlay.generatingConfig));
+                  Navigator.of(context).push(
+                      ProgressBarOverlay(ProgressBarOverlay.generatingConfig));
                   mnemonicLogicBloc
                       .deriveKeysFromMnemonic(passwordController.text);
                 },

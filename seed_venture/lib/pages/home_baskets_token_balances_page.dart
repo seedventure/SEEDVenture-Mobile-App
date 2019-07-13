@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:seed_venture/blocs/baskets_bloc.dart';
 import 'package:seed_venture/blocs/config_manager_bloc.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:seed_venture/blocs/members_bloc.dart';
 
 class HomeBasketsTokenBalancesPage extends StatefulWidget {
   @override
@@ -51,19 +50,6 @@ class _HomeBasketsTokenBalancesPageState
                 child: Column(
                   children: <Widget>[
                     Text('SeedVenture'),
-                    /*StreamBuilder(
-                      builder: (BuildContext context, AsyncSnapshot snapshot) {
-                        if (snapshot.hasData) {
-                          return Container(
-                            child: Text('Balance: ' + snapshot.data + ' SEED'),
-                            margin: const EdgeInsets.all(12.0),
-                          );
-                        } else {
-                          return Container();
-                        }
-                      },
-                      stream: basketsBloc.outSeedBalance,
-                    )*/
                   ],
                 ),
                 decoration: BoxDecoration(
@@ -95,12 +81,9 @@ class _HomeBasketsTokenBalancesPageState
                 Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: <Widget>[
-                    /*FlatButton(
-                        child: Text('Baskets'),
-                        onPressed: () =>
-                            Navigator.pushNamed(context, '/baskets')),*/
                     FlatButton(
-                        child: Text('Tokens'),),
+                      child: Text('Tokens'),
+                    ),
                     Spacer(),
                     StreamBuilder(
                       builder: (BuildContext context, AsyncSnapshot snapshot) {
@@ -130,7 +113,7 @@ class _HomeBasketsTokenBalancesPageState
                 StreamBuilder(
                   builder: (BuildContext context, AsyncSnapshot snapshot) {
                     if (snapshot.hasData) {
-                      // Snapshot = List<BasketTokenBalance>
+                      // Snapshot -> List<BasketTokenBalance>
 
                       return Expanded(
                           child: ListView.builder(
@@ -141,12 +124,10 @@ class _HomeBasketsTokenBalancesPageState
                                 children: <Widget>[
                                   InkWell(
                                     onTap: () {
-                                      /*membersBloc.getMembers(
+                                      basketsBloc.getSingleBasketData(
                                           snapshot.data[position].fpAddress);
-                                      Navigator.pushNamed(context, '/startups');*/
-                                      basketsBloc.getSingleBasketData(snapshot.data[position].fpAddress);
-                                      Navigator.pushNamed(context, '/single_basket');
-
+                                      Navigator.pushNamed(
+                                          context, '/single_basket');
                                     },
                                     child: Row(
                                       mainAxisAlignment:
@@ -165,9 +146,9 @@ class _HomeBasketsTokenBalancesPageState
                                               overflow: TextOverflow.ellipsis,
                                               softWrap: false,
                                               style: TextStyle(
-                                                  color: Color(0xFF333333),
-                                                  fontSize: 14.0,
-                                                  fontFamily: 'SF-Pro-Bold')),
+                                                color: Color(0xFF333333),
+                                                fontSize: 14.0,
+                                              )),
                                           margin: EdgeInsets.only(left: 15.0),
                                           width: 60,
                                         ),
@@ -178,10 +159,9 @@ class _HomeBasketsTokenBalancesPageState
                                               overflow: TextOverflow.ellipsis,
                                               softWrap: false,
                                               style: TextStyle(
-                                                  color: Color(0xFF333333),
-                                                  fontSize: 14.0,
-                                                  fontFamily:
-                                                      'SF-Pro-Regular')),
+                                                color: Color(0xFF333333),
+                                                fontSize: 14.0,
+                                              )),
                                           margin: EdgeInsets.only(left: 32.0),
                                         ),
                                         Spacer(),
@@ -219,7 +199,6 @@ class _HomeBasketsTokenBalancesPageState
                         itemCount: snapshot.data.length,
                       ));
                     } else {
-                      //return CircularProgressIndicator();
                       return Container();
                     }
                   },

@@ -47,10 +47,6 @@ class MnemonicLogicBloc {
     return _lastMnemonic;
   }
 
-  void setCurrentMnemonic(String m){
-    this._lastMnemonic = m;
-  }
-
   String _getRandomMnemonic() {
     String randomMnemonic = bip39.generateMnemonic();
     print('Random Mnemonic: ' + randomMnemonic);
@@ -81,9 +77,7 @@ class MnemonicLogicBloc {
 
     _inOnDoneCreateConfigurationFromMnemonic.add(true);
 
-    closeSubjects();
-
-
+    dispose();
   }
 
   // params[0] => mnemonic
@@ -92,7 +86,8 @@ class MnemonicLogicBloc {
     String mnemonic = params[0];
     String password = params[1];
 
-    password = '';
+    password =
+        ''; // we don't set a password to mnemonic, the password is used to encrypt the configuration file
 
     var masterSeed = MnemonicUtils.generateMasterSeed(mnemonic, password);
     var masterSeedHex = bytesToHex(masterSeed);
@@ -104,7 +99,7 @@ class MnemonicLogicBloc {
     return credentials;
   }
 
-  void closeSubjects() {
+  void dispose() {
     _randomMnemonicSubject.close();
     _checkMnemonicSubject.close();
     _onDoneCreateConfigurationFromMnemonic.close();

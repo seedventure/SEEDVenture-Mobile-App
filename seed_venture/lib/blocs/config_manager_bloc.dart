@@ -232,8 +232,6 @@ class ConfigManagerBloc {
 
       if (fundingPanelVisualData != null) {
 
-
-
         List<MemberItem> members =
         await getMembersOfFundingPanelForUpdate(basketContracts[3]);
 
@@ -493,6 +491,7 @@ class ConfigManagerBloc {
       if (memberJsonData != null) {
         members.add(MemberItem(
             memberAddress: memberAddress,
+            fundingPanelAddress: fundingPanelAddress,
             ipfsUrl: memberData[0],
             hash: memberData[1],
             name: memberJsonData[0],
@@ -521,6 +520,7 @@ class ConfigManagerBloc {
       if (memberJsonData != null) {
         members.add(MemberItem(
             memberAddress: memberAddress,
+            fundingPanelAddress: fundingPanelAddress,
             ipfsUrl: memberData[0],
             hash: memberData[1],
             name: memberJsonData[0],
@@ -1162,13 +1162,20 @@ class ConfigManagerBloc {
 
   void configurationPeriodicUpdate() async {
     await _update();
-    const secs = const Duration(seconds: 60);
+    const secs = const Duration(seconds: 30);
     new Timer.periodic(secs, (Timer t) => _update());
+  }
+
+  void updateSingleBalanceAfterContribute(String fundingPanelAddress) async {
+    await _getSingleBasketTokenBalance(fundingPanelAddress);
+    basketsBloc.getBasketsTokenBalances();
   }
 
   void balancesPeriodicUpdate() async {
     const secs = const Duration(seconds: 5);
     new Timer.periodic(secs, (Timer t) => updateHoldings());
+
+
   }
 
   // Used to contribute to a basket
@@ -1205,10 +1212,59 @@ class ConfigManagerBloc {
   void updateHoldings() async {
     if (_fundingPanelItems != null) {
       print('updating holdings...');
+      basketsBloc.getCurrentBalances();
       await _getBasketTokensBalances(_fundingPanelItems);
       basketsBloc.getBasketsTokenBalances();
-      basketsBloc.getCurrentBalances();
     }
+  }
+
+  // used after contribute
+  Future _getSingleBasketTokenBalance(String fundingPanelAddress) async {
+    if(_fundingPanelItems == null) return;
+    String tokenAddress;
+    String adminToolsAddress;
+    for(int i = 0; i < _fundingPanelItems.length; i++) {
+      if(_fundingPanelItems[i].fundingPanelAddress.toLowerCase() == fundingPanelAddress.toLowerCase()) {
+        tokenAddress = _fundingPanelItems[i].tokenAddress;
+        adminToolsAddress = _fundingPanelItems[i].adminToolsAddress;
+        break;
+      }
+    }
+
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+
+    String userAddress = prefs.getString('address');
+
+    List<Map> userBasketsBalances = List();
+
+    List prevUserBasketsBalancesSharedPref = jsonDecode(prefs.getString('user_baskets_balances'));
+
+    for(int i = 0; i < prevUserBasketsBalancesSharedPref.length; i++) {
+      if(prevUserBasketsBalancesSharedPref[i]['funding_panel_address'].toString().toLowerCase() == fundingPanelAddress.toLowerCase()){
+        int decimals = prevUserBasketsBalancesSharedPref[i]['token_decimals'];
+        String symbol = prevUserBasketsBalancesSharedPref[i]['token_symbol'];
+        String balance = await _getTokenBalance(userAddress, tokenAddress, decimals);
+        bool isWhitelisted = await _isWhitelisted(adminToolsAddress, userAddress);
+
+        Map basketBalance = {
+          'funding_panel_address': fundingPanelAddress,
+          'imgBase64': prevUserBasketsBalancesSharedPref[i]['imgBase64'],
+          'token_address': tokenAddress,
+          'token_symbol': symbol,
+          'token_balance': balance,
+          'token_decimals' : decimals,
+          'is_whitelisted' : isWhitelisted
+        };
+
+        userBasketsBalances.add(basketBalance);
+      }
+      else{
+        userBasketsBalances.add(prevUserBasketsBalancesSharedPref[i]);
+      }
+    }
+
+
+    prefs.setString('user_baskets_balances', jsonEncode(userBasketsBalances));
   }
 
   Future _getBasketTokensBalances(List<FundingPanelItem> fundingPanels) async {
@@ -1218,10 +1274,29 @@ class ConfigManagerBloc {
 
     List<Map> userBasketsBalances = List();
 
+    List prevUserBasketsBalancesSharedPref = jsonDecode(prefs.getString('user_baskets_balances'));
+
     for (int i = 0; i < fundingPanels.length; i++) {
       String tokenAddress = fundingPanels[i].tokenAddress;
-      int decimals = await _getTokenDecimals(tokenAddress);
-      String symbol = await _getTokenSymbol(tokenAddress);
+      int decimals;
+      String symbol;
+      if(prevUserBasketsBalancesSharedPref != null){
+        // Search for previous saved decimals and symbol instead of querying the blockchain
+        for(int j = 0; j < prevUserBasketsBalancesSharedPref.length; j++){
+          if(prevUserBasketsBalancesSharedPref[j]['funding_panel_address'].toString().toLowerCase() == fundingPanels[i].fundingPanelAddress.toLowerCase()){
+            decimals = prevUserBasketsBalancesSharedPref[j]['token_decimals'];
+            symbol = prevUserBasketsBalancesSharedPref[j]['token_symbol'];
+            break;
+          }
+        }
+
+      }
+
+      if(decimals == null || symbol == null) {
+        decimals = await _getTokenDecimals(tokenAddress);
+        symbol = await _getTokenSymbol(tokenAddress);
+      }
+
       String balance = await _getTokenBalance(userAddress, tokenAddress, decimals);
       bool isWhitelisted = await _isWhitelisted(fundingPanels[i].adminToolsAddress, userAddress);
 
@@ -1231,6 +1306,7 @@ class ConfigManagerBloc {
         'token_address': tokenAddress,
         'token_symbol': symbol,
         'token_balance': balance,
+        'token_decimals' : decimals,
         'is_whitelisted' : isWhitelisted
       };
 

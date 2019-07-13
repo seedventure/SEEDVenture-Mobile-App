@@ -4,7 +4,7 @@ import 'package:flutter/services.dart';
 
 final HomePageBloc homePageBloc = HomePageBloc();
 
-class HomePageBloc  {
+class HomePageBloc {
   PublishSubject<int> _firstLaunchSubject = PublishSubject<int>();
 
   Stream<int> get outFirstLaunch => _firstLaunchSubject.stream;
@@ -13,10 +13,9 @@ class HomePageBloc  {
   HomePageBloc() {
     SharedPreferences.getInstance().then((prefs) {
       bool isOnBoardingDone = prefs.getBool('on_boarding_done');
-      if(isOnBoardingDone == null || isOnBoardingDone == false){
+      if (isOnBoardingDone == null || isOnBoardingDone == false) {
         _inFirstLaunch.add(0);
-      }
-      else {
+      } else {
         _inFirstLaunch.add(1);
       }
     });

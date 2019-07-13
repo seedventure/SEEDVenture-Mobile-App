@@ -10,14 +10,9 @@ class InsertPasswordImportPage extends StatefulWidget {
 class _InsertPasswordImportPageState extends State<InsertPasswordImportPage> {
   final TextEditingController passwordController = TextEditingController();
   final _scaffoldKey = GlobalKey<ScaffoldState>();
-  dynamic specificBloc;
 
   @override
   void initState() {
-
-
-    specificBloc = importLogicBloc.getCurrentBloc();
-
     importLogicBloc.outImportStatus.listen((done) {
       if (done) {
         Navigator.pop(context);
@@ -30,7 +25,7 @@ class _InsertPasswordImportPageState extends State<InsertPasswordImportPage> {
       if (wrong) {
         Navigator.pop(context);
         SnackBar wrongPasswordSnackBar =
-        SnackBar(content: Text('Wrong Password'));
+            SnackBar(content: Text('Wrong Password'));
         _scaffoldKey.currentState.showSnackBar(wrongPasswordSnackBar);
       }
     });
@@ -40,8 +35,6 @@ class _InsertPasswordImportPageState extends State<InsertPasswordImportPage> {
 
   @override
   Widget build(BuildContext context) {
-
-
     return Scaffold(
         key: _scaffoldKey,
         appBar: AppBar(
@@ -64,7 +57,8 @@ class _InsertPasswordImportPageState extends State<InsertPasswordImportPage> {
               ),
               RaisedButton(
                 onPressed: () {
-                  Navigator.of(context).push(ProgressBarOverlay(ProgressBarOverlay.generatingConfig));
+                  Navigator.of(context).push(
+                      ProgressBarOverlay(ProgressBarOverlay.generatingConfig));
                   importLogicBloc.import(passwordController.text);
                 },
                 child: Text('Import', style: TextStyle(color: Colors.white)),

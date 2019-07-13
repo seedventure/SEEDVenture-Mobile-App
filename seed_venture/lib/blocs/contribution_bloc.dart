@@ -33,25 +33,26 @@ class ContributionBloc {
   Sink<bool> get _inTransactionSuccess => _transactionSuccess.sink;
 
   SharedPreferences _prefs;
+  String _fundingPanelAddress;
 
   bool hasEnoughFunds(String seedAmount) {
     seedAmount = seedAmount.replaceAll(',', '.');
     double seedBalance = double.parse(_prefs.getString('seed_balance'));
     double seedToSend = double.parse(seedAmount);
 
-    if(seedBalance >= seedToSend)
-      return true;
+    if (seedBalance >= seedToSend) return true;
     return false;
   }
 
-  ContributionBloc(){
-    SharedPreferences.getInstance().then((sp){
+  ContributionBloc() {
+    SharedPreferences.getInstance().then((sp) {
       _prefs = sp;
     });
   }
 
   Future contribute(
       String seedAmount, String configPassword, String fpAddress) async {
+    this._fundingPanelAddress = fpAddress;
     Credentials credentials =
         await configManagerBloc.checkConfigPassword(configPassword);
     if (credentials == null) {
@@ -86,7 +87,6 @@ class ContributionBloc {
   }
 
   Future<String> _postNonce(String address) async {
-
     Map txCountParams = {
       "id": "1",
       "jsonrpc": "2.0",
@@ -268,7 +268,8 @@ class ContributionBloc {
         try {
           if (jsonResponse['result']['status'] == '0x1') {
             _inTransactionSuccess.add(true);
-            configManagerBloc.updateHoldings();
+            //configManagerBloc.updateHoldings();
+            configManagerBloc.updateSingleBalanceAfterContribute(_fundingPanelAddress);
           } else {
             _inErrorInContributionTransaction.add(true);
           }
@@ -292,5 +293,11 @@ class ContributionBloc {
     } else {
       return null;
     }
+  }
+
+  void dispose() {
+    _transactionSuccess.close();
+    _errorInContributionTransaction.close();
+    _configurationWrongPassword.close();
   }
 }

@@ -9,17 +9,18 @@ import 'dart:math';
 import 'package:decimal/decimal.dart';
 import 'package:seed_venture/models/basket_token_balance_item.dart';
 import 'package:flutter/material.dart';
+import 'package:seed_venture/utils/utils.dart';
 
 final BasketsBloc basketsBloc = BasketsBloc();
 
 class BasketsBloc {
-  BehaviorSubject<List<FundingPanelItem>> _getFundingPanelsDetails =
+  /*BehaviorSubject<List<FundingPanelItem>> _getFundingPanelsDetails =
       BehaviorSubject<List<FundingPanelItem>>();
 
   Stream<List<FundingPanelItem>> get outFundingPanelsDetails =>
       _getFundingPanelsDetails.stream;
   Sink<List<FundingPanelItem>> get _inFundingPanelsDetails =>
-      _getFundingPanelsDetails.sink;
+      _getFundingPanelsDetails.sink;*/
 
   PublishSubject<List<String>> _notificationsiOS =
       PublishSubject<List<String>>();
@@ -42,12 +43,18 @@ class BasketsBloc {
       _basketsTokenBalances.sink;
 
   BehaviorSubject<FundingPanelItem> _singleFundingPanelData =
-  BehaviorSubject<FundingPanelItem>();
+      BehaviorSubject<FundingPanelItem>();
 
   Stream<FundingPanelItem> get outSingleFundingPanelData =>
       _singleFundingPanelData.stream;
   Sink<FundingPanelItem> get _inSingleFundingPanelData =>
       _singleFundingPanelData.sink;
+
+  // Used to avoid reloading base64 images (flickering)
+  List<BasketTokenBalanceItem> _prevBasketTokenBalances;
+
+  // Address of last funding panel opened by the user
+  String _currentFundingPanelAddress;
 
   FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin;
 
@@ -64,7 +71,17 @@ class BasketsBloc {
     _initNotifications();
   }
 
-  void getSingleBasketData(String fundingPanelAddress)  {
+  String getCurrentFundingPanelAddress() {
+    return _currentFundingPanelAddress;
+  }
+
+  void updateAfterContribute() {
+    // _currentFundingPanelAddress will be the fp the user contributed to
+    getCurrentBalances();
+
+  }
+
+  void getSingleBasketData(String fundingPanelAddress) {
     SharedPreferences.getInstance().then((prefs) {
       List maps = jsonDecode(prefs.getString('funding_panels_data'));
       FundingPanelItem basket;
@@ -72,7 +89,8 @@ class BasketsBloc {
       for (int i = 0; i < maps.length; i++) {
         // no need for members in this case
 
-        if(maps[i]['funding_panel_address'].toString().toLowerCase() == fundingPanelAddress.toLowerCase()){
+        if (maps[i]['funding_panel_address'].toString().toLowerCase() ==
+            fundingPanelAddress.toLowerCase()) {
           basket = FundingPanelItem(
               tokenAddress: maps[i]['token_address'],
               fundingPanelAddress: maps[i]['funding_panel_address'],
@@ -82,12 +100,13 @@ class BasketsBloc {
               name: maps[i]['name'],
               description: maps[i]['description'],
               url: maps[i]['url']);
+
+          break;
         }
-
-
       }
 
       _inSingleFundingPanelData.add(basket);
+      this._currentFundingPanelAddress = fundingPanelAddress;
     });
   }
 
@@ -100,7 +119,7 @@ class BasketsBloc {
     var initializationSettings = new InitializationSettings(
         initializationSettingsAndroid, initializationSettingsIOS);
     flutterLocalNotificationsPlugin.initialize(initializationSettings,
-        onSelectNotification: onSelectNotification);
+        onSelectNotification: _onSelectNotification);
   }
 
   Future<String> _getOldEthBalance() async {
@@ -214,10 +233,10 @@ class BasketsBloc {
   }
 
   void notification(String notificationData) async {
-    await launchNotification(notificationData);
+    await _launchNotification(notificationData);
   }
 
-  Future<void> launchNotification(String notificationData) async {
+  Future<void> _launchNotification(String notificationData) async {
     var androidPlatformChannelSpecifics = new AndroidNotificationDetails(
         'SeedVenture', 'SeedVenture update', 'Seedventure',
         importance: Importance.Max, priority: Priority.High);
@@ -229,7 +248,7 @@ class BasketsBloc {
         payload: '');
   }
 
-  Future<void> onSelectNotification(String payload) async {
+  Future<void> _onSelectNotification(String payload) async {
     if (payload != null) {
       //debugPrint('notification payload: ' + payload);
     }
@@ -244,7 +263,7 @@ class BasketsBloc {
     _inNotificationsiOS.add(params);
   }
 
-  void getBaskets() {
+  /*void getBaskets() {
     SharedPreferences.getInstance().then((prefs) {
       List maps = jsonDecode(prefs.getString('funding_panels_data'));
       List<FundingPanelItem> fundingPanelItems = List();
@@ -264,7 +283,7 @@ class BasketsBloc {
 
       _inFundingPanelsDetails.add(fundingPanelItems);
     });
-  }
+  }*/
 
   void getBasketsTokenBalances() {
     List<BasketTokenBalanceItem> basketTokenBalances = List();
@@ -279,37 +298,36 @@ class BasketsBloc {
         String symbol = basketBalanceMap['token_symbol'];
         bool isWhitelisted = basketBalanceMap['is_whitelisted'];
         String fundingPanelAddress = basketBalanceMap['funding_panel_address'];
+        String imgBase64 = basketBalanceMap['imgBase64'];
 
         Image tokenLogo;
 
-        tokenLogo = getImageFromBase64(basketBalanceMap['imgBase64']);
+        if (_prevBasketTokenBalances != null &&
+            _prevBasketTokenBalances[i].imgBase64 == imgBase64) {
+          tokenLogo = _prevBasketTokenBalances[i].tokenLogo;
+        } else {
+          tokenLogo = Utils.getImageFromBase64(basketBalanceMap['imgBase64']);
+        }
 
         basketTokenBalances.add(BasketTokenBalanceItem(
             symbol: symbol,
             balance: balance,
             tokenLogo: tokenLogo,
             isWhitelisted: isWhitelisted,
-            fpAddress: fundingPanelAddress));
+            fpAddress: fundingPanelAddress,
+            imgBase64: imgBase64));
       }
 
       _inBasketTokenBalances.add(basketTokenBalances);
+      _prevBasketTokenBalances = basketTokenBalances;
     });
   }
 
-  Image getImageFromBase64(String base64) {
-    if (base64 != '') {
-      return Image.memory(base64Decode(base64), width: 35.0, height: 35.0);
-    } else {
-      return Image.asset(
-        'assets/watermelon.png',
-        height: 35.0,
-        width: 35.0,
-      );
-    }
-  }
-
-  void closeSubjects() {
-    _getFundingPanelsDetails.close();
+  void dispose() {
+    //_getFundingPanelsDetails.close();
     _notificationsiOS.close();
+    _seedEthBalances.close();
+    _basketsTokenBalances.close();
+    _singleFundingPanelData.close();
   }
 }

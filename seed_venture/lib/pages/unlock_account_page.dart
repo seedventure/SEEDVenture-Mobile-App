@@ -13,14 +13,12 @@ class _UnlockAccountPageState extends State<UnlockAccountPage> {
 
   @override
   void initState() {
-
-    unlockAccountBloc.outPasswordCheck.listen((isCorrect){
-      if(!isCorrect){
+    unlockAccountBloc.outPasswordCheck.listen((isCorrect) {
+      if (!isCorrect) {
         SnackBar wrongPasswordSnackBar =
-        SnackBar(content: Text('Wrong Password'));
+            SnackBar(content: Text('Wrong Password'));
         _scaffoldKey.currentState.showSnackBar(wrongPasswordSnackBar);
-      }
-      else {
+      } else {
         Navigator.of(context)
             .pushNamedAndRemoveUntil('/home', (Route<dynamic> route) => false);
       }
@@ -59,34 +57,33 @@ class _UnlockAccountPageState extends State<UnlockAccountPage> {
                       decoration: InputDecoration(
                           border: InputBorder.none, hintText: 'Password...'),
                     )),
-
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: <Widget>[
                     Container(
                         child: RaisedButton(
-                          onPressed: () {
-                            unlockAccountBloc.isPasswordCorrect(passwordController.text);
-                          },
-                          child: Text('Unlock', style: TextStyle(color: Colors.white)),
-                        )
-                    )
+                      onPressed: () {
+                        unlockAccountBloc
+                            .isPasswordCorrect(passwordController.text);
+                      },
+                      child:
+                          Text('Unlock', style: TextStyle(color: Colors.white)),
+                    ))
                   ],
                 ),
-
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: <Widget>[
                     Container(
                         child: RaisedButton(
-                          onPressed: () {
-                            OnBoardingBloc.setOnBoardingToBeDone();
-                            Navigator.of(context)
-                                .pushNamedAndRemoveUntil('/on_boarding', (Route<dynamic> route) => false);
-                          },
-                          child: Text('Forget', style: TextStyle(color: Colors.white)),
-                        )
-                    )
+                      onPressed: () {
+                        OnBoardingBloc.setOnBoardingToBeDone();
+                        Navigator.of(context).pushNamedAndRemoveUntil(
+                            '/on_boarding', (Route<dynamic> route) => false);
+                      },
+                      child:
+                          Text('Forget', style: TextStyle(color: Colors.white)),
+                    ))
                   ],
                 ),
               ],

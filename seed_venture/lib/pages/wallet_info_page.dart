@@ -125,7 +125,9 @@ class _WalletInfoPageState extends State<WalletInfoPage> {
                         child: RichText(
                           text: TextSpan(
                             text: 'View on Etherscan',
-                            style: new TextStyle(color: Colors.blue),
+                            style: new TextStyle(
+                                color: Colors.blue,
+                                fontFamily: 'Poppins-Regular'),
                             recognizer: new TapGestureRecognizer()
                               ..onTap = () {
                                 launch('https://ropsten.etherscan.io/address/' +

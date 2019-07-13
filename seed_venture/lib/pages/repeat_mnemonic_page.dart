@@ -11,7 +11,6 @@ class RepeatMnemonicPage extends StatefulWidget {
 class _RepeatMnemonicPageState extends State<RepeatMnemonicPage> {
   final TextEditingController mnemonicController = TextEditingController();
   final _scaffoldKey = GlobalKey<ScaffoldState>();
- // MnemonicLogicBloc mnemonicLogicBloc;
   StreamSubscription _streamSubscription;
   Stream _previousStream;
 
@@ -23,10 +22,6 @@ class _RepeatMnemonicPageState extends State<RepeatMnemonicPage> {
       } else {
         Navigator.of(context)
             .push(MaterialPageRoute(builder: (BuildContext context) {
-          /*return BlocProvider<MnemonicLogicBloc>(
-            bloc: mnemonicLogicBloc,
-            child: InsertPasswordMnemonicPage(),
-          );*/
           return InsertPasswordMnemonicPage();
         }));
       }
@@ -36,8 +31,7 @@ class _RepeatMnemonicPageState extends State<RepeatMnemonicPage> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    //final MnemonicLogicBloc mnemonicLogicBloc =
-   //     BlocProvider.of<MnemonicLogicBloc>(context);
+
     if (mnemonicLogicBloc.outCheckMnemonic != _previousStream) {
       _streamSubscription?.cancel();
       _previousStream = mnemonicLogicBloc.outCheckMnemonic;
@@ -53,7 +47,6 @@ class _RepeatMnemonicPageState extends State<RepeatMnemonicPage> {
 
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
         key: _scaffoldKey,
         appBar: AppBar(

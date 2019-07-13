@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:seed_venture/pages/create_config_page.dart';
-import 'package:seed_venture/blocs/onboarding_bloc.dart';
 import 'package:seed_venture/pages/import_config_page.dart';
 
 class OnBoardingPage extends StatelessWidget {
@@ -30,7 +29,6 @@ class OnBoardingPage extends StatelessWidget {
                 onPressed: () {
                   Navigator.of(context)
                       .push(MaterialPageRoute(builder: (BuildContext context) {
-
                     return CreateConfigPage();
                   }));
                 },
@@ -43,7 +41,7 @@ class OnBoardingPage extends StatelessWidget {
                 onPressed: () {
                   Navigator.of(context)
                       .push(MaterialPageRoute(builder: (BuildContext context) {
-                      return ImportConfigPage();
+                    return ImportConfigPage();
                   }));
                 },
                 child: Text('Import Config',

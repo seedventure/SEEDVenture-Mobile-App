@@ -23,29 +23,20 @@ class SettingsBloc {
   void onChangeNotificationSettings(bool newValue) {
     SharedPreferences.getInstance().then((prefs) {
       prefs.setBool('notifications_enabled', newValue);
-
       _inNotificationSettings.add(newValue);
     });
   }
 
-
   Future exportConfigurationFile() async {
-
     final documentsDir = await getApplicationDocumentsDirectory();
     String path = documentsDir.path;
     String configFilePath = '$path/configuration.json';
 
+    var platform = MethodChannel('seedventure.io/export_config');
 
-    var platform = MethodChannel(
-        'seedventure.io/export_config');
-
-
-    var result = await platform
-        .invokeMethod('exportConfig', {
+    await platform.invokeMethod('exportConfig', {
       "path": configFilePath,
     });
-
-
   }
 
   void dispose() {
@@ -55,7 +46,7 @@ class SettingsBloc {
   static Future<bool> areNotificationsEnabled() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     bool notificationsEnabled = prefs.getBool('notifications_enabled');
-    if(notificationsEnabled == null) {
+    if (notificationsEnabled == null) {
       prefs.setBool('notifications_enabled', true);
       notificationsEnabled = true;
     }

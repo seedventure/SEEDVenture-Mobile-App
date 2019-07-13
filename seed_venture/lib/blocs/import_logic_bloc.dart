@@ -10,17 +10,12 @@ import 'package:rxdart/rxdart.dart';
 final ImportLogicBloc importLogicBloc = ImportLogicBloc();
 
 class ImportLogicBloc {
-  /*MnemonicLogicBloc _mnemonicLogicBloc;
-  JSONWalletLogicBloc _jsonWalletLogicBloc;
-  ImportPrivateKeyLogicBloc _importPrivateKeyLogicBloc;
-  ImportFromConfigFileBloc _importFromConfigFileBloc;*/
-
   PublishSubject _importStatusSubject = PublishSubject();
-
-  PublishSubject<bool> _wrongPasswordSubject = PublishSubject<bool>();
 
   Stream get outImportStatus => _importStatusSubject.stream;
   Sink get _inImportStatus => _importStatusSubject.sink;
+
+  PublishSubject<bool> _wrongPasswordSubject = PublishSubject<bool>();
 
   Stream get outWrongPassword => _wrongPasswordSubject.stream;
   Sink get _inWrongPassword => _wrongPasswordSubject.sink;
@@ -32,24 +27,9 @@ class ImportLogicBloc {
 
   int _currentImportMode;
 
-
-  void dispose() {}
-
-  dynamic getCurrentBloc() {
-    switch (_currentImportMode) {
-      case fromMnemonicWords:
-        return mnemonicLogicBloc;
-        break;
-      case fromJSONFile:
-        return jsonWalletLogicBloc;
-        break;
-      case fromPrivateKey:
-        return importPrivateKeyLogicBloc;
-        break;
-      case fromConfigFile:
-        return importFromConfigFileBloc;
-        break;
-    }
+  void dispose() {
+    _importStatusSubject.close();
+    _wrongPasswordSubject.close();
   }
 
   void setCurrentImportMode(int importMode) {
@@ -101,14 +81,14 @@ class ImportLogicBloc {
       return;
     }
 
-    print('address from json: ' + credentials.address.hex);
+    print('address: ' + credentials.address.hex);
 
     await configManagerBloc.createConfiguration(credentials, password);
 
-    mnemonicLogicBloc.closeSubjects();
-    jsonWalletLogicBloc.closeSubjects();
-    importPrivateKeyLogicBloc.closeSubjects();
-    importFromConfigFileBloc.closeSubjects();
+    mnemonicLogicBloc.dispose();
+    jsonWalletLogicBloc.dispose();
+    importPrivateKeyLogicBloc.dispose();
+    importFromConfigFileBloc.dispose();
 
     _inImportStatus.add(true);
   }

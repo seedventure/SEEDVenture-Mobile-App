@@ -1,5 +1,7 @@
 final ImportPrivateKeyLogicBloc importPrivateKeyLogicBloc = ImportPrivateKeyLogicBloc();
 
+// Test private key import
+
 class ImportPrivateKeyLogicBloc   {
   String _currentPrivateKey;
 
@@ -12,8 +14,6 @@ class ImportPrivateKeyLogicBloc   {
   }
 
   // validatePrivateKey()
-
-  void closeSubjects() {}
 
   void dispose() {}
 }

@@ -1,21 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:seed_venture/pages/home_page.dart';
-import 'package:seed_venture/pages/baskets_page.dart';
 import 'package:flutter/services.dart';
-import 'package:seed_venture/pages/members_page.dart';
 import 'package:seed_venture/pages/settings_page.dart';
 import 'package:seed_venture/pages/home_baskets_token_balances_page.dart';
 import 'package:seed_venture/pages/wallet_info_page.dart';
 import 'package:seed_venture/pages/unlock_account_page.dart';
 import 'package:seed_venture/pages/on_boarding_page.dart';
 import 'package:seed_venture/pages/single_basket_page.dart';
-import 'package:seed_venture/blocs/mnemonic_logic_bloc.dart';
+import 'package:seed_venture/pages/startup_list_page.dart';
+import 'package:seed_venture/pages/single_startup_page.dart';
 
 void main() {
   return runApp(SeedVentureApp());
 }
-
-
 
 class SeedVentureApp extends StatelessWidget {
   @override
@@ -44,7 +41,6 @@ class SeedVentureApp extends StatelessWidget {
         title: 'SeedVenture',
         home: HomePage(),
         routes: <String, WidgetBuilder>{
-
           '/unlock_account': (BuildContext context) {
             return UnlockAccountPage();
           },
@@ -57,11 +53,11 @@ class SeedVentureApp extends StatelessWidget {
           '/single_basket': (BuildContext context) {
             return SingleBasketPage();
           },
-          '/baskets': (BuildContext context) {
-            return BasketsPage();
+          '/single_startup': (BuildContext context) {
+            return SingleStartupPage();
           },
           '/startups': (BuildContext context) {
-            return MembersPage();
+            return StartupListPage();
           },
           '/settings': (BuildContext context) {
             return SettingsPage();
@@ -69,7 +65,6 @@ class SeedVentureApp extends StatelessWidget {
           '/wallet_info': (BuildContext context) {
             return WalletInfoPage();
           }
-
         });
   }
 }

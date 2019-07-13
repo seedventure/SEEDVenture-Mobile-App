@@ -17,19 +17,13 @@ class ImportFromConfigFileBloc {
 
   String _configFilePath;
 
-  void setConfigFilePath(String configFilePath) {
-    this._configFilePath = configFilePath;
-  }
-
   String getConfigFilePath() {
     return _configFilePath;
   }
 
-  void closeSubjects() {
+  void dispose() {
     _configFileSelection.close();
   }
-
-  void dispose() {}
 
   void selectConfigFile() async {
     try {

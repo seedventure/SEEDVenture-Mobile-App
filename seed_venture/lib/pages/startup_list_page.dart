@@ -1,34 +1,31 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
-import 'package:seed_venture/blocs/baskets_bloc.dart';
 import 'package:seed_venture/blocs/members_bloc.dart';
-import 'package:seed_venture/models/funding_panel_item.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:seed_venture/models/member_item.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_html/flutter_html.dart';
+import 'package:seed_venture/utils/utils.dart';
 
-class BasketsPage extends StatefulWidget {
+class StartupListPage extends StatefulWidget {
   @override
-  State<StatefulWidget> createState() => _BasketsPageState();
+  State<StatefulWidget> createState() => _StartupListPageState();
 }
 
-class _BasketsPageState extends State<BasketsPage> {
-  FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin;
-
-  Widget _buildStaggeredGridView(List<FundingPanelItem> fundingPanelDetails) {
+class _StartupListPageState extends State<StartupListPage> {
+  Widget _buildStaggeredGridView(List<MemberItem> members) {
     List<StaggeredTile> _staggeredTiles = <StaggeredTile>[];
 
     List<Widget> _tiles = <Widget>[];
 
-    for (int i = 0; i < fundingPanelDetails.length; i++) {
+    for (int i = 0; i < members.length; i++) {
       _staggeredTiles.add(StaggeredTile.count(2, 3));
-      _tiles.add(_BasketTile(
-        name: fundingPanelDetails[i].name,
-        description: fundingPanelDetails[i].description,
-        url: fundingPanelDetails[i].url,
-        imgBase64: fundingPanelDetails[i].imgBase64,
-        fpAddress: fundingPanelDetails[i].fundingPanelAddress,
-        latestDexQuotation: fundingPanelDetails[i].latestDexQuotation,
+      _tiles.add(_StartupTile(
+        name: members[i].name,
+        description: members[i].description,
+        url: members[i].url,
+        imgBase64: members[i].imgBase64,
+        memberAddress: members[i].memberAddress,
+        fpAddress: members[i].fundingPanelAddress,
       ));
     }
 
@@ -51,31 +48,37 @@ class _BasketsPageState extends State<BasketsPage> {
   Widget build(BuildContext context) {
     return new Scaffold(
         appBar: new AppBar(
-          title: new Text('Baskets'),
+          title: new Text('Startup List'),
         ),
         body: new Padding(
             padding: const EdgeInsets.only(top: 12.0),
             child: StreamBuilder(
               builder: (BuildContext context, AsyncSnapshot snapshot) {
                 if (snapshot.hasData) {
-                  return _buildStaggeredGridView(snapshot.data);
+                  if (snapshot.data.length > 0) {
+                    return _buildStaggeredGridView(snapshot.data);
+                  } else {
+                    return Center(
+                      child: Text('This baskets does not have any startup'),
+                    );
+                  }
                 } else {
                   return CircularProgressIndicator();
                 }
               },
-              stream: basketsBloc.outFundingPanelsDetails,
+              stream: membersBloc.outMembers,
             )));
   }
 }
 
-class _BasketTile extends StatelessWidget {
-  const _BasketTile(
+class _StartupTile extends StatelessWidget {
+  const _StartupTile(
       {this.name,
       this.description,
       this.url,
       this.imgBase64,
       this.fpAddress,
-      this.latestDexQuotation});
+      this.memberAddress});
 
   final Color backgroundColor = Colors.white;
 
@@ -83,8 +86,8 @@ class _BasketTile extends StatelessWidget {
   final String description;
   final String url;
   final String imgBase64;
+  final String memberAddress;
   final String fpAddress;
-  final String latestDexQuotation;
 
   @override
   Widget build(BuildContext context) {
@@ -92,8 +95,8 @@ class _BasketTile extends StatelessWidget {
       color: backgroundColor,
       child: new InkWell(
         onTap: () {
-          membersBloc.getMembers(fpAddress);
-          Navigator.pushNamed(context, '/startups');
+          membersBloc.getSingleMemberData(fpAddress, memberAddress);
+          Navigator.pushNamed(context, '/single_startup');
         },
         child: Container(
           child: Column(
@@ -106,8 +109,8 @@ class _BasketTile extends StatelessWidget {
                       children: <Widget>[
                         Expanded(
                           flex: 1,
-                        child: basketsBloc.getImageFromBase64(imgBase64),
-                    ),
+                          child: Utils.getImageFromBase64(imgBase64),
+                        ),
                         Expanded(
                           flex: 2,
                           child: Container(
@@ -118,25 +121,8 @@ class _BasketTile extends StatelessWidget {
                               softWrap: false,
                             ),
                             margin: EdgeInsets.only(left: 8.0),
-                            //width: 100,
                           ),
                         ),
-
-                        Expanded(
-                          flex: 1,
-                          child: IconButton(
-                            icon: Icon(
-                              Icons.star_border,
-                              color: Colors.blue,
-                              size: 20.0,
-                            ),
-
-                            onPressed: () => print('pressed'),
-
-                          ),
-                        )
-
-
                       ],
                     ),
                     margin:
@@ -151,14 +137,7 @@ class _BasketTile extends StatelessWidget {
                       data: description,
                     )),
                     margin: const EdgeInsets.all(8.0),
-                  )
-              ),
-              Expanded(
-                  flex: 1,
-                  child: Container(
-                    child: Text('Latest Quotation: ' + latestDexQuotation),
-                    margin: const EdgeInsets.all(8.0),
-                  ))
+                  )),
             ],
           ),
         ),

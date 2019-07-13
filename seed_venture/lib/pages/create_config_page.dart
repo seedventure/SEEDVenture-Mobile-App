@@ -5,9 +5,6 @@ import 'package:seed_venture/blocs/mnemonic_logic_bloc.dart';
 class CreateConfigPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    //final MnemonicLogicBloc mnemonicLogicBloc =
-    //  BlocProvider.of<MnemonicLogicBloc>(context);
-
     return Scaffold(
         appBar: AppBar(
           title: Text('Create Config'),

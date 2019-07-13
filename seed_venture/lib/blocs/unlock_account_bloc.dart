@@ -13,20 +13,21 @@ class UnlockAccountBloc {
   Stream get outPasswordCheck => _passwordCheck.stream;
   Sink get _inPasswordCheck => _passwordCheck.sink;
 
-
   UnlockAccountBloc() {
-    SharedPreferences.getInstance().then((prefs){
+    SharedPreferences.getInstance().then((prefs) {
       this._hashPass = prefs.getString('sha256_pass');
     });
   }
 
-  void isPasswordCorrect(String password){
-    if(crypto.sha256
-        .convert(utf8.encode(password)).toString() == _hashPass){
+  void isPasswordCorrect(String password) {
+    if (crypto.sha256.convert(utf8.encode(password)).toString() == _hashPass) {
       _inPasswordCheck.add(true);
-    }
-    else{
+    } else {
       _inPasswordCheck.add(false);
     }
+  }
+
+  void dispose() {
+    _passwordCheck.close();
   }
 }

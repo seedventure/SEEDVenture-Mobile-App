@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:seed_venture/blocs/home_page_bloc.dart';
 import 'package:seed_venture/pages/on_boarding_page.dart';
-import 'package:seed_venture/pages/home_baskets_token_balances_page.dart';
 import 'package:seed_venture/pages/unlock_account_page.dart';
 
 class HomePage extends StatelessWidget {
@@ -15,9 +14,7 @@ class HomePage extends StatelessWidget {
       builder: (BuildContext context, AsyncSnapshot snapshot) {
         if (snapshot.hasData) {
           if (snapshot.data == 1) {
-            //return HomeBasketsTokenBalancesPage();
             return UnlockAccountPage();
-
           } else {
             return OnBoardingPage();
           }

@@ -1,6 +1,6 @@
-
 class MemberItem {
   final String memberAddress;
+  final String fundingPanelAddress;
   final String ipfsUrl;
   final String hash;
   final String name;
@@ -8,6 +8,13 @@ class MemberItem {
   final String url;
   final String imgBase64;
 
-
-  MemberItem({this.memberAddress, this.ipfsUrl, this.hash, this.name, this.description, this.url, this.imgBase64});
+  MemberItem(
+      {this.memberAddress,
+      this.fundingPanelAddress,
+      this.ipfsUrl,
+      this.hash,
+      this.name,
+      this.description,
+      this.url,
+      this.imgBase64});
 }

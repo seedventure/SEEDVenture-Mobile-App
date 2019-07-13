@@ -55,9 +55,7 @@ class JSONWalletLogicBloc {
     }
   }
 
-  void closeSubjects() {
+  void dispose() {
     _jsonFileSelection.close();
   }
-
-  void dispose() {}
 }
