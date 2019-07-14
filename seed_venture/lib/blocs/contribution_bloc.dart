@@ -9,6 +9,7 @@ import 'package:web3dart/src/io/rawtransaction.dart';
 import 'dart:async';
 import 'package:rxdart/rxdart.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:math';
 
 final ContributionBloc contributionBloc = ContributionBloc();
 
@@ -144,8 +145,8 @@ class ContributionBloc {
 
     RawTransaction rawTx = new RawTransaction(
       nonce: nonce.toInt(),
-      gasPrice: 10000000000,
-      gasLimit: 70000,
+      gasPrice: DefaultGasPrice * pow(10, 9),
+      gasLimit: DefaultGasLimit,
       to: EthereumAddress(SeedTokenAddress).number,
       value: BigInt.from(0),
       data: numbers.hexToBytes(data),
@@ -213,8 +214,8 @@ class ContributionBloc {
 
     RawTransaction rawTx = new RawTransaction(
       nonce: nonce.toInt(),
-      gasPrice: 10000000000,
-      gasLimit: 150000,
+      gasPrice: DefaultGasPrice * pow(10, 9),
+      gasLimit: DefaultGasLimit,
       to: EthereumAddress(fpAddress).number,
       value: BigInt.from(0),
       data: numbers.hexToBytes(data),
@@ -268,7 +269,6 @@ class ContributionBloc {
         try {
           if (jsonResponse['result']['status'] == '0x1') {
             _inTransactionSuccess.add(true);
-            //configManagerBloc.updateHoldings();
             configManagerBloc.updateSingleBalanceAfterContribute(_fundingPanelAddress);
           } else {
             _inErrorInContributionTransaction.add(true);

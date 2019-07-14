@@ -292,7 +292,7 @@ class _SingleBasketPageState extends State<SingleBasketPage> {
                                 Navigator.pushNamed(context, '/startups');
                               },
                               child: const Text(
-                                'View Startups',
+                                'View Startup',
                                 style: TextStyle(color: Colors.white),
                               ),
                             ))

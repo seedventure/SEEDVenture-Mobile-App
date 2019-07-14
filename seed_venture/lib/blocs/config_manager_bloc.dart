@@ -58,6 +58,24 @@ class ConfigManagerBloc {
     };
     configurationMap.addAll(lastCheckedBlockNumberMap);
 
+    Map additionalInfo = {
+      'seedTokenAddress' : SeedTokenAddress,
+      'factoryAddress' : GlobalFactoryAddress_v1,
+      'dexAddress' : DexAddress,
+      'web3Provider' : 'assets/scripts/blockchain.provider.web3.js',
+      'etherscanURL' : EtherscanURL,
+      'web3URL' : infuraWSS,
+      'ipfsProvider': 'assets/scripts/ipfs.provider.http.js',
+      'ipfsHost': 'ipfs.infura.io',
+      'ipfsPort': '5001',
+      'ipfsProtocol': 'https',
+      'ipfsUrlTemplate': 'https://ipfs.io/ipfs/',
+      'gasPrice': DefaultGasPrice,
+      'gasLimit': DefaultGasLimit,
+
+    };
+    configurationMap.addAll(additionalInfo);
+
     await getFundingPanelItems(fundingPanelItems, configurationMap);
 
     Map userMapDecrypted = {
@@ -182,6 +200,8 @@ class ConfigManagerBloc {
     }
     return null;
   }
+
+
 
 
 
@@ -312,6 +332,33 @@ class ConfigManagerBloc {
 
     sharedPreferences.setString(
         'funding_panels_data', jsonEncode(fpMapsSharedPrefs));
+  }
+
+  Future<String> _getOwner(String fundingPanelAddress) async {
+    String data = "0x8da5cb5b";
+
+    Map callParams = {
+      "id": "1",
+      "jsonrpc": "2.0",
+      "method": "eth_call",
+      "params": [
+        {
+          "to": fundingPanelAddress,
+          "data": data,
+        },
+        "latest"
+      ]
+    };
+
+    var callResponse = await http.post(infuraHTTP,
+        body: jsonEncode(callParams),
+        headers: {'content-type': 'application/json'});
+
+    Map resMap = jsonDecode(callResponse.body);
+
+    String address = EthereumAddress(resMap['result'].toString()).hex;
+
+    return address;
   }
 
   Future getFundingPanelItems(
@@ -537,7 +584,6 @@ class ConfigManagerBloc {
     List<String> memberJsonData = List();
 
     try {
-      print('STARTUPPPPP');
       var response = await http.get(ipfsURL).timeout(Duration(seconds: 10));
       if (response.statusCode != 200) {
         return null;
@@ -720,7 +766,7 @@ class ConfigManagerBloc {
       "method": "eth_call",
       "params": [
         {
-          "to": GlobalFactoryAddress,
+          "to": GlobalFactoryAddress_v1,
           "data": data,
         },
         "latest"
@@ -755,7 +801,7 @@ class ConfigManagerBloc {
       "method": "eth_call",
       "params": [
         {
-          "to": GlobalFactoryAddress,
+          "to": GlobalFactoryAddress_v1,
           "data": data,
         },
         "latest"
@@ -1237,7 +1283,12 @@ class ConfigManagerBloc {
 
     List<Map> userBasketsBalances = List();
 
-    List prevUserBasketsBalancesSharedPref = jsonDecode(prefs.getString('user_baskets_balances'));
+    List prevUserBasketsBalancesSharedPref;
+
+    if(prefs.getString('user_baskets_balances') != null) {
+      prevUserBasketsBalancesSharedPref =
+          jsonDecode(prefs.getString('user_baskets_balances'));
+    }
 
     for(int i = 0; i < prevUserBasketsBalancesSharedPref.length; i++) {
       if(prevUserBasketsBalancesSharedPref[i]['funding_panel_address'].toString().toLowerCase() == fundingPanelAddress.toLowerCase()){
@@ -1274,7 +1325,12 @@ class ConfigManagerBloc {
 
     List<Map> userBasketsBalances = List();
 
-    List prevUserBasketsBalancesSharedPref = jsonDecode(prefs.getString('user_baskets_balances'));
+    List prevUserBasketsBalancesSharedPref;
+
+    if(prefs.getString('user_baskets_balances') != null) {
+      prevUserBasketsBalancesSharedPref =
+          jsonDecode(prefs.getString('user_baskets_balances'));
+    }
 
     for (int i = 0; i < fundingPanels.length; i++) {
       String tokenAddress = fundingPanels[i].tokenAddress;
