@@ -18,7 +18,9 @@ class FundingPanelItem {
   // shared
   final String latestDexQuotation;
   final List<MemberItem> members;
+  final List tags;
+  final List documents;
 
   FundingPanelItem({this.tokenAddress, this.fundingPanelAddress, this.adminToolsAddress, this.fundingPanelUpdates,
-      this.name, this.description, this.url, this.imgBase64, this.favorite, this.latestDexQuotation, this.members});
+      this.name, this.description, this.url, this.imgBase64, this.favorite, this.latestDexQuotation, this.members, this.tags, this.documents});
 }

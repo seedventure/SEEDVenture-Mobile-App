@@ -118,7 +118,6 @@ class MainActivity: FlutterActivity() {
 
           var seedVentureDir = File(Environment.getExternalStorageDirectory().getPath() + File.separator + "SeedVenture")
 
-
           var path = call.argument<String>("path")
 
           val input = File(path)

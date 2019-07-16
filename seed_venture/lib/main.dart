@@ -22,9 +22,9 @@ class SeedVentureApp extends StatelessWidget {
         theme: ThemeData(
             // Define the default Brightness and Colors
             brightness: Brightness.light,
-            primaryColor: Colors.lightBlue[800],
-            accentColor: Colors.orangeAccent,
-            buttonColor: Colors.lightBlue[800],
+            primaryColor: Color(0xFF006B97),
+            accentColor: Color(0xFF6fd2fb),
+            buttonColor: Color(0xFF006B97),
 
             // Define the default Font Family
             fontFamily: 'Poppins-Regular',

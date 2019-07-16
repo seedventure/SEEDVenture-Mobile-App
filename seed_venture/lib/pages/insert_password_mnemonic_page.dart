@@ -13,6 +13,7 @@ class _InsertPasswordMnemonicPageState
   final TextEditingController passwordController = TextEditingController();
   final TextEditingController repeatPasswordController =
       TextEditingController();
+  final _scaffoldKey = GlobalKey<ScaffoldState>();
   StreamSubscription _streamSubscription;
   Stream _previousStream;
 
@@ -39,6 +40,27 @@ class _InsertPasswordMnemonicPageState
   }
 
   @override
+  void initState() {
+    mnemonicLogicBloc.outCheckConfirmPassword.listen((equal) {
+      if (equal == 'ok') {
+        Navigator.of(context)
+            .push(ProgressBarOverlay(ProgressBarOverlay.generatingConfig));
+        mnemonicLogicBloc.deriveKeysFromMnemonic(passwordController.text);
+      } else {
+        SnackBar snack;
+        if (equal == 'empty') {
+          snack = SnackBar(content: Text('The password can\'t be empty'));
+        } else {
+          snack = SnackBar(content: Text('The passwords don\'t correspond!'));
+        }
+
+        _scaffoldKey.currentState.showSnackBar(snack);
+      }
+    });
+    super.initState();
+  }
+
+  @override
   void dispose() {
     _streamSubscription.cancel();
     super.dispose();
@@ -47,6 +69,7 @@ class _InsertPasswordMnemonicPageState
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      key: _scaffoldKey,
       appBar: AppBar(
         title: Text('Password'),
       ),
@@ -90,10 +113,7 @@ class _InsertPasswordMnemonicPageState
               ),
               RaisedButton(
                 onPressed: () {
-                  Navigator.of(context).push(
-                      ProgressBarOverlay(ProgressBarOverlay.generatingConfig));
-                  mnemonicLogicBloc
-                      .deriveKeysFromMnemonic(passwordController.text);
+                  mnemonicLogicBloc.checkConfirmPassword(passwordController.text, repeatPasswordController.text);
                 },
                 child: Text('Continue', style: TextStyle(color: Colors.white)),
               )

@@ -254,6 +254,8 @@ class _SingleBasketPageState extends State<SingleBasketPage> {
                       margin: const EdgeInsets.only(
                           top: 15.0, left: 8.0, right: 8.0),
                     ),
+                    _getAdditionalLinksUI(snapshot),
+                    _getTagsWidget(snapshot),
                     Container(
                       margin: EdgeInsets.only(top: 15.0),
                       height: 1.0,
@@ -322,5 +324,74 @@ class _SingleBasketPageState extends State<SingleBasketPage> {
           },
           stream: basketsBloc.outSingleFundingPanelData,
         ));
+  }
+
+  Widget _getAdditionalLinksUI(AsyncSnapshot snapshot) {
+    if (snapshot.data.documents == null || snapshot.data.documents.length == 0)
+      return Container();
+
+    List<Widget> elements = List();
+
+    for (int i = 0; i < snapshot.data.documents.length; i++) {
+      Map document = snapshot.data.documents[i];
+      elements.add(Container(
+          margin: const EdgeInsets.only(top: 10.0, bottom: 15.0),
+          child: RichText(
+            text: TextSpan(
+              text: document['name'],
+              style: new TextStyle(color: Colors.blue),
+              recognizer: new TapGestureRecognizer()
+                ..onTap = () {
+                  launch(document['link']);
+                },
+            ),
+          )));
+    }
+
+    return Container(
+      margin: const EdgeInsets.only(top: 15.0, left: 8.0, right: 8.0),
+      child: Column(
+        children: elements,
+      ),
+    );
+  }
+
+  Widget _getTagsWidget(AsyncSnapshot snapshot) {
+    if(snapshot.data.tags == null || snapshot.data.tags.length == 0) return Container();
+    List<Widget> tags = List();
+    for(int i = 0; i < snapshot.data.tags.length; i++) {
+      tags.add(
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: <Widget>[
+            Expanded(
+              child: Container(
+                  decoration: new BoxDecoration(
+                      color: Color(0xFF006B97),
+                      borderRadius: new BorderRadius.only(
+                          bottomLeft: const Radius.circular(5.0),
+                          bottomRight: const Radius.circular(5.0),
+                          topLeft: const Radius.circular(5.0),
+                          topRight: const Radius.circular(5.0))),
+                  height: 22,
+                  margin: const EdgeInsets.only(
+                      right: 30.0, bottom: 10.0, top: 15.0, left: 8.0),
+                  child: Center(
+                    child: Text(
+                      snapshot.data.tags[i],
+                      style: TextStyle(color: Colors.white),
+                    ),
+                  )),
+            ),
+            Spacer(),
+            Spacer(),
+          ],
+        ),
+      );
+    }
+    return Column(
+        children: tags,
+    );
   }
 }

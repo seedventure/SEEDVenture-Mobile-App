@@ -17,6 +17,7 @@ class MnemonicLogicBloc {
   PublishSubject<bool> _onDoneCreateConfigurationFromMnemonic =
       PublishSubject<bool>();
   PublishSubject<String> _setCustomMnemonic = PublishSubject<String>();
+  PublishSubject<String> _checkConfirmPassword = PublishSubject<String>();
 
   Stream<String> get outRandomMnemonic => _randomMnemonicSubject.stream;
   Sink<String> get _inRandomMnemonic => _randomMnemonicSubject.sink;
@@ -31,6 +32,11 @@ class MnemonicLogicBloc {
 
   Stream<String> get outSetCustomMnemonic => _setCustomMnemonic.stream;
   Sink<String> get inSetCustomMnemonic => _setCustomMnemonic.sink;
+
+  Stream<String> get outCheckConfirmPassword =>
+      _checkConfirmPassword.stream;
+  Sink<String> get _inCheckConfirmPassword =>
+      _checkConfirmPassword.sink;
 
   String _lastMnemonic;
 
@@ -51,6 +57,12 @@ class MnemonicLogicBloc {
     String randomMnemonic = bip39.generateMnemonic();
     print('Random Mnemonic: ' + randomMnemonic);
     return randomMnemonic;
+  }
+
+  void checkConfirmPassword(String pass, String passConfirm){
+    if(pass.length == 0) _inCheckConfirmPassword.add('empty');
+    else if(pass == passConfirm) _inCheckConfirmPassword.add('ok');
+    else _inCheckConfirmPassword.add('not_equal');
   }
 
   void isMnemonicCorrect(String typedMnemonic) {
@@ -104,5 +116,6 @@ class MnemonicLogicBloc {
     _checkMnemonicSubject.close();
     _onDoneCreateConfigurationFromMnemonic.close();
     _setCustomMnemonic.close();
+    _checkConfirmPassword.close();
   }
 }

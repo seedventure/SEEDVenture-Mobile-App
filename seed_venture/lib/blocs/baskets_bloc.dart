@@ -78,7 +78,6 @@ class BasketsBloc {
   void updateAfterContribute() {
     // _currentFundingPanelAddress will be the fp the user contributed to
     getCurrentBalances();
-
   }
 
   void getSingleBasketData(String fundingPanelAddress) {
@@ -92,6 +91,8 @@ class BasketsBloc {
         if (maps[i]['funding_panel_address'].toString().toLowerCase() ==
             fundingPanelAddress.toLowerCase()) {
           basket = FundingPanelItem(
+              tags: maps[i]['tags'],
+              documents: maps[i]['documents'],
               tokenAddress: maps[i]['token_address'],
               fundingPanelAddress: maps[i]['funding_panel_address'],
               adminToolsAddress: maps[i]['admin_tools_address'],
@@ -294,15 +295,18 @@ class BasketsBloc {
       for (int i = 0; i < balancesMaps.length; i++) {
         Map basketBalanceMap = balancesMaps[i];
 
+        String name = basketBalanceMap['name'];
         String balance = basketBalanceMap['token_balance'];
         String symbol = basketBalanceMap['token_symbol'];
         bool isWhitelisted = basketBalanceMap['is_whitelisted'];
         String fundingPanelAddress = basketBalanceMap['funding_panel_address'];
         String imgBase64 = basketBalanceMap['imgBase64'];
+        List tags = basketBalanceMap['basket_tags'];
 
         Image tokenLogo;
 
         if (_prevBasketTokenBalances != null &&
+            _prevBasketTokenBalances.length > i &&
             _prevBasketTokenBalances[i].imgBase64 == imgBase64) {
           tokenLogo = _prevBasketTokenBalances[i].tokenLogo;
         } else {
@@ -310,16 +314,19 @@ class BasketsBloc {
         }
 
         basketTokenBalances.add(BasketTokenBalanceItem(
-            symbol: symbol,
-            balance: balance,
-            tokenLogo: tokenLogo,
-            isWhitelisted: isWhitelisted,
-            fpAddress: fundingPanelAddress,
-            imgBase64: imgBase64));
+          name: name,
+          basketTags: tags,
+          symbol: symbol,
+          balance: balance,
+          tokenLogo: tokenLogo,
+          isWhitelisted: isWhitelisted,
+          fpAddress: fundingPanelAddress,
+          imgBase64: imgBase64,
+        ));
       }
 
-      _inBasketTokenBalances.add(basketTokenBalances);
       _prevBasketTokenBalances = basketTokenBalances;
+      _inBasketTokenBalances.add(basketTokenBalances);
     });
   }
 
@@ -329,5 +336,50 @@ class BasketsBloc {
     _seedEthBalances.close();
     _basketsTokenBalances.close();
     _singleFundingPanelData.close();
+  }
+
+  List getFilteredItems(String searchText) {
+    if (searchText == '') return _prevBasketTokenBalances;
+    List items = List();
+    for (int i = 0; i < _prevBasketTokenBalances.length; i++) {
+      /*if(_prevBasketTokenBalances[i].basketTags.contains(searchText)){
+        items.add(_prevBasketTokenBalances[i]);
+      }*/
+
+      /*else if(_prevBasketTokenBalances[i].symbol.toLowerCase() == searchText.toLowerCase()) {
+    items.add(_prevBasketTokenBalances[i]);
+    }
+    else if(_prevBasketTokenBalances[i].name.toLowerCase() == searchText.toLowerCase()) {
+    items.add(_prevBasketTokenBalances[i]);
+    }*/
+
+      bool added = false;
+      _prevBasketTokenBalances[i].basketTags.forEach((tag) {
+        if (!added && tag.toString().toLowerCase().contains(searchText.toLowerCase())) {
+          items.add(_prevBasketTokenBalances[i]);
+          added = true;
+        }
+      });
+
+      if(_prevBasketTokenBalances[i]
+          .name == null)
+        print('NAME IS NULL!!!!!');
+
+      if (!added) {
+        if (_prevBasketTokenBalances[i]
+            .symbol
+            .toLowerCase()
+            .contains(searchText.toLowerCase())) {
+          items.add(_prevBasketTokenBalances[i]);
+        } else if (_prevBasketTokenBalances[i]
+            .name != null && _prevBasketTokenBalances[i]
+            .name
+            .toLowerCase()
+            .contains(searchText.toLowerCase())) {
+          items.add(_prevBasketTokenBalances[i]);
+        }
+      }
+    }
+    return items;
   }
 }
