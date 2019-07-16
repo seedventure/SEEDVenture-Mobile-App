@@ -55,7 +55,7 @@ class _ImportConfigPageState extends State<ImportConfigPage> {
     return Scaffold(
         key: _scaffoldKey,
         appBar: AppBar(
-          title: Text('Import Config'),
+          title: Text('Import Wallet'),
         ),
         body: SingleChildScrollView(
             child: Container(

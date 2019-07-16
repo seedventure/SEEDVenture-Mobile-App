@@ -56,6 +56,9 @@ class BasketsBloc {
   // Address of last funding panel opened by the user
   String _currentFundingPanelAddress;
 
+  // Last funding panel opened by the user
+  FundingPanelItem _currentFundingPanelItem;
+
   FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin;
 
   BasketsBloc() {
@@ -90,7 +93,24 @@ class BasketsBloc {
 
         if (maps[i]['funding_panel_address'].toString().toLowerCase() ==
             fundingPanelAddress.toLowerCase()) {
+
+          bool favorite = false;;
+          List favorites = prefs.getStringList('favorites');
+          if(favorites.contains(fundingPanelAddress.toLowerCase()))
+            favorite = true;
+
+          bool isWhitelisted;
+
+
+          for(int i = 0; i < _prevBasketTokenBalances.length; i++) {
+            if(_prevBasketTokenBalances[i].fpAddress.toLowerCase() == fundingPanelAddress.toLowerCase()){
+              isWhitelisted = _prevBasketTokenBalances[i].isWhitelisted;
+              break;
+            }
+          }
+
           basket = FundingPanelItem(
+              favorite: favorite,
               tags: maps[i]['tags'],
               documents: maps[i]['documents'],
               tokenAddress: maps[i]['token_address'],
@@ -98,8 +118,10 @@ class BasketsBloc {
               adminToolsAddress: maps[i]['admin_tools_address'],
               latestDexQuotation: maps[i]['latest_dex_price'],
               imgBase64: maps[i]['imgBase64'],
+              seedWhitelistThreshold: maps[i]['seed_whitelist_threshold'],
               name: maps[i]['name'],
               description: maps[i]['description'],
+              whitelisted: isWhitelisted,
               url: maps[i]['url']);
 
           break;
@@ -108,6 +130,7 @@ class BasketsBloc {
 
       _inSingleFundingPanelData.add(basket);
       this._currentFundingPanelAddress = fundingPanelAddress;
+      this._currentFundingPanelItem = basket;
     });
   }
 
@@ -381,5 +404,32 @@ class BasketsBloc {
       }
     }
     return items;
+  }
+
+  void setFavorite() {
+    SharedPreferences.getInstance().then((prefs) {
+      List favorites = prefs.getStringList('favorites');
+      favorites.add(_currentFundingPanelAddress.toLowerCase());
+      prefs.setStringList('favorites', favorites);
+
+      _currentFundingPanelItem.setFavorite(true);
+      _inSingleFundingPanelData.add(_currentFundingPanelItem);
+    });
+  }
+
+  void removeFromFavorites() {
+    SharedPreferences.getInstance().then((prefs) {
+      List favorites = prefs.getStringList('favorites');
+      for(int i = 0; i < favorites.length; i++) {
+        if(favorites[i] == _currentFundingPanelAddress.toLowerCase()){
+          favorites.removeAt(i);
+          break;
+        }
+      }
+      prefs.setStringList('favorites', favorites);
+
+      _currentFundingPanelItem.setFavorite(false);
+      _inSingleFundingPanelData.add(_currentFundingPanelItem);
+    });
   }
 }

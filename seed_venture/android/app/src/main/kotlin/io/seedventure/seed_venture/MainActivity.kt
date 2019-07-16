@@ -12,6 +12,7 @@ import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugins.GeneratedPluginRegistrant
 import java.io.File
 import java.io.IOException
+import java.util.*
 
 
 class MainActivity: FlutterActivity() {
@@ -122,7 +123,10 @@ class MainActivity: FlutterActivity() {
 
           val input = File(path)
 
-          val output = File(seedVentureDir.path + File.separator + "configuration.json")
+         val calendar = Calendar.getInstance()
+
+          val output = File(seedVentureDir.path + File.separator + calendar.get(Calendar.DAY_OF_MONTH) + "_" + calendar.get(Calendar.MONTH) +
+                  "_" + calendar.get(Calendar.YEAR) + "_configuration.json")
 
           input.copyTo(output)
 

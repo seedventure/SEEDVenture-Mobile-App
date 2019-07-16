@@ -30,12 +30,17 @@ class _UnlockAccountPageState extends State<UnlockAccountPage> {
   @override
   Widget build(BuildContext context) {
     return new Scaffold(
+        resizeToAvoidBottomPadding:
+            false, // if true, it resize when the keyboard appear/disappear
         key: _scaffoldKey,
-        appBar: new AppBar(
+        /*appBar: new AppBar(
           title: new Text('Unlock Account'),
-        ),
-        body: SingleChildScrollView(
-          child: Container(
+        ),*/
+        body:
+            //SingleChildScrollView(
+            //  child:
+            /*Container(
+
             margin: const EdgeInsets.only(top: 12.0),
             child: Column(
               children: <Widget>[
@@ -88,7 +93,109 @@ class _UnlockAccountPageState extends State<UnlockAccountPage> {
                 ),
               ],
             ),
+          ),*/
+            Stack(children: <Widget>[
+          Positioned.fill(
+            child: Image(
+              image: AssetImage('assets/bg-login.png'),
+              fit: BoxFit.cover,
+            ),
           ),
-        ));
+          Center(
+            child: Column(
+              children: <Widget>[
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    Container(
+                      margin: const EdgeInsets.only(top: 50.0, bottom: 10.0),
+                        child: Image.asset(
+                      'assets/seed-logo.png',
+                      height: 100,
+                      width: 100,
+                    ))
+                  ],
+                ),
+                Container(
+                  margin: const EdgeInsets.only(bottom: 20.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                      Expanded(
+                          child: Center(
+                            child: Text(
+                              'The first decentralized venture capital investment platform',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(color: Colors.white),
+                            ),
+                          ))
+                    ],
+                  )
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    Expanded(
+                        child: Center(
+                      child: Text(
+                        'Please, type your password to unlock your account',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(color: Colors.white),
+                      ),
+                    ))
+                  ],
+                ),
+                Container(
+                    margin: const EdgeInsets.all(12.0),
+                    child: TextField(
+                        obscureText: true,
+                        controller: passwordController,
+                        style: TextStyle(color: Colors.white),
+                        decoration: new InputDecoration(
+                            border: InputBorder.none,
+                            hintStyle: TextStyle(color: Colors.white),
+                            labelStyle: new TextStyle(color: Colors.white),
+                            /*border: new UnderlineInputBorder(
+                                        borderSide: new BorderSide(
+                                            color: Colors.white)),*/
+                            hintText: 'Password...'))),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    Container(
+                        child: RaisedButton(
+                      color: Colors.white,
+                      onPressed: () {
+                        FocusScope.of(context).requestFocus(new FocusNode());
+                        unlockAccountBloc
+                            .isPasswordCorrect(passwordController.text);
+                      },
+                      child: Text('Unlock',
+                          style: TextStyle(color: Color(0xFF006B97))),
+                    ))
+                  ],
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    Container(
+                        child: RaisedButton(
+                      color: Colors.white,
+                      onPressed: () {
+                        OnBoardingBloc.setOnBoardingToBeDone();
+                        Navigator.of(context).pushNamedAndRemoveUntil(
+                            '/on_boarding', (Route<dynamic> route) => false);
+                      },
+                      child: Text('Forget',
+                          style: TextStyle(color: Color(0xFF006B97))),
+                    ))
+                  ],
+                ),
+              ],
+            ),
+          )
+        ])
+        //    )
+        );
   }
 }

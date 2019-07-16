@@ -48,7 +48,8 @@ class _SingleStartupPageState extends State<SingleStartupPage> {
                                 ),
                               ),
                             ),
-                            Expanded(
+                            Spacer()
+                            /*Expanded(
                               flex: 1,
                               child: IconButton(
                                 icon: Icon(
@@ -58,7 +59,7 @@ class _SingleStartupPageState extends State<SingleStartupPage> {
                                 ),
                                 onPressed: () => print('pressed'),
                               ),
-                            )
+                            )*/
                           ],
                         )),
                     Container(

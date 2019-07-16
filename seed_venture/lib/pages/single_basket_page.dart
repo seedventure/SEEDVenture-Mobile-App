@@ -7,6 +7,7 @@ import 'package:seed_venture/utils/utils.dart';
 import 'package:seed_venture/blocs/members_bloc.dart';
 import 'package:seed_venture/blocs/contribution_bloc.dart';
 import 'package:seed_venture/widgets/progress_bar_overlay.dart';
+import 'package:seed_venture/models/funding_panel_item.dart';
 
 class SingleBasketPage extends StatefulWidget {
   @override
@@ -76,7 +77,7 @@ class _SingleBasketPageState extends State<SingleBasketPage> {
         });
   }
 
-  Future _showContributeDialog() async {
+  Future _showContributeDialog(FundingPanelItem fundingPanel) async {
     TextEditingController amountController = TextEditingController();
 
     await showDialog(
@@ -101,7 +102,8 @@ class _SingleBasketPageState extends State<SingleBasketPage> {
                       Expanded(
                         child: Container(
                           child: Text(
-                              'Remember that you have to be whitelisted to contribute to this basket!'),
+                              'Remember that you have to be whitelisted to contribute to this basket above to the WL threshold!', textAlign: TextAlign.center,),
+
                           margin: const EdgeInsets.only(left: 8.0, right: 8.0),
                         ),
                       )
@@ -126,12 +128,18 @@ class _SingleBasketPageState extends State<SingleBasketPage> {
                       onPressed: () {
                         Navigator.pop(context);
 
-                        if (contributionBloc
-                            .hasEnoughFunds(amountController.text)) {
-                          _showConfigPasswordDialog(amountController.text);
+                        if(contributionBloc.checkWhitelisting(amountController.text, fundingPanel)) {
+                          if (contributionBloc
+                              .hasEnoughFunds(amountController.text)) {
+                            _showConfigPasswordDialog(amountController.text);
+                          } else {
+                            SnackBar error =
+                            SnackBar(content: Text('Insufficient Funds'));
+                            _scaffoldKey.currentState.showSnackBar(error);
+                          }
                         } else {
                           SnackBar error =
-                              SnackBar(content: Text('Insufficient Funds'));
+                          SnackBar(content: Text('You are not whitelisted'));
                           _scaffoldKey.currentState.showSnackBar(error);
                         }
                       },
@@ -177,7 +185,7 @@ class _SingleBasketPageState extends State<SingleBasketPage> {
         Navigator.pop(context);
         SnackBar contributedSnackBar = SnackBar(
             content: Text(
-                'You have contributed to this project! Your balance is being updated...'));
+                'You have contributed to this basket!'));
         _scaffoldKey.currentState.showSnackBar(contributedSnackBar);
       }
     });
@@ -219,16 +227,10 @@ class _SingleBasketPageState extends State<SingleBasketPage> {
                                 ),
                               ),
                             ),
+                        //Spacer()
                             Expanded(
                               flex: 1,
-                              child: IconButton(
-                                icon: Icon(
-                                  Icons.star_border,
-                                  color: Colors.blue,
-                                  size: 20.0,
-                                ),
-                                onPressed: () => print('pressed'),
-                              ),
+                              child: _getFavoriteIcon(snapshot),
                             )
                           ],
                         )),
@@ -307,7 +309,7 @@ class _SingleBasketPageState extends State<SingleBasketPage> {
                             margin: EdgeInsets.only(top: 20.0),
                             child: RaisedButton(
                               elevation: 0,
-                              onPressed: () => _showContributeDialog(),
+                              onPressed: () => _showContributeDialog(snapshot.data),
                               child: const Text(
                                 'Send SEED',
                                 style: TextStyle(color: Colors.white),
@@ -394,4 +396,28 @@ class _SingleBasketPageState extends State<SingleBasketPage> {
         children: tags,
     );
   }
+
+  IconButton _getFavoriteIcon(AsyncSnapshot snapshot) {
+    if(snapshot.data.favorite){
+      return IconButton(
+        icon: Icon(
+          Icons.star,
+          color: Colors.blue,
+          size: 20.0,
+        ),
+        onPressed: () => basketsBloc.removeFromFavorites(),
+      );
+    }
+    else {
+      return IconButton(
+        icon: Icon(
+          Icons.star_border,
+          color: Colors.blue,
+          size: 20.0,
+        ),
+        onPressed: () => basketsBloc.setFavorite(),
+      );
+    }
+  }
+
 }

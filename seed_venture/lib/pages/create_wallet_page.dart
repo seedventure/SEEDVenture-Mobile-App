@@ -7,7 +7,7 @@ class CreateConfigPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          title: Text('Create Config'),
+          title: Text('Create Wallet'),
         ),
         body: Container(
           width: double.infinity,

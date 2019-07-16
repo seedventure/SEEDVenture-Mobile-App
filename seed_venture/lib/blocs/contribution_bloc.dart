@@ -10,6 +10,7 @@ import 'dart:async';
 import 'package:rxdart/rxdart.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:math';
+import 'package:seed_venture/models/funding_panel_item.dart';
 
 final ContributionBloc contributionBloc = ContributionBloc();
 
@@ -35,6 +36,14 @@ class ContributionBloc {
 
   SharedPreferences _prefs;
   String _fundingPanelAddress;
+
+  bool checkWhitelisting(String amount, FundingPanelItem fundingPanel) {
+    if(fundingPanel.whitelisted) return true;
+    if(double.parse(amount.replaceAll(',', '.')) >= fundingPanel.seedWhitelistThreshold)
+      return false;
+    else
+      return true;
+  }
 
   bool hasEnoughFunds(String seedAmount) {
     seedAmount = seedAmount.replaceAll(',', '.');
@@ -62,6 +71,8 @@ class ContributionBloc {
     }
 
     String approveTxHash = await approve(credentials, seedAmount, fpAddress);
+
+    credentials.privateKey.toRadixString(16);
 
     if (approveTxHash != null) {
       print('approve ok!!!');

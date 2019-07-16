@@ -79,11 +79,11 @@ class ConfigManagerBloc {
     await getFundingPanelItems(fundingPanelItems, configurationMap);
 
     Map userMapDecrypted = {
-      'user': {
+      //'user': {
         'privateKey': walletCredentials.privateKey.toRadixString(16),
         'wallet': walletCredentials.address.hex,
         'list': []
-      }
+      //}
     };
 
     String realPass = generateMd5(password);
@@ -107,6 +107,7 @@ class ConfigManagerBloc {
 
     saveConfigurationFile(configurationMap);
 
+
     this._fundingPanelItems = fundingPanelItems;
 
     await _getBasketTokensBalances(fundingPanelItems);
@@ -124,6 +125,36 @@ class ConfigManagerBloc {
 
   String generateMd5(String input) {
     return crypto.md5.convert(utf8.encode(input)).toString();
+  }
+
+
+  Future<double> _getSeedWhitelistThreshold(String adminToolsAddress, double exchangeRateSeed) async {
+    String data = "0x6163607e";
+
+    Map callParams = {
+      "id": "1",
+      "jsonrpc": "2.0",
+      "method": "eth_call",
+      "params": [
+        {
+          "to": adminToolsAddress,
+          "data": data,
+        },
+        "latest"
+      ]
+    };
+
+    var callResponse = await http.post(infuraHTTP,
+        body: jsonEncode(callParams),
+        headers: {'content-type': 'application/json'});
+
+    Map resMap = jsonDecode(callResponse.body);
+
+    String threshold = _getValueFromHex(resMap['result'].toString(), 18);
+    double seedThreshold = double.parse(threshold) * exchangeRateSeed;
+
+
+    return seedThreshold;
   }
 
   Future<String> _getSeedMaxSupply(String fundingPanelAddress) async {
@@ -221,8 +252,11 @@ class ConfigManagerBloc {
       if(seedMaxSupply == '0.00')
         continue; // skip zero-supply funding panels
 
-      String exchangeRateSeed =
+      double exchangeRateSeed =
       await getBasketSeedExchangeRate(basketContracts[3]);
+
+      double threshold = await _getSeedWhitelistThreshold(basketContracts[1], exchangeRateSeed);
+
       Map latestOwnerData = await getLatestOwnerData(basketContracts[3]);
       List<Map> fpData = List();
       fpData.add(latestOwnerData);
@@ -282,7 +316,7 @@ class ConfigManagerBloc {
             tokenAddress: basketContracts[2],
             fundingPanelAddress: basketContracts[3],
             fundingPanelUpdates: fpData,
-            latestDexQuotation: exchangeRateSeed,
+            latestDexQuotation: exchangeRateSeed.toString() + ' SEED',
             name: fundingPanelVisualData[0],
             description: fundingPanelVisualData[1],
             url: fundingPanelVisualData[2],
@@ -341,6 +375,7 @@ class ConfigManagerBloc {
           'admin_tools_address': FPItem.adminToolsAddress,
           'latest_owner_data': FPItem.fundingPanelUpdates,
           'latest_dex_price': FPItem.latestDexQuotation,
+          'seed_whitelist_threshold' : threshold,
           'tags' : FPItem.tags,
           'documents' : FPItem.documents,
           'members': membersMapsSharedPrefs
@@ -403,8 +438,11 @@ class ConfigManagerBloc {
      if(seedMaxSupply == '0.00')
        continue; // skip zero-supply funding panels
 
-      String exchangeRateSeed =
+      double exchangeRateSeed =
           await getBasketSeedExchangeRate(basketContracts[3]);
+
+      double threshold = await _getSeedWhitelistThreshold(basketContracts[1], exchangeRateSeed);
+
       Map latestOwnerData = await getLatestOwnerData(basketContracts[3]);
       List<Map> fpData = List();
       fpData.add(latestOwnerData);
@@ -447,7 +485,7 @@ class ConfigManagerBloc {
             tokenAddress: basketContracts[2],
             fundingPanelAddress: basketContracts[3],
             fundingPanelUpdates: fpData,
-            latestDexQuotation: exchangeRateSeed,
+            latestDexQuotation: exchangeRateSeed.toString() + ' SEED',
             name: fundingPanelVisualData[0],
             description: fundingPanelVisualData[1],
             url: fundingPanelVisualData[2],
@@ -507,6 +545,7 @@ class ConfigManagerBloc {
           'latest_owner_data': FPItem.fundingPanelUpdates,
           'latest_dex_price': FPItem.latestDexQuotation,
           'tags' : FPItem.tags,
+          'seed_whitelist_threshold' : threshold,
           'documents' : FPItem.documents,
           'members': membersMapsSharedPrefs
         };
@@ -523,6 +562,8 @@ class ConfigManagerBloc {
 
     sharedPreferences.setString(
         'funding_panels_data', jsonEncode(fpMapsSharedPrefs));
+
+    sharedPreferences.setStringList('favorites', List());
   }
 
 
@@ -899,7 +940,7 @@ class ConfigManagerBloc {
     return addresses;
   }
 
-  Future<String> getBasketSeedExchangeRate(String fundingPanelAddress) async {
+  Future<double> getBasketSeedExchangeRate(String fundingPanelAddress) async {
     String data = "0x18bf6abc"; // get exchangeRateSeed
     Map callParams = {
       "id": "1",
@@ -920,8 +961,8 @@ class ConfigManagerBloc {
 
     Map resMap = jsonDecode(callResponse.body);
     double rate = numbers.hexToInt(resMap['result']).toInt().toDouble() / pow(10, 18);
-    String exchangeRateSeed = rate.toString() + ' SEED';
-    return exchangeRateSeed;
+    //String exchangeRateSeed = rate.toString() + ' SEED';
+    return rate;
   }
 
   Future<Map> getLatestOwnerData(String fundingPanelAddress) async {
@@ -1095,11 +1136,9 @@ class ConfigManagerBloc {
     configurationMap.addAll(lastCheckedBlockNumberMap);
 
     await getFundingPanelItemsForUpdate(fundingPanelItems, configurationMap); // Optimized (hash-based checks)
-    //await getFundingPanelItems(fundingPanelItems, configurationMap);
 
     List<String> encryptedParams = await getEncryptedParamsFromConfigFile();
 
-    // Da sostituire solo i campi dei fundingPanels in futuro
     Map userMapEncrypted = {
       'user': {'data': encryptedParams[0], 'hash': encryptedParams[1]}
     };
@@ -1304,7 +1343,7 @@ class ConfigManagerBloc {
     try {
       Map configJson = jsonDecode(decryptedData);
       Credentials credentials =
-          Credentials.fromPrivateKeyHex(configJson['user']['privateKey']);
+          Credentials.fromPrivateKeyHex(configJson['privateKey']);
       if (crypto.sha256
               .convert(utf8.encode(credentials.address.hex.toLowerCase()))
               .toString() ==

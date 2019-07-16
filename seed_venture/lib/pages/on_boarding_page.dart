@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:seed_venture/pages/create_config_page.dart';
-import 'package:seed_venture/pages/import_config_page.dart';
+import 'package:seed_venture/pages/create_wallet_page.dart';
+import 'package:seed_venture/pages/import_wallet_page.dart';
 
 class OnBoardingPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          title: Text('On Boarding'),
+          title: Text('Welcome to SEEDVenture'),
         ),
         body: Container(
           width: double.infinity,
@@ -21,7 +21,7 @@ class OnBoardingPage extends StatelessWidget {
                     children: <Widget>[
                       Expanded(
                         child: Text(
-                            'Create/Import a configuration or continue to view all the baskets...'),
+                            'Create/Import a wallet or continue to view all the baskets...'),
                       )
                     ],
                   )),
@@ -33,7 +33,7 @@ class OnBoardingPage extends StatelessWidget {
                   }));
                 },
                 child: Text(
-                  'Create Config',
+                  'Create Wallet',
                   style: TextStyle(color: Colors.white),
                 ),
               ),
@@ -44,7 +44,7 @@ class OnBoardingPage extends StatelessWidget {
                     return ImportConfigPage();
                   }));
                 },
-                child: Text('Import Config',
+                child: Text('Import Wallet',
                     style: TextStyle(color: Colors.white)),
               ),
               /*Container(
