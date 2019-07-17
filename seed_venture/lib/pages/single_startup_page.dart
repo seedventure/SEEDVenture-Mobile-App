@@ -49,17 +49,6 @@ class _SingleStartupPageState extends State<SingleStartupPage> {
                               ),
                             ),
                             Spacer()
-                            /*Expanded(
-                              flex: 1,
-                              child: IconButton(
-                                icon: Icon(
-                                  Icons.star_border,
-                                  color: Colors.blue,
-                                  size: 20.0,
-                                ),
-                                onPressed: () => print('pressed'),
-                              ),
-                            )*/
                           ],
                         )),
                     Container(
@@ -84,6 +73,7 @@ class _SingleStartupPageState extends State<SingleStartupPage> {
                       margin: const EdgeInsets.only(
                           top: 15.0, left: 8.0, right: 8.0),
                     ),
+                    _getAdditionalLinksUI(snapshot),
                     Container(
                       margin: EdgeInsets.only(top: 15.0),
                       height: 1.0,
@@ -107,5 +97,35 @@ class _SingleStartupPageState extends State<SingleStartupPage> {
           },
           stream: membersBloc.outSingleMemberData,
         ));
+  }
+
+  Widget _getAdditionalLinksUI(AsyncSnapshot snapshot) {
+    if (snapshot.data.documents == null || snapshot.data.documents.length == 0)
+      return Container();
+
+    List<Widget> elements = List();
+
+    for (int i = 0; i < snapshot.data.documents.length; i++) {
+      Map document = snapshot.data.documents[i];
+      elements.add(Container(
+          margin: const EdgeInsets.only(top: 10.0, bottom: 15.0),
+          child: RichText(
+            text: TextSpan(
+              text: document['name'],
+              style: new TextStyle(color: Colors.blue),
+              recognizer: new TapGestureRecognizer()
+                ..onTap = () {
+                  launch(document['link']);
+                },
+            ),
+          )));
+    }
+
+    return Container(
+      margin: const EdgeInsets.only(top: 15.0, left: 8.0, right: 8.0),
+      child: Column(
+        children: elements,
+      ),
+    );
   }
 }

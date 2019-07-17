@@ -22,6 +22,7 @@ class FundingPanelItem {
   final List tags;
   final List documents;
   final bool whitelisted;
+  final bool blacklisted;
 
   void setFavorite(bool favorite){
     this.favorite = favorite;
@@ -30,5 +31,5 @@ class FundingPanelItem {
 
 
   FundingPanelItem({this.tokenAddress, this.fundingPanelAddress, this.adminToolsAddress, this.fundingPanelUpdates,
-      this.name, this.description, this.url, this.imgBase64, this.favorite, this.latestDexQuotation, this.members, this.tags, this.documents, this.seedWhitelistThreshold, this.whitelisted});
+      this.name, this.description, this.url, this.imgBase64, this.favorite, this.latestDexQuotation, this.members, this.tags, this.documents, this.seedWhitelistThreshold, this.whitelisted, this.blacklisted});
 }

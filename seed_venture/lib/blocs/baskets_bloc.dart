@@ -14,14 +14,6 @@ import 'package:seed_venture/utils/utils.dart';
 final BasketsBloc basketsBloc = BasketsBloc();
 
 class BasketsBloc {
-  /*BehaviorSubject<List<FundingPanelItem>> _getFundingPanelsDetails =
-      BehaviorSubject<List<FundingPanelItem>>();
-
-  Stream<List<FundingPanelItem>> get outFundingPanelsDetails =>
-      _getFundingPanelsDetails.stream;
-  Sink<List<FundingPanelItem>> get _inFundingPanelsDetails =>
-      _getFundingPanelsDetails.sink;*/
-
   PublishSubject<List<String>> _notificationsiOS =
       PublishSubject<List<String>>();
 
@@ -50,14 +42,27 @@ class BasketsBloc {
   Sink<FundingPanelItem> get _inSingleFundingPanelData =>
       _singleFundingPanelData.sink;
 
+  BehaviorSubject<List<BasketTokenBalanceItem>> _favoritesBasketsTokenBalances =
+      BehaviorSubject<List<BasketTokenBalanceItem>>();
+
+  Stream<List<BasketTokenBalanceItem>> get outFavoritesBasketsTokenBalances =>
+      _favoritesBasketsTokenBalances.stream;
+  Sink<List<BasketTokenBalanceItem>> get _inFavoritesBasketsTokenBalances =>
+      _favoritesBasketsTokenBalances.sink;
+
   // Used to avoid reloading base64 images (flickering)
   List<BasketTokenBalanceItem> _prevBasketTokenBalances;
+
+  // Used to avoid reloading base64 images (flickering)
+  List<BasketTokenBalanceItem> _prevBasketTokenBalancesFavorites;
 
   // Address of last funding panel opened by the user
   String _currentFundingPanelAddress;
 
   // Last funding panel opened by the user
   FundingPanelItem _currentFundingPanelItem;
+
+  List _favorites;
 
   FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin;
 
@@ -67,9 +72,6 @@ class BasketsBloc {
     // SEED and ETH balances fetching
     _getOldBalances();
     getCurrentBalances();
-
-    // pre-load data for Baskets Page
-    //getBaskets();
 
     _initNotifications();
   }
@@ -93,18 +95,20 @@ class BasketsBloc {
 
         if (maps[i]['funding_panel_address'].toString().toLowerCase() ==
             fundingPanelAddress.toLowerCase()) {
-
-          bool favorite = false;;
+          bool favorite = false;
+          ;
           List favorites = prefs.getStringList('favorites');
-          if(favorites.contains(fundingPanelAddress.toLowerCase()))
+          if (favorites.contains(fundingPanelAddress.toLowerCase()))
             favorite = true;
 
           bool isWhitelisted;
+          bool isBlacklisted;
 
-
-          for(int i = 0; i < _prevBasketTokenBalances.length; i++) {
-            if(_prevBasketTokenBalances[i].fpAddress.toLowerCase() == fundingPanelAddress.toLowerCase()){
+          for (int i = 0; i < _prevBasketTokenBalances.length; i++) {
+            if (_prevBasketTokenBalances[i].fpAddress.toLowerCase() ==
+                fundingPanelAddress.toLowerCase()) {
               isWhitelisted = _prevBasketTokenBalances[i].isWhitelisted;
+              isBlacklisted = _prevBasketTokenBalances[i].isBlacklisted;
               break;
             }
           }
@@ -122,6 +126,7 @@ class BasketsBloc {
               name: maps[i]['name'],
               description: maps[i]['description'],
               whitelisted: isWhitelisted,
+              blacklisted: isBlacklisted,
               url: maps[i]['url']);
 
           break;
@@ -309,6 +314,57 @@ class BasketsBloc {
     });
   }*/
 
+  void getFavoritesBasketsTokenBalances() {
+    List<BasketTokenBalanceItem> basketTokenBalances = List();
+
+    SharedPreferences.getInstance().then((prefs) {
+      List balancesMaps = jsonDecode(prefs.getString('user_baskets_balances'));
+      List favorites = prefs.getStringList('favorites');
+
+      for (int i = 0; i < balancesMaps.length; i++) {
+        Map basketBalanceMap = balancesMaps[i];
+
+        String fundingPanelAddress = basketBalanceMap['funding_panel_address'];
+
+        if (favorites.contains(fundingPanelAddress.toLowerCase())) {
+          String name = basketBalanceMap['name'];
+          String balance = basketBalanceMap['token_balance'];
+          String symbol = basketBalanceMap['token_symbol'];
+          bool isWhitelisted = basketBalanceMap['is_whitelisted'];
+          bool isBlacklisted = basketBalanceMap['is_blacklisted'];
+          String imgBase64 = basketBalanceMap['imgBase64'];
+          List tags = basketBalanceMap['basket_tags'];
+
+          Image tokenLogo;
+
+          if (_prevBasketTokenBalances != null &&
+              _prevBasketTokenBalances.length > i &&
+              _prevBasketTokenBalances[i].imgBase64 == imgBase64) {
+            tokenLogo = _prevBasketTokenBalances[i].tokenLogo;
+          } else {
+            tokenLogo = Utils.getImageFromBase64(basketBalanceMap['imgBase64']);
+          }
+
+          basketTokenBalances.add(BasketTokenBalanceItem(
+            name: name,
+            basketTags: tags,
+            symbol: symbol,
+            balance: balance,
+            tokenLogo: tokenLogo,
+            isWhitelisted: isWhitelisted,
+            isBlacklisted: isBlacklisted,
+            fpAddress: fundingPanelAddress,
+            imgBase64: imgBase64,
+          ));
+        }
+      }
+
+      _prevBasketTokenBalancesFavorites = basketTokenBalances;
+      _favorites = favorites;
+      _inFavoritesBasketsTokenBalances.add(basketTokenBalances);
+    });
+  }
+
   void getBasketsTokenBalances() {
     List<BasketTokenBalanceItem> basketTokenBalances = List();
 
@@ -322,6 +378,7 @@ class BasketsBloc {
         String balance = basketBalanceMap['token_balance'];
         String symbol = basketBalanceMap['token_symbol'];
         bool isWhitelisted = basketBalanceMap['is_whitelisted'];
+        bool isBlacklisted = basketBalanceMap['is_blacklisted'];
         String fundingPanelAddress = basketBalanceMap['funding_panel_address'];
         String imgBase64 = basketBalanceMap['imgBase64'];
         List tags = basketBalanceMap['basket_tags'];
@@ -343,6 +400,7 @@ class BasketsBloc {
           balance: balance,
           tokenLogo: tokenLogo,
           isWhitelisted: isWhitelisted,
+          isBlacklisted: isBlacklisted,
           fpAddress: fundingPanelAddress,
           imgBase64: imgBase64,
         ));
@@ -359,6 +417,7 @@ class BasketsBloc {
     _seedEthBalances.close();
     _basketsTokenBalances.close();
     _singleFundingPanelData.close();
+    _favoritesBasketsTokenBalances.close();
   }
 
   List getFilteredItems(String searchText) {
@@ -378,15 +437,14 @@ class BasketsBloc {
 
       bool added = false;
       _prevBasketTokenBalances[i].basketTags.forEach((tag) {
-        if (!added && tag.toString().toLowerCase().contains(searchText.toLowerCase())) {
+        if (!added &&
+            tag.toString().toLowerCase().contains(searchText.toLowerCase())) {
           items.add(_prevBasketTokenBalances[i]);
           added = true;
         }
       });
 
-      if(_prevBasketTokenBalances[i]
-          .name == null)
-        print('NAME IS NULL!!!!!');
+      if (_prevBasketTokenBalances[i].name == null) print('NAME IS NULL!!!!!');
 
       if (!added) {
         if (_prevBasketTokenBalances[i]
@@ -394,12 +452,49 @@ class BasketsBloc {
             .toLowerCase()
             .contains(searchText.toLowerCase())) {
           items.add(_prevBasketTokenBalances[i]);
-        } else if (_prevBasketTokenBalances[i]
-            .name != null && _prevBasketTokenBalances[i]
-            .name
-            .toLowerCase()
-            .contains(searchText.toLowerCase())) {
+        } else if (_prevBasketTokenBalances[i].name != null &&
+            _prevBasketTokenBalances[i]
+                .name
+                .toLowerCase()
+                .contains(searchText.toLowerCase())) {
           items.add(_prevBasketTokenBalances[i]);
+        }
+      }
+    }
+    return items;
+  }
+
+  List getFilteredItemsFavorites(String searchText) {
+    if (searchText == '') return _prevBasketTokenBalancesFavorites;
+    List items = List();
+    for (int i = 0; i < _prevBasketTokenBalancesFavorites.length; i++) {
+      if (_favorites.contains(
+          _prevBasketTokenBalancesFavorites[i].fpAddress.toLowerCase())) {
+        bool added = false;
+        _prevBasketTokenBalancesFavorites[i].basketTags.forEach((tag) {
+          if (!added &&
+              tag.toString().toLowerCase().contains(searchText.toLowerCase())) {
+            items.add(_prevBasketTokenBalancesFavorites[i]);
+            added = true;
+          }
+        });
+
+        if (_prevBasketTokenBalancesFavorites[i].name == null)
+          print('NAME IS NULL!!!!!');
+
+        if (!added) {
+          if (_prevBasketTokenBalancesFavorites[i]
+              .symbol
+              .toLowerCase()
+              .contains(searchText.toLowerCase())) {
+            items.add(_prevBasketTokenBalancesFavorites[i]);
+          } else if (_prevBasketTokenBalancesFavorites[i].name != null &&
+              _prevBasketTokenBalancesFavorites[i]
+                  .name
+                  .toLowerCase()
+                  .contains(searchText.toLowerCase())) {
+            items.add(_prevBasketTokenBalancesFavorites[i]);
+          }
         }
       }
     }
@@ -420,8 +515,8 @@ class BasketsBloc {
   void removeFromFavorites() {
     SharedPreferences.getInstance().then((prefs) {
       List favorites = prefs.getStringList('favorites');
-      for(int i = 0; i < favorites.length; i++) {
-        if(favorites[i] == _currentFundingPanelAddress.toLowerCase()){
+      for (int i = 0; i < favorites.length; i++) {
+        if (favorites[i] == _currentFundingPanelAddress.toLowerCase()) {
           favorites.removeAt(i);
           break;
         }
@@ -430,6 +525,7 @@ class BasketsBloc {
 
       _currentFundingPanelItem.setFavorite(false);
       _inSingleFundingPanelData.add(_currentFundingPanelItem);
+      getFavoritesBasketsTokenBalances();
     });
   }
 }

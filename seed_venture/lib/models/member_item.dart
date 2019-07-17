@@ -7,6 +7,7 @@ class MemberItem {
   final String description;
   final String url;
   final String imgBase64;
+  final List documents;
 
   MemberItem(
       {this.memberAddress,
@@ -16,5 +17,6 @@ class MemberItem {
       this.name,
       this.description,
       this.url,
-      this.imgBase64});
+      this.imgBase64,
+      this.documents});
 }

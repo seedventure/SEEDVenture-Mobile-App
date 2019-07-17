@@ -8,14 +8,16 @@ class BasketTokenBalanceItem {
   final Image tokenLogo;
   final String imgBase64;
   final bool isWhitelisted;
+  final bool isBlacklisted;
   final String fpAddress;
   final List basketTags;
 
 
-  BasketTokenBalanceItem({this.name, this.balance, this.symbol, this.tokenLogo, this.imgBase64, this.isWhitelisted, this.fpAddress, this.basketTags});
+  BasketTokenBalanceItem({this.name, this.balance, this.symbol, this.tokenLogo, this.imgBase64, this.isWhitelisted, this.isBlacklisted, this.fpAddress, this.basketTags});
 
   Color getWhitelistingColor(){
-    Color dotColor = this.isWhitelisted == true ? Colors.green : Colors.red;
+    if(this.isBlacklisted) return Colors.red;
+    Color dotColor = this.isWhitelisted == true ? Colors.green : Colors.yellow;
     return dotColor;
   }
 }

@@ -8,6 +8,7 @@ import 'package:seed_venture/blocs/members_bloc.dart';
 import 'package:seed_venture/blocs/contribution_bloc.dart';
 import 'package:seed_venture/widgets/progress_bar_overlay.dart';
 import 'package:seed_venture/models/funding_panel_item.dart';
+import 'package:auto_size_text/auto_size_text.dart';
 
 class SingleBasketPage extends StatefulWidget {
   @override
@@ -302,21 +303,7 @@ class _SingleBasketPageState extends State<SingleBasketPage> {
                             ))
                       ],
                     ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: <Widget>[
-                        Container(
-                            margin: EdgeInsets.only(top: 20.0),
-                            child: RaisedButton(
-                              elevation: 0,
-                              onPressed: () => _showContributeDialog(snapshot.data),
-                              child: const Text(
-                                'Send SEED',
-                                style: TextStyle(color: Colors.white),
-                              ),
-                            ))
-                      ],
-                    ),
+                    _getSendSeedButtonIfNotBlacklisted(snapshot)
                   ],
                 ),
               ));
@@ -368,6 +355,7 @@ class _SingleBasketPageState extends State<SingleBasketPage> {
           mainAxisAlignment: MainAxisAlignment.start,
           children: <Widget>[
             Expanded(
+              //flex: 2,
               child: Container(
                   decoration: new BoxDecoration(
                       color: Color(0xFF006B97),
@@ -376,17 +364,18 @@ class _SingleBasketPageState extends State<SingleBasketPage> {
                           bottomRight: const Radius.circular(5.0),
                           topLeft: const Radius.circular(5.0),
                           topRight: const Radius.circular(5.0))),
-                  height: 22,
+                  height: 25,
                   margin: const EdgeInsets.only(
                       right: 30.0, bottom: 10.0, top: 15.0, left: 8.0),
                   child: Center(
-                    child: Text(
-                      snapshot.data.tags[i],
-                      style: TextStyle(color: Colors.white),
-                    ),
+                      child: AutoSizeText(
+                        snapshot.data.tags[i],
+                        style: TextStyle(color: Colors.white),
+                        maxLines: 2,
+                      )
                   )),
             ),
-            Spacer(),
+            Spacer(), // delete one spacer ?
             Spacer(),
           ],
         ),
@@ -418,6 +407,26 @@ class _SingleBasketPageState extends State<SingleBasketPage> {
         onPressed: () => basketsBloc.setFavorite(),
       );
     }
+  }
+
+  Widget _getSendSeedButtonIfNotBlacklisted(AsyncSnapshot snapshot) {
+    if(snapshot.data.blacklisted)
+      return Container();
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: <Widget>[
+        Container(
+            margin: EdgeInsets.only(top: 20.0),
+            child: RaisedButton(
+              elevation: 0,
+              onPressed: () => _showContributeDialog(snapshot.data),
+              child: const Text(
+                'Send SEED',
+                style: TextStyle(color: Colors.white),
+              ),
+            ))
+      ],
+    );
   }
 
 }

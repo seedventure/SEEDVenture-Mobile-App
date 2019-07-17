@@ -347,7 +347,8 @@ class ConfigManagerBloc {
             'name': members[i].name,
             'description': members[i].description,
             'url': members[i].url,
-            'imgBase64': members[i].imgBase64
+            'imgBase64': members[i].imgBase64,
+            'documents' : members[i].documents
           };
 
           membersMapsSharedPrefs.add(memberMapSP);
@@ -516,7 +517,8 @@ class ConfigManagerBloc {
             'name': members[i].name,
             'description': members[i].description,
             'url': members[i].url,
-            'imgBase64': members[i].imgBase64
+            'imgBase64': members[i].imgBase64,
+            'documents' : members[i].documents
           };
 
           membersMapsSharedPrefs.add(memberMapSP);
@@ -587,6 +589,7 @@ class ConfigManagerBloc {
             ret.add(members[j]['description']);
             ret.add(members[j]['url']);
             ret.add(members[j]['imgBase64']);
+            ret.add(jsonEncode(members[j]['documents']));
             return ret;
           }
         }
@@ -626,6 +629,17 @@ class ConfigManagerBloc {
 
 
       if (memberJsonData != null) {
+
+        List documents = List();
+
+        if(memberJsonData[4] != null && memberJsonData[4] != ''){
+          List documentMaps = jsonDecode(memberJsonData[4]);
+          documentMaps.forEach((document){
+            documents.add(document);
+          });
+        }
+
+
         members.add(MemberItem(
             memberAddress: memberAddress,
             fundingPanelAddress: fundingPanelAddress,
@@ -634,6 +648,7 @@ class ConfigManagerBloc {
             name: memberJsonData[0],
             description: memberJsonData[1],
             url: memberJsonData[2],
+            documents: documents,
             imgBase64: memberJsonData[3]));
       }
     }
@@ -655,6 +670,15 @@ class ConfigManagerBloc {
           await getMemberJSONDataFromIPFS(memberData[0]);
 
       if (memberJsonData != null) {
+        List documents = List();
+
+        if(memberJsonData[4] != null && memberJsonData[4] != ''){
+          List documentMaps = jsonDecode(memberJsonData[4]);
+          documentMaps.forEach((document){
+            documents.add(document);
+          });
+        }
+
         members.add(MemberItem(
             memberAddress: memberAddress,
             fundingPanelAddress: fundingPanelAddress,
@@ -663,7 +687,8 @@ class ConfigManagerBloc {
             name: memberJsonData[0],
             description: memberJsonData[1],
             url: memberJsonData[2],
-            imgBase64: memberJsonData[3]));
+            imgBase64: memberJsonData[3],
+            documents: documents));
       }
     }
 
@@ -691,6 +716,12 @@ class ConfigManagerBloc {
 
       memberJsonData.add(responseMap['url']);
       memberJsonData.add(responseMap['image']);
+
+      if(responseMap['documents'] != null) {
+        memberJsonData.add(jsonEncode(responseMap['documents']));
+      }
+      else memberJsonData.add('');
+
 
       return memberJsonData;
     } catch (e) {
@@ -1400,6 +1431,7 @@ class ConfigManagerBloc {
         String symbol = prevUserBasketsBalancesSharedPref[i]['token_symbol'];
         String balance = await _getTokenBalance(userAddress, tokenAddress, decimals);
         bool isWhitelisted = await _isWhitelisted(adminToolsAddress, userAddress);
+        bool isBlacklisted = isWhitelisted == false ? false : await _isBlacklisted(adminToolsAddress, userAddress, decimals);
 
         Map basketBalance = {
           'name' : prevUserBasketsBalancesSharedPref[i]['name'],
@@ -1410,6 +1442,7 @@ class ConfigManagerBloc {
           'token_balance': balance,
           'token_decimals' : decimals,
           'is_whitelisted' : isWhitelisted,
+          'is_blacklisted' : isBlacklisted,
           'basket_tags' : tags
         };
 
@@ -1461,6 +1494,8 @@ class ConfigManagerBloc {
 
       String balance = await _getTokenBalance(userAddress, tokenAddress, decimals);
       bool isWhitelisted = await _isWhitelisted(fundingPanels[i].adminToolsAddress, userAddress);
+      bool isBlacklisted = isWhitelisted == false ? false : await _isBlacklisted(fundingPanels[i].adminToolsAddress, userAddress, decimals);
+
 
       Map basketBalance = {
         'name' : fundingPanels[i].name,
@@ -1471,6 +1506,7 @@ class ConfigManagerBloc {
         'token_balance': balance,
         'token_decimals' : decimals,
         'is_whitelisted' : isWhitelisted,
+        'is_blacklisted' : isBlacklisted,
         'basket_tags' : fundingPanels[i].tags
       };
 
@@ -1478,6 +1514,42 @@ class ConfigManagerBloc {
     }
 
     prefs.setString('user_baskets_balances', jsonEncode(userBasketsBalances));
+  }
+
+  Future<bool> _isBlacklisted(
+      String adminToolsAddress, String userAddress, int decimals) async {
+    String data = "0xf76912aa";
+
+    userAddress = userAddress.substring(2);
+
+    while (userAddress.length != 64) {
+      userAddress = '0' + userAddress;
+    }
+
+    data = data + userAddress;
+
+    Map callParams = {
+      "id": "1",
+      "jsonrpc": "2.0",
+      "method": "eth_call",
+      "params": [
+        {
+          "to": adminToolsAddress,
+          "data": data,
+        },
+        "latest"
+      ]
+    };
+
+    var callResponse = await http.post(infuraHTTP,
+        body: jsonEncode(callParams),
+        headers: {'content-type': 'application/json'});
+
+    Map resMap = jsonDecode(callResponse.body);
+
+    String hexValue = _getValueFromHex(resMap['result'], decimals);
+
+    return hexValue == '0.00';
   }
 
   Future<bool> _isWhitelisted(

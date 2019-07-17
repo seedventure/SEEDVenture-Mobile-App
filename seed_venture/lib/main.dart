@@ -9,6 +9,7 @@ import 'package:seed_venture/pages/on_boarding_page.dart';
 import 'package:seed_venture/pages/single_basket_page.dart';
 import 'package:seed_venture/pages/startup_list_page.dart';
 import 'package:seed_venture/pages/single_startup_page.dart';
+import 'package:seed_venture/pages/my_wallet_page.dart';
 
 void main() {
   return runApp(SeedVentureApp());
@@ -49,6 +50,9 @@ class SeedVentureApp extends StatelessWidget {
           },
           '/home': (BuildContext context) {
             return HomeBasketsTokenBalancesPage();
+          },
+          '/my_wallet': (BuildContext context) {
+            return MyWalletPage();
           },
           '/single_basket': (BuildContext context) {
             return SingleBasketPage();

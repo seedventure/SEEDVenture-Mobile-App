@@ -33,67 +33,9 @@ class _UnlockAccountPageState extends State<UnlockAccountPage> {
         resizeToAvoidBottomPadding:
             false, // if true, it resize when the keyboard appear/disappear
         key: _scaffoldKey,
-        /*appBar: new AppBar(
-          title: new Text('Unlock Account'),
-        ),*/
-        body:
-            //SingleChildScrollView(
-            //  child:
-            /*Container(
 
-            margin: const EdgeInsets.only(top: 12.0),
-            child: Column(
-              children: <Widget>[
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                    Expanded(
-                        child: Center(
-                      child: Text(
-                          'Please, type your password to unlock your account'),
-                    ))
-                  ],
-                ),
-                Container(
-                    margin: const EdgeInsets.all(12.0),
-                    child: TextField(
-                      obscureText: true,
-                      controller: passwordController,
-                      decoration: InputDecoration(
-                          border: InputBorder.none, hintText: 'Password...'),
-                    )),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                    Container(
-                        child: RaisedButton(
-                      onPressed: () {
-                        unlockAccountBloc
-                            .isPasswordCorrect(passwordController.text);
-                      },
-                      child:
-                          Text('Unlock', style: TextStyle(color: Colors.white)),
-                    ))
-                  ],
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                    Container(
-                        child: RaisedButton(
-                      onPressed: () {
-                        OnBoardingBloc.setOnBoardingToBeDone();
-                        Navigator.of(context).pushNamedAndRemoveUntil(
-                            '/on_boarding', (Route<dynamic> route) => false);
-                      },
-                      child:
-                          Text('Forget', style: TextStyle(color: Colors.white)),
-                    ))
-                  ],
-                ),
-              ],
-            ),
-          ),*/
+        body:
+
             Stack(children: <Widget>[
           Positioned.fill(
             child: Image(
@@ -113,7 +55,8 @@ class _UnlockAccountPageState extends State<UnlockAccountPage> {
                       'assets/seed-logo.png',
                       height: 100,
                       width: 100,
-                    ))
+                    )
+                    )
                   ],
                 ),
                 Container(

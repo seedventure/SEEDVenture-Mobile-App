@@ -38,8 +38,9 @@ class ContributionBloc {
   String _fundingPanelAddress;
 
   bool checkWhitelisting(String amount, FundingPanelItem fundingPanel) {
-    if(fundingPanel.whitelisted) return true;
-    if(double.parse(amount.replaceAll(',', '.')) >= fundingPanel.seedWhitelistThreshold)
+    if (fundingPanel.whitelisted) return true;
+    if (double.parse(amount.replaceAll(',', '.')) >=
+        fundingPanel.seedWhitelistThreshold)
       return false;
     else
       return true;
@@ -76,9 +77,7 @@ class ContributionBloc {
 
     if (approveTxHash != null) {
       print('approve ok!!!');
-
       Timer waitForApproveTimer = await waitForApproveTx(approveTxHash);
-
       const oneSec = const Duration(seconds: 1);
       Timer.periodic(oneSec, (Timer thisTimer) async {
         if (!waitForApproveTimer.isActive) {
@@ -280,7 +279,8 @@ class ContributionBloc {
         try {
           if (jsonResponse['result']['status'] == '0x1') {
             _inTransactionSuccess.add(true);
-            configManagerBloc.updateSingleBalanceAfterContribute(_fundingPanelAddress);
+            configManagerBloc
+                .updateSingleBalanceAfterContribute(_fundingPanelAddress);
           } else {
             _inErrorInContributionTransaction.add(true);
           }

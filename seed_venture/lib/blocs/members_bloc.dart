@@ -38,7 +38,8 @@ class MembersBloc {
                   name: members[j]['name'],
                   description: members[j]['description'],
                   imgBase64: members[j]['imgBase64'],
-                  url: members[j]['url']);
+                  url: members[j]['url'],
+                  documents: maps[j]['documents']);
 
               break;
             }
@@ -69,7 +70,8 @@ class MembersBloc {
                 name: membersMaps[j]['name'],
                 imgBase64: membersMaps[j]['imgBase64'],
                 url: membersMaps[j]['url'],
-                ipfsUrl: membersMaps[j]['ipfsUrl']));
+                ipfsUrl: membersMaps[j]['ipfsUrl'],
+                documents: membersMaps[j]['documents']));
           }
 
           break;

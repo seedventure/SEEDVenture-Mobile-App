@@ -1,21 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:seed_venture/blocs/baskets_bloc.dart';
-import 'package:seed_venture/blocs/config_manager_bloc.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:auto_size_text/auto_size_text.dart';
 
-class HomeBasketsTokenBalancesPage extends StatefulWidget {
+class MyWalletPage extends StatefulWidget {
   @override
-  State<StatefulWidget> createState() => _HomeBasketsTokenBalancesPageState();
+  State<StatefulWidget> createState() => _MyWalletPageState();
 }
 
-class _HomeBasketsTokenBalancesPageState
-    extends State<HomeBasketsTokenBalancesPage> {
+class _MyWalletPageState extends State<MyWalletPage> {
+  final _scaffoldKey = new GlobalKey<ScaffoldState>();
+
   final TextEditingController _filter = new TextEditingController();
   String _searchText = "";
-  String filterText = '';
+  String filterText = ''; // names filtered by search text
   Icon _searchIcon = new Icon(Icons.search);
-  Widget _appBarTitle = new Text('Baskets Tokens');
+  Widget _appBarTitle = new Text('My Wallet');
 
   void _searchPressed() {
     setState(() {
@@ -34,14 +33,14 @@ class _HomeBasketsTokenBalancesPageState
         );
       } else {
         this._searchIcon = new Icon(Icons.search);
-        this._appBarTitle = new Text('Baskets Tokens');
+        this._appBarTitle = new Text('My Wallet');
         filterText = '';
         _filter.clear();
       }
     });
   }
 
-  _HomeBasketsTokenBalancesPageState() {
+  _MyWalletPageState() {
     _filter.addListener(() {
       if (_filter.text.isEmpty) {
         setState(() {
@@ -58,79 +57,9 @@ class _HomeBasketsTokenBalancesPageState
   }
 
   @override
-  void initState() {
-    configManagerBloc.configurationPeriodicUpdate();
-    configManagerBloc.balancesPeriodicUpdate();
-
-    basketsBloc.outNotificationsiOS.listen((notificationData) async {
-      String title = notificationData[0];
-      String body = notificationData[1];
-
-      await showDialog(
-        context: context,
-        builder: (BuildContext context) => CupertinoAlertDialog(
-              title: Text(title),
-              content: Text(body),
-              actions: [
-                CupertinoDialogAction(
-                  isDefaultAction: true,
-                  child: Text('Ok'),
-                  onPressed: () async {
-                    Navigator.of(context, rootNavigator: true).pop();
-                  },
-                )
-              ],
-            ),
-      );
-    });
-    super.initState();
-  }
-
-  @override
   Widget build(BuildContext context) {
     return new Scaffold(
-        drawer: Drawer(
-          child: ListView(
-            padding: EdgeInsets.zero,
-            children: <Widget>[
-              DrawerHeader(
-                child: Column(
-                  children: <Widget>[
-                    Container(
-                        margin: const EdgeInsets.only(top: 10.0),
-                        child: Image.asset(
-                          'assets/seed-logo.png',
-                          height: 100,
-                          width: 100,
-                        ))
-                  ],
-                ),
-                decoration: BoxDecoration(
-                  color: Color(0xFF6fd2fb),
-                ),
-              ),
-              ListTile(
-                title: Text('My Wallet'),
-                onTap: () {
-                  basketsBloc.getFavoritesBasketsTokenBalances();
-                  Navigator.pushNamed(context, '/my_wallet');
-                },
-              ),
-              ListTile(
-                title: Text('Settings'),
-                onTap: () {
-                  Navigator.pushNamed(context, '/settings');
-                },
-              ),
-              ListTile(
-                title: Text('Wallet Info'),
-                onTap: () {
-                  Navigator.pushNamed(context, '/wallet_info');
-                },
-              ),
-            ],
-          ),
-        ),
+        key: _scaffoldKey,
         appBar: new AppBar(
           actions: <Widget>[
             InkWell(
@@ -143,59 +72,26 @@ class _HomeBasketsTokenBalancesPageState
           ],
           title: _appBarTitle,
         ),
-        body: new Padding(
-            padding: const EdgeInsets.only(top: 12.0),
-            child: StreamBuilder(
-              builder: (BuildContext context, AsyncSnapshot snapshot) {
-                if (snapshot.hasData) {
-                  // Snapshot -> List<BasketTokenBalance>
-
-                  return _getUI(this.filterText);
-                } else {
-                  return Container();
-                }
-              },
-              stream: basketsBloc.outBasketTokenBalances,
-            )));
+        body: StreamBuilder(
+          builder: (BuildContext context, AsyncSnapshot snapshot) {
+            if (snapshot.hasData) {
+              // Snapshot -> List<BasketTokenBalance>
+              return _getUIFavorites(this.filterText);
+            } else {
+              return Container();
+            }
+          },
+          stream: basketsBloc.outFavoritesBasketsTokenBalances,
+        ));
   }
 
-  Widget _getUI(String filteredText) {
-    List data = basketsBloc.getFilteredItems(filteredText);
+  Widget _getUIFavorites(String filteredText) {
+    List data = basketsBloc.getFilteredItemsFavorites(filteredText);
     if (data.length != 0) {
       return Column(
         children: <Widget>[
-          Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: <Widget>[
-              Spacer(),
-              Spacer(),
-              StreamBuilder(
-                builder: (BuildContext context, AsyncSnapshot snapshot) {
-                  if (snapshot.hasData) {
-                    return Container(
-                      child: Row(
-                        children: <Widget>[
-                          Container(
-                            child: Text(snapshot.data[0] + ' SEED'),
-                            margin: const EdgeInsets.only(right: 8.0),
-                          ),
-                          Container(
-                            child: Text(snapshot.data[1] + ' ETH'),
-                          ),
-                        ],
-                      ),
-                      margin: const EdgeInsets.only(right: 15.0, bottom: 15.0),
-                    );
-                  } else {
-                    return Container();
-                  }
-                },
-                stream: basketsBloc.outSeedEthBalance,
-              ),
-            ],
-          ),
           Container(
-              margin: const EdgeInsets.only(bottom: 8.0),
+              margin: const EdgeInsets.only(bottom: 8.0, top: 12.0),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.start,
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -306,7 +202,7 @@ class _HomeBasketsTokenBalancesPageState
                             Spacer(),
                             Container(
                                 margin:
-                                    const EdgeInsets.only(right: 10.0), // 8.0 ?
+                                    const EdgeInsets.only(right: 10.0), // 8.0
                                 child: ClipOval(
                                   child: Container(
                                     color:
@@ -333,12 +229,11 @@ class _HomeBasketsTokenBalancesPageState
       );
     } else if (filteredText == '') {
       return Center(
-        child: Text('No basket found'),
+        child: Text('You don\'t have any favorite basket'),
       );
-    } else {
+    } else
       return Center(
         child: Text('No basket matches your search'),
       );
-    }
   }
 }
