@@ -8,7 +8,9 @@ import 'package:seed_venture/blocs/members_bloc.dart';
 import 'package:seed_venture/blocs/contribution_bloc.dart';
 import 'package:seed_venture/widgets/progress_bar_overlay.dart';
 import 'package:seed_venture/models/funding_panel_item.dart';
+import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:auto_size_text/auto_size_text.dart';
+import 'package:intl/intl.dart';
 
 class SingleBasketPage extends StatefulWidget {
   @override
@@ -17,6 +19,7 @@ class SingleBasketPage extends StatefulWidget {
 
 class _SingleBasketPageState extends State<SingleBasketPage> {
   final _scaffoldKey = new GlobalKey<ScaffoldState>();
+  final formatter = new NumberFormat("#,###.##");
 
   Future _showConfigPasswordDialog(String seedAmount) async {
     TextEditingController passwordController = TextEditingController();
@@ -79,7 +82,8 @@ class _SingleBasketPageState extends State<SingleBasketPage> {
   }
 
   Future _showContributeDialog(FundingPanelItem fundingPanel) async {
-    TextEditingController amountController = TextEditingController();
+    TextEditingController amountControllerSEED = TextEditingController();
+    TextEditingController amountControllerBasketToken = TextEditingController();
 
     await showDialog(
         context: context,
@@ -103,8 +107,9 @@ class _SingleBasketPageState extends State<SingleBasketPage> {
                       Expanded(
                         child: Container(
                           child: Text(
-                              'Remember that you have to be whitelisted to contribute to this basket above to the WL threshold!', textAlign: TextAlign.center,),
-
+                            'Remember that you have to be whitelisted to contribute to this basket above to the WL threshold!',
+                            textAlign: TextAlign.center,
+                          ),
                           margin: const EdgeInsets.only(left: 8.0, right: 8.0),
                         ),
                       )
@@ -115,12 +120,34 @@ class _SingleBasketPageState extends State<SingleBasketPage> {
                       keyboardType:
                           TextInputType.numberWithOptions(decimal: true),
                       decoration: InputDecoration(
-                          border: InputBorder.none, hintText: 'Amount...'),
-                      controller: amountController,
+                          border: InputBorder.none, hintText: 'SEED...'),
+                      controller: amountControllerSEED,
+                      onChanged: (value){
+                        if(value.isEmpty) amountControllerBasketToken.text = '';
+                        else
+                          amountControllerBasketToken.text = (double.parse(value) / fundingPanel.latestDexQuotation).toString();
+                      },
                     ),
                     height: 50,
                     width: double.infinity,
-                    margin: EdgeInsets.all(20.0),
+                    margin: EdgeInsets.only(top: 20.0, left: 20.0, right: 20.0),
+                  ),
+                  Container(
+                    child: TextField(
+                      keyboardType:
+                      TextInputType.numberWithOptions(decimal: true),
+                      decoration: InputDecoration(
+                          border: InputBorder.none, hintText: 'Basket Token...'),
+                      controller: amountControllerBasketToken,
+                      onChanged: (value){
+                        if(value.isEmpty) amountControllerSEED.text = '';
+                        else
+                          amountControllerSEED.text = (double.parse(value) * fundingPanel.latestDexQuotation).toString();
+                      },
+                    ),
+                    height: 50,
+                    width: double.infinity,
+                    margin: EdgeInsets.only(left: 20.0, right: 20.0, bottom: 20.0),
                   ),
                   Container(
                     margin:
@@ -129,18 +156,19 @@ class _SingleBasketPageState extends State<SingleBasketPage> {
                       onPressed: () {
                         Navigator.pop(context);
 
-                        if(contributionBloc.checkWhitelisting(amountController.text, fundingPanel)) {
+                        if (contributionBloc.checkWhitelisting(
+                            amountControllerSEED.text, fundingPanel)) {
                           if (contributionBloc
-                              .hasEnoughFunds(amountController.text)) {
-                            _showConfigPasswordDialog(amountController.text);
+                              .hasEnoughFunds(amountControllerSEED.text)) {
+                            _showConfigPasswordDialog(amountControllerSEED.text);
                           } else {
                             SnackBar error =
-                            SnackBar(content: Text('Insufficient Funds'));
+                                SnackBar(content: Text('Insufficient Funds'));
                             _scaffoldKey.currentState.showSnackBar(error);
                           }
                         } else {
-                          SnackBar error =
-                          SnackBar(content: Text('You are not whitelisted'));
+                          SnackBar error = SnackBar(
+                              content: Text('You are not whitelisted'));
                           _scaffoldKey.currentState.showSnackBar(error);
                         }
                       },
@@ -184,9 +212,8 @@ class _SingleBasketPageState extends State<SingleBasketPage> {
     contributionBloc.outTransactionSuccess.listen((success) {
       if (success) {
         Navigator.pop(context);
-        SnackBar contributedSnackBar = SnackBar(
-            content: Text(
-                'You have contributed to this basket!'));
+        SnackBar contributedSnackBar =
+            SnackBar(content: Text('You have contributed to this basket!'));
         _scaffoldKey.currentState.showSnackBar(contributedSnackBar);
       }
     });
@@ -228,7 +255,7 @@ class _SingleBasketPageState extends State<SingleBasketPage> {
                                 ),
                               ),
                             ),
-                        //Spacer()
+                            //Spacer()
                             Expanded(
                               flex: 1,
                               child: _getFavoriteIcon(snapshot),
@@ -260,14 +287,36 @@ class _SingleBasketPageState extends State<SingleBasketPage> {
                     _getAdditionalLinksUI(snapshot),
                     _getTagsWidget(snapshot),
                     Container(
-                      margin: EdgeInsets.only(top: 15.0),
+                      margin: EdgeInsets.only(top: 8.0),
+                      height: 1.0,
+                      width: double.infinity,
+                      color: Color(0xFFF3F3F3),
+                    ),
+                    Container(
+                      margin: const EdgeInsets.only(left: 8.0, top: 12.0),
+                      child: Text('Max Supply: ' + formatter.format(double.parse(snapshot.data.seedMaxSupply)) + ' SEED'),
+                    ),
+                    Container(
+                      margin: const EdgeInsets.only(left: 8.0, top: 12.0),
+                      child: Text('Total Raised: ' + formatter.format(double.parse(snapshot.data.seedTotalRaised)) + ' SEED'),
+                    ),
+                    Container(
+                      margin: const EdgeInsets.only(left: 8.0, top: 12.0),
+                      child: Text('SEED Liquidity: ' + formatter.format(double.parse(snapshot.data.seedLiquidity)) + ' SEED'),
+                    ),
+                    Container(
+                      margin: const EdgeInsets.only(left: 8.0, top: 12.0),
+                      child: Text('Total SEED Unlocked: ' + formatter.format(double.parse(snapshot.data.totalUnlockedForStartup)) + ' SEED'),
+                    ),
+                    Container(
+                      margin: EdgeInsets.only(top: 8.0),
                       height: 1.0,
                       width: double.infinity,
                       color: Color(0xFFF3F3F3),
                     ),
                     Container(
                       child: Text('Latest Quotation: ' +
-                          snapshot.data.latestDexQuotation),
+                          snapshot.data.latestDexQuotation.toStringAsFixed(snapshot.data.latestDexQuotation.truncateToDouble() == snapshot.data.latestDexQuotation ? 0 : 2) + ' SEED'),
                       margin: const EdgeInsets.only(
                           top: 15.0, left: 8.0, right: 8.0),
                     ),
@@ -346,48 +395,42 @@ class _SingleBasketPageState extends State<SingleBasketPage> {
   }
 
   Widget _getTagsWidget(AsyncSnapshot snapshot) {
-    if(snapshot.data.tags == null || snapshot.data.tags.length == 0) return Container();
-    List<Widget> tags = List();
-    for(int i = 0; i < snapshot.data.tags.length; i++) {
-      tags.add(
-        Row(
-          mainAxisSize: MainAxisSize.min,
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: <Widget>[
-            Expanded(
-              //flex: 2,
-              child: Container(
-                  decoration: new BoxDecoration(
-                      color: Color(0xFF006B97),
-                      borderRadius: new BorderRadius.only(
-                          bottomLeft: const Radius.circular(5.0),
-                          bottomRight: const Radius.circular(5.0),
-                          topLeft: const Radius.circular(5.0),
-                          topRight: const Radius.circular(5.0))),
-                  height: 25,
-                  margin: const EdgeInsets.only(
-                      right: 30.0, bottom: 10.0, top: 15.0, left: 8.0),
-                  child: Center(
-                      child: AutoSizeText(
-                        snapshot.data.tags[i],
-                        style: TextStyle(color: Colors.white),
-                        maxLines: 2,
-                      )
-                  )),
-            ),
-            Spacer(), // delete one spacer ?
-            Spacer(),
-          ],
+    if (snapshot.data.tags == null || snapshot.data.tags.length == 0)
+      return Container();
+
+    List<StaggeredTile> _staggeredTiles = <StaggeredTile>[];
+
+    List<Widget> _tiles = <Widget>[];
+
+    for (int i = 0; i < snapshot.data.tags.length; i++) {
+      _staggeredTiles.add(StaggeredTile.count(1, 1));
+      _tiles.add(Center(
+        child: AutoSizeText(
+          snapshot.data.tags[i],
+          textAlign: TextAlign.center,
+          style:
+              TextStyle(fontWeight: FontWeight.bold),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          softWrap: false,
         ),
-      );
+      ));
     }
-    return Column(
-        children: tags,
+
+    return StaggeredGridView.count(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      crossAxisCount: 3,
+      staggeredTiles: _staggeredTiles,
+      children: _tiles,
+      //mainAxisSpacing: 4.0,
+      //crossAxisSpacing: 4.0,
+      padding: const EdgeInsets.all(4.0),
     );
   }
 
   IconButton _getFavoriteIcon(AsyncSnapshot snapshot) {
-    if(snapshot.data.favorite){
+    if (snapshot.data.favorite) {
       return IconButton(
         icon: Icon(
           Icons.star,
@@ -396,8 +439,7 @@ class _SingleBasketPageState extends State<SingleBasketPage> {
         ),
         onPressed: () => basketsBloc.removeFromFavorites(),
       );
-    }
-    else {
+    } else {
       return IconButton(
         icon: Icon(
           Icons.star_border,
@@ -410,8 +452,7 @@ class _SingleBasketPageState extends State<SingleBasketPage> {
   }
 
   Widget _getSendSeedButtonIfNotBlacklisted(AsyncSnapshot snapshot) {
-    if(snapshot.data.blacklisted)
-      return Container();
+    if (snapshot.data.blacklisted) return Container();
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: <Widget>[
@@ -428,5 +469,4 @@ class _SingleBasketPageState extends State<SingleBasketPage> {
       ],
     );
   }
-
 }

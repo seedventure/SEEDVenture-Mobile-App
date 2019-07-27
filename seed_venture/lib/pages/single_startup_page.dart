@@ -4,6 +4,7 @@ import 'package:flutter_html/flutter_html.dart';
 import 'package:flutter/gestures.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:seed_venture/utils/utils.dart';
+import 'package:intl/intl.dart';
 
 class SingleStartupPage extends StatefulWidget {
   @override
@@ -12,6 +13,7 @@ class SingleStartupPage extends StatefulWidget {
 
 class _SingleStartupPageState extends State<SingleStartupPage> {
   final _scaffoldKey = new GlobalKey<ScaffoldState>();
+  final formatter = new NumberFormat("#,###.##");
 
   @override
   Widget build(BuildContext context) {
@@ -74,6 +76,16 @@ class _SingleStartupPageState extends State<SingleStartupPage> {
                           top: 15.0, left: 8.0, right: 8.0),
                     ),
                     _getAdditionalLinksUI(snapshot),
+                    Container(
+                      margin: EdgeInsets.only(top: 15.0),
+                      height: 1.0,
+                      width: double.infinity,
+                      color: Color(0xFFF3F3F3),
+                    ),
+                    Container(
+                      margin: const EdgeInsets.only(left: 8.0, top: 12.0),
+                      child: Text('SEED Unlocked: ' + formatter.format(double.parse(snapshot.data.seedsUnlocked)) + ' SEED'),
+                    ),
                     Container(
                       margin: EdgeInsets.only(top: 15.0),
                       height: 1.0,

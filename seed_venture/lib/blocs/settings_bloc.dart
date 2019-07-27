@@ -28,7 +28,7 @@ class SettingsBloc {
   }
 
   Future exportConfigurationFile() async {
-    final documentsDir = await getApplicationDocumentsDirectory();
+    final documentsDir = await getApplicationSupportDirectory();
     String path = documentsDir.path;
     String configFilePath = '$path/configuration.json';
 

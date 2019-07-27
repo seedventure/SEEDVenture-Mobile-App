@@ -16,13 +16,17 @@ class FundingPanelItem {
   bool favorite;
 
   // shared
-  final String latestDexQuotation;
+  final double latestDexQuotation;
   final double seedWhitelistThreshold;
   final List<MemberItem> members;
   final List tags;
   final List documents;
   final bool whitelisted;
   final bool blacklisted;
+  final String seedTotalRaised;
+  final String seedMaxSupply;
+  final String seedLiquidity;
+  final String totalUnlockedForStartup;
 
   void setFavorite(bool favorite){
     this.favorite = favorite;
@@ -31,5 +35,6 @@ class FundingPanelItem {
 
 
   FundingPanelItem({this.tokenAddress, this.fundingPanelAddress, this.adminToolsAddress, this.fundingPanelUpdates,
-      this.name, this.description, this.url, this.imgBase64, this.favorite, this.latestDexQuotation, this.members, this.tags, this.documents, this.seedWhitelistThreshold, this.whitelisted, this.blacklisted});
+      this.name, this.description, this.url, this.imgBase64, this.favorite, this.latestDexQuotation, this.members, this.tags, this.documents, this.seedWhitelistThreshold, this.whitelisted, this.blacklisted,
+  this.seedTotalRaised, this.seedMaxSupply, this.seedLiquidity, this.totalUnlockedForStartup});
 }

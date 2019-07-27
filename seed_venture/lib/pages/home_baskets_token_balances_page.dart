@@ -3,6 +3,7 @@ import 'package:seed_venture/blocs/baskets_bloc.dart';
 import 'package:seed_venture/blocs/config_manager_bloc.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:auto_size_text/auto_size_text.dart';
+import 'package:intl/intl.dart';
 
 class HomeBasketsTokenBalancesPage extends StatefulWidget {
   @override
@@ -16,6 +17,8 @@ class _HomeBasketsTokenBalancesPageState
   String filterText = '';
   Icon _searchIcon = new Icon(Icons.search);
   Widget _appBarTitle = new Text('Baskets Tokens');
+
+  final formatter = new NumberFormat("#,###.##");
 
   void _searchPressed() {
     setState(() {
@@ -89,6 +92,7 @@ class _HomeBasketsTokenBalancesPageState
   @override
   Widget build(BuildContext context) {
     return new Scaffold(
+        backgroundColor: Colors.white,
         drawer: Drawer(
           child: ListView(
             padding: EdgeInsets.zero,
@@ -176,11 +180,15 @@ class _HomeBasketsTokenBalancesPageState
                       child: Row(
                         children: <Widget>[
                           Container(
-                            child: Text(snapshot.data[0] + ' SEED'),
+                            child: Text(_getFormattedQuantity(
+                                    double.parse(snapshot.data[0])) +
+                                ' SEED'),
                             margin: const EdgeInsets.only(right: 8.0),
                           ),
                           Container(
-                            child: Text(snapshot.data[1] + ' ETH'),
+                            child: Text(_getFormattedQuantity(
+                                    double.parse(snapshot.data[1])) +
+                                ' ETH'),
                           ),
                         ],
                       ),
@@ -209,7 +217,6 @@ class _HomeBasketsTokenBalancesPageState
                           maxLines: 1,
                         ),
                         margin: EdgeInsets.only(left: 8.0),
-                        //height: 16.0,
                       )),
                   Spacer(),
                   Expanded(
@@ -217,20 +224,18 @@ class _HomeBasketsTokenBalancesPageState
                     child: Container(
                       child: AutoSizeText(
                         'QUANTITY',
+                        textAlign: TextAlign.center,
                         style: TextStyle(color: Color(0xFFAEAEAE)),
                         maxLines: 1,
                       ),
-                      margin: EdgeInsets.only(left: 8.0),
-                      //height: 16.0,
                     ),
                   ),
-                  Spacer(),
                   Expanded(
-                      flex: 2,
+                      flex: 3,
                       child: Container(
-                          //margin: EdgeInsets.only(right: 8.0),
                           child: AutoSizeText(
-                        'VALUE',
+                        'VALUE (SEED)',
+                        textAlign: TextAlign.center,
                         style: TextStyle(color: Color(0xFFAEAEAE)),
                         maxLines: 1,
                       ))),
@@ -238,12 +243,13 @@ class _HomeBasketsTokenBalancesPageState
                   Expanded(
                     flex: 1,
                     child: Container(
-                        //margin: EdgeInsets.only(left: 8.0),
+                        margin: EdgeInsets.only(right: 8.0),
                         child: AutoSizeText(
-                      'WL',
-                      style: TextStyle(color: Color(0xFFAEAEAE)),
-                      maxLines: 1,
-                    )),
+                          'WL',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(color: Color(0xFFAEAEAE)),
+                          maxLines: 1,
+                        )),
                   ),
                 ],
               )),
@@ -251,79 +257,97 @@ class _HomeBasketsTokenBalancesPageState
               child: ListView.builder(
             itemBuilder: (context, position) {
               return Container(
-                  margin: EdgeInsets.only(bottom: 20.0),
+                  color: _getRowColorByIndex(position),
+                  padding: EdgeInsets.only(bottom: 20.0, top: 20.0),
                   child: Column(
                     children: <Widget>[
                       InkWell(
-                        onTap: () {
-                          basketsBloc
-                              .getSingleBasketData(data[position].fpAddress);
-                          Navigator.pushNamed(context, '/single_basket');
-                        },
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          children: <Widget>[
-                            Container(
-                              margin: const EdgeInsets.only(left: 8.0),
-                              child: data[position].tokenLogo,
-                            ),
-                            Expanded(
-                              child: Container(
-                                child: AutoSizeText(
-                                  data[position].symbol,
-                                  overflow: TextOverflow.ellipsis,
-                                  softWrap: false,
-                                  style: TextStyle(color: Color(0xFF333333)),
-                                  maxLines: 1,
-                                ),
-                                margin: EdgeInsets.only(left: 8.0),
-                              ),
-                            ),
-                            Spacer(),
-                            Expanded(
-                              child: Container(
-                                child: Text(data[position].balance,
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    softWrap: false,
-                                    style: TextStyle(
-                                      color: Color(0xFF333333),
-                                      fontSize: 14.0,
-                                    )),
-                              ),
-                            ),
-                            Spacer(),
-                            Expanded(
-                              flex: 2,
-                              child: Container(
-                                child: AutoSizeText(
-                                  '0.00 SEED',
-                                  style: TextStyle(color: Color(0xFF333333)),
-                                  maxLines: 1,
-                                ),
-                              ),
-                            ),
-                            Spacer(),
-                            Container(
-                                margin:
-                                    const EdgeInsets.only(right: 10.0), // 8.0 ?
-                                child: ClipOval(
-                                  child: Container(
-                                    color:
-                                        data[position].getWhitelistingColor(),
-                                    height: 20.0,
-                                    width: 20.0,
+                          onTap: () {
+                            basketsBloc
+                                .getSingleBasketData(data[position].fpAddress);
+                            Navigator.pushNamed(context, '/single_basket');
+                          },
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: <Widget>[
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                children: <Widget>[
+                                  Container(
+                                    margin: const EdgeInsets.only(left: 8.0),
+                                    child: data[position].tokenLogo,
                                   ),
-                                )),
-                          ],
-                        ),
-                      ),
-                      Container(
-                        margin: EdgeInsets.only(left: 50.0, top: 15.0),
-                        height: 1.0,
-                        width: double.infinity,
-                        color: Color(0xFFF3F3F3),
-                      ),
+                                  Expanded(
+                                    flex: 2,
+                                    child: Container(
+                                      child: AutoSizeText(
+                                        data[position].symbol,
+                                        overflow: TextOverflow.ellipsis,
+                                        softWrap: false,
+                                        style: _getTextStyle(
+                                            data[position].isHighlighted),
+                                        maxLines: 1,
+                                      ),
+                                      margin: EdgeInsets.only(left: 8.0),
+                                    ),
+                                  ),
+                                  Spacer(),
+                                  Expanded(
+                                    flex: 3,
+                                    child: Container(
+                                      child: AutoSizeText(
+                                        _getFormattedQuantity(double.parse(
+                                            data[position].balance)),
+                                        textAlign: TextAlign.center,
+                                        style: _getTextStyle(
+                                            data[position].isHighlighted),
+                                        maxLines: 2,
+                                        overflow: TextOverflow.ellipsis,
+                                        softWrap: false,
+                                      ),
+                                    ),
+                                  ),
+                                  Spacer(),
+                                  Expanded(
+                                    flex: 3,
+                                    child: Container(
+                                      child: AutoSizeText(
+                                        _getFormattedQuantity(double.parse(
+                                                data[position].balance) *
+                                            data[position].quotation),
+                                        textAlign: TextAlign.center,
+                                        style: _getTextStyle(
+                                            data[position].isHighlighted),
+                                        maxLines: 2,
+                                        overflow: TextOverflow.ellipsis,
+                                        softWrap: false,
+                                      ),
+                                    ),
+                                  ),
+                                  Spacer(),
+                                  Spacer(),
+                                  Container(
+                                      margin:
+                                          const EdgeInsets.only(right: 10.0),
+                                      child: ClipOval(
+                                        child: Container(
+                                          color: data[position]
+                                              .getWhitelistingColor(),
+                                          height: 20.0,
+                                          width: 20.0,
+                                        ),
+                                      )),
+                                ],
+                              ),
+                              Container(
+                                margin:
+                                    const EdgeInsets.only(left: 8.0, top: 8.0),
+                                child: Text('Total Raised: ' +
+                                    data[position].seedTotalRaised +
+                                    ' SEED'),
+                              )
+                            ],
+                          )),
                     ],
                   ));
             },
@@ -340,5 +364,23 @@ class _HomeBasketsTokenBalancesPageState
         child: Text('No basket matches your search'),
       );
     }
+  }
+
+  Color _getRowColorByIndex(int index) {
+    if (index % 2 == 0) return Colors.white;
+    return Color(0xFFf2f2f2);
+  }
+
+  String _getFormattedQuantity(double quantity) {
+    if (quantity == 0) return '0.00';
+
+    return formatter.format(quantity);
+  }
+
+  TextStyle _getTextStyle(bool isHighlighted) {
+    TextStyle style = isHighlighted
+        ? TextStyle(color: Color(0xFF333333), fontWeight: FontWeight.bold)
+        : TextStyle(color: Color(0xFF333333));
+    return style;
   }
 }

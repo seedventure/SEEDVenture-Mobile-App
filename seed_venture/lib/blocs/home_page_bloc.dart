@@ -27,6 +27,12 @@ class HomePageBloc {
     await platform.invokeMethod('getPermission', {});
   }
 
+  Future<void> createMainDirIOS() async {
+    var platform = MethodChannel('seedventure.io/create_main_dir');
+
+    await platform.invokeMethod('createMainDir', {});
+  }
+
   void dispose() {
     _firstLaunchSubject.close();
   }

@@ -98,14 +98,12 @@ class _UnlockAccountPageState extends State<UnlockAccountPage> {
                             border: InputBorder.none,
                             hintStyle: TextStyle(color: Colors.white),
                             labelStyle: new TextStyle(color: Colors.white),
-                            /*border: new UnderlineInputBorder(
-                                        borderSide: new BorderSide(
-                                            color: Colors.white)),*/
                             hintText: 'Password...'))),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: <Widget>[
                     Container(
+                      margin: const EdgeInsets.only(bottom: 16.0),
                         child: RaisedButton(
                       color: Colors.white,
                       onPressed: () {
@@ -125,9 +123,7 @@ class _UnlockAccountPageState extends State<UnlockAccountPage> {
                         child: RaisedButton(
                       color: Colors.white,
                       onPressed: () {
-                        OnBoardingBloc.setOnBoardingToBeDone();
-                        Navigator.of(context).pushNamedAndRemoveUntil(
-                            '/on_boarding', (Route<dynamic> route) => false);
+                        _showForgetAlertDialog();
                       },
                       child: Text('Forget',
                           style: TextStyle(color: Color(0xFF006B97))),
@@ -138,7 +134,36 @@ class _UnlockAccountPageState extends State<UnlockAccountPage> {
             ),
           )
         ])
-        //    )
         );
+  }
+
+  void _showForgetAlertDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: new Text("Forget Credentials"),
+          content: new Text(
+              "All your data will be lost, do you want to continue?"),
+          actions: <Widget>[
+            new FlatButton(
+              child: new Text("Cancel"),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            new FlatButton(
+              child: new Text("Ok"),
+              onPressed: () {
+                Navigator.of(context).pop();
+                OnBoardingBloc.setOnBoardingToBeDone();
+                Navigator.of(context).pushNamedAndRemoveUntil(
+                    '/on_boarding', (Route<dynamic> route) => false);
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 }

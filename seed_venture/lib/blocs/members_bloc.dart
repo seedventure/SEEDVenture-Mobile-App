@@ -31,6 +31,7 @@ class MembersBloc {
             if (members[j]['member_address'].toString().toLowerCase() ==
                 memberAddress.toLowerCase()) {
               startup = MemberItem(
+                  seedsUnlocked: members[j]['seeds_unlocked'],
                   memberAddress: members[j]['members_address'],
                   fundingPanelAddress: fundingPanelAddress,
                   ipfsUrl: members[j]['ipfsUrl'],

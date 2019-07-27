@@ -10,6 +10,7 @@ import 'package:decimal/decimal.dart';
 import 'package:seed_venture/models/basket_token_balance_item.dart';
 import 'package:flutter/material.dart';
 import 'package:seed_venture/utils/utils.dart';
+import 'dart:math';
 
 final BasketsBloc basketsBloc = BasketsBloc();
 
@@ -114,6 +115,10 @@ class BasketsBloc {
           }
 
           basket = FundingPanelItem(
+              seedMaxSupply: maps[i]['seed_max_supply'],
+              seedTotalRaised: maps[i]['seed_total_raised'],
+              seedLiquidity: maps[i]['seed_liquidity'],
+              totalUnlockedForStartup: maps[i]['total_unlocked'],
               favorite: favorite,
               tags: maps[i]['tags'],
               documents: maps[i]['documents'],
@@ -142,7 +147,7 @@ class BasketsBloc {
   void _initNotifications() {
     flutterLocalNotificationsPlugin = new FlutterLocalNotificationsPlugin();
     var initializationSettingsAndroid =
-        new AndroidInitializationSettings('ic_launcher');
+        new AndroidInitializationSettings('seed_icon');
     var initializationSettingsIOS = new IOSInitializationSettings(
         onDidReceiveLocalNotification: onDidRecieveLocalNotification);
     var initializationSettings = new InitializationSettings(
@@ -266,6 +271,7 @@ class BasketsBloc {
   }
 
   Future<void> _launchNotification(String notificationData) async {
+    var rng = new Random();
     var androidPlatformChannelSpecifics = new AndroidNotificationDetails(
         'SeedVenture', 'SeedVenture update', 'Seedventure',
         importance: Importance.Max, priority: Priority.High);
@@ -273,7 +279,7 @@ class BasketsBloc {
     var platformChannelSpecifics = new NotificationDetails(
         androidPlatformChannelSpecifics, iOSPlatformChannelSpecifics);
     await flutterLocalNotificationsPlugin.show(
-        0, 'SeedVenture', notificationData, platformChannelSpecifics,
+        rng.nextInt(1000), 'SeedVenture', notificationData, platformChannelSpecifics,
         payload: '');
   }
 
@@ -334,6 +340,8 @@ class BasketsBloc {
           bool isBlacklisted = basketBalanceMap['is_blacklisted'];
           String imgBase64 = basketBalanceMap['imgBase64'];
           List tags = basketBalanceMap['basket_tags'];
+          double quotation = basketBalanceMap['quotation'];
+          String seedTotalRaised = basketBalanceMap['seed_total_raised'];
 
           Image tokenLogo;
 
@@ -346,6 +354,7 @@ class BasketsBloc {
           }
 
           basketTokenBalances.add(BasketTokenBalanceItem(
+            quotation: quotation,
             name: name,
             basketTags: tags,
             symbol: symbol,
@@ -355,6 +364,7 @@ class BasketsBloc {
             isBlacklisted: isBlacklisted,
             fpAddress: fundingPanelAddress,
             imgBase64: imgBase64,
+            seedTotalRaised: seedTotalRaised
           ));
         }
       }
@@ -365,7 +375,7 @@ class BasketsBloc {
     });
   }
 
-  void getBasketsTokenBalances() {
+  void getBasketsTokenBalances({String fpAddressToHighlight}) { // fpAddressToHighlight is used to make a balance BOLD if recently contributed by the user
     List<BasketTokenBalanceItem> basketTokenBalances = List();
 
     SharedPreferences.getInstance().then((prefs) {
@@ -382,6 +392,8 @@ class BasketsBloc {
         String fundingPanelAddress = basketBalanceMap['funding_panel_address'];
         String imgBase64 = basketBalanceMap['imgBase64'];
         List tags = basketBalanceMap['basket_tags'];
+        double quotation = basketBalanceMap['quotation'];
+        String seedTotalRaised = basketBalanceMap['seed_total_raised'];
 
         Image tokenLogo;
 
@@ -393,7 +405,24 @@ class BasketsBloc {
           tokenLogo = Utils.getImageFromBase64(basketBalanceMap['imgBase64']);
         }
 
+        bool isHighlighted = false;
+
+        if(fpAddressToHighlight != null && fundingPanelAddress.toLowerCase() == fpAddressToHighlight.toLowerCase()) {
+          isHighlighted = true;
+        }
+        else {
+          if(_prevBasketTokenBalances != null) {
+            for(int j = 0; j < _prevBasketTokenBalances.length; j++) {
+              if(_prevBasketTokenBalances[j].fpAddress.toLowerCase() == fundingPanelAddress.toLowerCase() && _prevBasketTokenBalances[j].isHighlighted){
+                isHighlighted = true;
+                break;
+              }
+            }
+          }
+        }
+
         basketTokenBalances.add(BasketTokenBalanceItem(
+          quotation: quotation,
           name: name,
           basketTags: tags,
           symbol: symbol,
@@ -403,6 +432,8 @@ class BasketsBloc {
           isBlacklisted: isBlacklisted,
           fpAddress: fundingPanelAddress,
           imgBase64: imgBase64,
+          isHighlighted: isHighlighted,
+          seedTotalRaised: seedTotalRaised
         ));
       }
 

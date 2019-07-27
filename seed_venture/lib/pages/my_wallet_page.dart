@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:seed_venture/blocs/baskets_bloc.dart';
 import 'package:auto_size_text/auto_size_text.dart';
+import 'package:intl/intl.dart';
 
 class MyWalletPage extends StatefulWidget {
   @override
@@ -15,6 +16,8 @@ class _MyWalletPageState extends State<MyWalletPage> {
   String filterText = ''; // names filtered by search text
   Icon _searchIcon = new Icon(Icons.search);
   Widget _appBarTitle = new Text('My Wallet');
+
+  final formatter = new NumberFormat("#,###.##");
 
   void _searchPressed() {
     setState(() {
@@ -59,6 +62,7 @@ class _MyWalletPageState extends State<MyWalletPage> {
   @override
   Widget build(BuildContext context) {
     return new Scaffold(
+        backgroundColor: Colors.white,
         key: _scaffoldKey,
         appBar: new AppBar(
           actions: <Widget>[
@@ -105,7 +109,6 @@ class _MyWalletPageState extends State<MyWalletPage> {
                           maxLines: 1,
                         ),
                         margin: EdgeInsets.only(left: 8.0),
-                        //height: 16.0,
                       )),
                   Spacer(),
                   Expanded(
@@ -113,118 +116,129 @@ class _MyWalletPageState extends State<MyWalletPage> {
                     child: Container(
                       child: AutoSizeText(
                         'QUANTITY',
+                        textAlign: TextAlign.center,
                         style: TextStyle(color: Color(0xFFAEAEAE)),
                         maxLines: 1,
                       ),
-                      margin: EdgeInsets.only(left: 8.0),
-                      //height: 16.0,
                     ),
                   ),
-                  Spacer(),
                   Expanded(
-                      flex: 2,
+                      flex: 3,
                       child: Container(
-                          //margin: EdgeInsets.only(right: 8.0),
                           child: AutoSizeText(
-                        'VALUE',
-                        style: TextStyle(color: Color(0xFFAEAEAE)),
-                        maxLines: 1,
-                      ))),
+                            'VALUE (SEED)',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(color: Color(0xFFAEAEAE)),
+                            maxLines: 1,
+                          ))),
                   Spacer(),
                   Expanded(
                     flex: 1,
                     child: Container(
-                        //margin: EdgeInsets.only(left: 8.0),
+                        margin: EdgeInsets.only(right: 8.0),
                         child: AutoSizeText(
-                      'WL',
-                      style: TextStyle(color: Color(0xFFAEAEAE)),
-                      maxLines: 1,
-                    )),
+                          'WL',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(color: Color(0xFFAEAEAE)),
+                          maxLines: 1,
+                        )),
                   ),
                 ],
               )),
           Expanded(
               child: ListView.builder(
-            itemBuilder: (context, position) {
-              return Container(
-                  margin: EdgeInsets.only(bottom: 20.0),
-                  child: Column(
-                    children: <Widget>[
-                      InkWell(
-                        onTap: () {
-                          basketsBloc
-                              .getSingleBasketData(data[position].fpAddress);
-                          Navigator.pushNamed(context, '/single_basket');
-                        },
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          children: <Widget>[
-                            Container(
-                              margin: const EdgeInsets.only(left: 8.0),
-                              child: data[position].tokenLogo,
-                            ),
-                            Expanded(
-                              child: Container(
-                                child: AutoSizeText(
-                                  data[position].symbol,
-                                  overflow: TextOverflow.ellipsis,
-                                  softWrap: false,
-                                  style: TextStyle(color: Color(0xFF333333)),
-                                  maxLines: 1,
-                                ),
-                                margin: EdgeInsets.only(left: 8.0),
-                              ),
-                            ),
-                            Spacer(),
-                            Expanded(
-                              child: Container(
-                                child: Text(data[position].balance,
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    softWrap: false,
-                                    style: TextStyle(
-                                      color: Color(0xFF333333),
-                                      fontSize: 14.0,
-                                    )),
-                              ),
-                            ),
-                            Spacer(),
-                            Expanded(
-                              flex: 2,
-                              child: Container(
-                                child: AutoSizeText(
-                                  '0.00 SEED',
-                                  style: TextStyle(color: Color(0xFF333333)),
-                                  maxLines: 1,
-                                ),
-                              ),
-                            ),
-                            Spacer(),
-                            Container(
-                                margin:
-                                    const EdgeInsets.only(right: 10.0), // 8.0
-                                child: ClipOval(
-                                  child: Container(
-                                    color:
-                                        data[position].getWhitelistingColor(),
-                                    height: 20.0,
-                                    width: 20.0,
+                itemBuilder: (context, position) {
+                  return Container(
+                      color: _getRowColorByIndex(position),
+                      padding: EdgeInsets.only(bottom: 20.0, top: 20.0),
+                      child: Column(
+                        children: <Widget>[
+                          InkWell(
+                              onTap: () {
+                                basketsBloc
+                                    .getSingleBasketData(data[position].fpAddress);
+                                Navigator.pushNamed(context, '/single_basket');
+                              },
+                              child: Column(
+                                children: <Widget>[
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.start,
+                                    children: <Widget>[
+                                      Container(
+                                        margin: const EdgeInsets.only(left: 8.0),
+                                        child: data[position].tokenLogo,
+                                      ),
+                                      Expanded(
+                                        flex: 2,
+                                        child: Container(
+                                          child: AutoSizeText(
+                                            data[position].symbol,
+                                            overflow: TextOverflow.ellipsis,
+                                            softWrap: false,
+                                            style:
+                                            TextStyle(color: Color(0xFF333333)),
+                                            maxLines: 1,
+                                          ),
+                                          margin: EdgeInsets.only(left: 8.0),
+                                        ),
+                                      ),
+                                      Spacer(),
+                                      //Spacer(),
+
+                                      Expanded(
+                                        flex: 3,
+                                        child: Container(
+                                          //margin: const EdgeInsets.only(left: 16.0),
+                                          child: AutoSizeText(
+                                            _getFormattedQuantity(double.parse(
+                                                data[position].balance)),
+                                            textAlign: TextAlign.center,
+                                            style:
+                                            TextStyle(color: Color(0xFF333333)),
+                                            maxLines: 2,
+                                            overflow: TextOverflow.ellipsis,
+                                            softWrap: false,
+                                          ),
+                                        ),
+                                      ),
+                                      Spacer(),
+                                      Expanded(
+                                        flex: 3,
+                                        child: Container(
+                                          child: AutoSizeText(
+                                            _getFormattedQuantity(double.parse(
+                                                data[position].balance) * data[position].quotation),
+                                            textAlign: TextAlign.center,
+                                            style:
+                                            TextStyle(color: Color(0xFF333333)),
+                                            maxLines: 2,
+                                            overflow: TextOverflow.ellipsis,
+                                            softWrap: false,
+                                          ),
+                                        ),
+                                      ),
+                                      Spacer(),
+                                      Spacer(),
+                                      Container(
+                                          margin: const EdgeInsets.only(
+                                              right: 10.0),
+                                          child: ClipOval(
+                                            child: Container(
+                                              color: data[position]
+                                                  .getWhitelistingColor(),
+                                              height: 20.0,
+                                              width: 20.0,
+                                            ),
+                                          )),
+                                    ],
                                   ),
-                                )),
-                          ],
-                        ),
-                      ),
-                      Container(
-                        margin: EdgeInsets.only(left: 50.0, top: 15.0),
-                        height: 1.0,
-                        width: double.infinity,
-                        color: Color(0xFFF3F3F3),
-                      ),
-                    ],
-                  ));
-            },
-            itemCount: data.length,
-          ))
+                                ],
+                              )),
+                        ],
+                      ));
+                },
+                itemCount: data.length,
+              ))
         ],
       );
     } else if (filteredText == '') {
@@ -235,5 +249,16 @@ class _MyWalletPageState extends State<MyWalletPage> {
       return Center(
         child: Text('No basket matches your search'),
       );
+  }
+
+  Color _getRowColorByIndex(int index) {
+    if (index % 2 == 0) return Colors.white;
+    return Color(0xFFf2f2f2);
+  }
+
+  String _getFormattedQuantity(double quantity) {
+    if (quantity == 0) return '0.00';
+
+    return formatter.format(quantity);
   }
 }

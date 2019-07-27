@@ -8,6 +8,7 @@ class MemberItem {
   final String url;
   final String imgBase64;
   final List documents;
+  final String seedsUnlocked;
 
   MemberItem(
       {this.memberAddress,
@@ -18,5 +19,6 @@ class MemberItem {
       this.description,
       this.url,
       this.imgBase64,
-      this.documents});
+      this.documents,
+      this.seedsUnlocked});
 }

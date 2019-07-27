@@ -9,6 +9,9 @@ class HomePage extends StatelessWidget {
     if (Theme.of(context).platform == TargetPlatform.android) {
       homePageBloc.handlePermissions();
     }
+    else {
+     // homePageBloc.createMainDirIOS();
+    }
 
     return StreamBuilder(
       builder: (BuildContext context, AsyncSnapshot snapshot) {

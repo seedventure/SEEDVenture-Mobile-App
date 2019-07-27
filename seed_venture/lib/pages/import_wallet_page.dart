@@ -110,7 +110,7 @@ class _ImportConfigPageState extends State<ImportConfigPage> {
                       Expanded(
                         child: Center(
                             child: Text(
-                          'Insert Private Key: ',
+                          'OR Insert Private Key: ',
                           style: TextStyle(fontWeight: FontWeight.bold),
                         )),
                       )
