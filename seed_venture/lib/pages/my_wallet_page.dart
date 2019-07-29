@@ -126,11 +126,11 @@ class _MyWalletPageState extends State<MyWalletPage> {
                       flex: 3,
                       child: Container(
                           child: AutoSizeText(
-                            'VALUE (SEED)',
-                            textAlign: TextAlign.center,
-                            style: TextStyle(color: Color(0xFFAEAEAE)),
-                            maxLines: 1,
-                          ))),
+                        'VALUE (SEED)',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(color: Color(0xFFAEAEAE)),
+                        maxLines: 1,
+                      ))),
                   Spacer(),
                   Expanded(
                     flex: 1,
@@ -147,98 +147,104 @@ class _MyWalletPageState extends State<MyWalletPage> {
               )),
           Expanded(
               child: ListView.builder(
-                itemBuilder: (context, position) {
-                  return Container(
-                      color: _getRowColorByIndex(position),
-                      padding: EdgeInsets.only(bottom: 20.0, top: 20.0),
-                      child: Column(
-                        children: <Widget>[
-                          InkWell(
-                              onTap: () {
-                                basketsBloc
-                                    .getSingleBasketData(data[position].fpAddress);
-                                Navigator.pushNamed(context, '/single_basket');
-                              },
-                              child: Column(
+            itemBuilder: (context, position) {
+              return Container(
+                  color: _getRowColorByIndex(position),
+                  padding: EdgeInsets.only(bottom: 20.0, top: 20.0),
+                  child: Column(
+                    children: <Widget>[
+                      InkWell(
+                          onTap: () {
+                            basketsBloc
+                                .getSingleBasketData(data[position].fpAddress);
+                            Navigator.pushNamed(context, '/single_basket');
+                          },
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: <Widget>[
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.start,
                                 children: <Widget>[
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.start,
-                                    children: <Widget>[
-                                      Container(
-                                        margin: const EdgeInsets.only(left: 8.0),
-                                        child: data[position].tokenLogo,
-                                      ),
-                                      Expanded(
-                                        flex: 2,
-                                        child: Container(
-                                          child: AutoSizeText(
-                                            data[position].symbol,
-                                            overflow: TextOverflow.ellipsis,
-                                            softWrap: false,
-                                            style:
-                                            TextStyle(color: Color(0xFF333333)),
-                                            maxLines: 1,
-                                          ),
-                                          margin: EdgeInsets.only(left: 8.0),
-                                        ),
-                                      ),
-                                      Spacer(),
-                                      //Spacer(),
-
-                                      Expanded(
-                                        flex: 3,
-                                        child: Container(
-                                          //margin: const EdgeInsets.only(left: 16.0),
-                                          child: AutoSizeText(
-                                            _getFormattedQuantity(double.parse(
-                                                data[position].balance)),
-                                            textAlign: TextAlign.center,
-                                            style:
-                                            TextStyle(color: Color(0xFF333333)),
-                                            maxLines: 2,
-                                            overflow: TextOverflow.ellipsis,
-                                            softWrap: false,
-                                          ),
-                                        ),
-                                      ),
-                                      Spacer(),
-                                      Expanded(
-                                        flex: 3,
-                                        child: Container(
-                                          child: AutoSizeText(
-                                            _getFormattedQuantity(double.parse(
-                                                data[position].balance) * data[position].quotation),
-                                            textAlign: TextAlign.center,
-                                            style:
-                                            TextStyle(color: Color(0xFF333333)),
-                                            maxLines: 2,
-                                            overflow: TextOverflow.ellipsis,
-                                            softWrap: false,
-                                          ),
-                                        ),
-                                      ),
-                                      Spacer(),
-                                      Spacer(),
-                                      Container(
-                                          margin: const EdgeInsets.only(
-                                              right: 10.0),
-                                          child: ClipOval(
-                                            child: Container(
-                                              color: data[position]
-                                                  .getWhitelistingColor(),
-                                              height: 20.0,
-                                              width: 20.0,
-                                            ),
-                                          )),
-                                    ],
+                                  Container(
+                                    margin: const EdgeInsets.only(left: 8.0),
+                                    child: data[position].tokenLogo,
                                   ),
+                                  Expanded(
+                                    flex: 2,
+                                    child: Container(
+                                      child: AutoSizeText(
+                                        data[position].symbol,
+                                        overflow: TextOverflow.ellipsis,
+                                        softWrap: false,
+                                        style:
+                                            TextStyle(color: Color(0xFF333333)),
+                                        maxLines: 1,
+                                      ),
+                                      margin: EdgeInsets.only(left: 8.0),
+                                    ),
+                                  ),
+                                  Spacer(),
+                                  Expanded(
+                                    flex: 3,
+                                    child: Container(
+                                      child: AutoSizeText(
+                                        _getFormattedQuantity(double.parse(
+                                            data[position].balance)),
+                                        textAlign: TextAlign.center,
+                                        style:
+                                            TextStyle(color: Color(0xFF333333)),
+                                        maxLines: 2,
+                                        overflow: TextOverflow.ellipsis,
+                                        softWrap: false,
+                                      ),
+                                    ),
+                                  ),
+                                  Spacer(),
+                                  Expanded(
+                                    flex: 3,
+                                    child: Container(
+                                      child: AutoSizeText(
+                                        _getFormattedQuantity(double.parse(
+                                                data[position].balance) *
+                                            data[position].quotation),
+                                        textAlign: TextAlign.center,
+                                        style:
+                                            TextStyle(color: Color(0xFF333333)),
+                                        maxLines: 2,
+                                        overflow: TextOverflow.ellipsis,
+                                        softWrap: false,
+                                      ),
+                                    ),
+                                  ),
+                                  Spacer(),
+                                  Spacer(),
+                                  Container(
+                                      margin:
+                                          const EdgeInsets.only(right: 10.0),
+                                      child: ClipOval(
+                                        child: Container(
+                                          color: data[position]
+                                              .getWhitelistingColor(),
+                                          height: 20.0,
+                                          width: 20.0,
+                                        ),
+                                      )),
                                 ],
-                              )),
-                        ],
-                      ));
-                },
-                itemCount: data.length,
-              ))
+                              ),
+                              Container(
+                                margin:
+                                    const EdgeInsets.only(left: 8.0, top: 8.0),
+                                child: Text('Total Raised: ' +
+                                    data[position].seedTotalRaised +
+                                    ' SEED'),
+                              )
+                            ],
+                          )),
+                    ],
+                  ));
+            },
+            itemCount: data.length,
+          ))
         ],
       );
     } else if (filteredText == '') {

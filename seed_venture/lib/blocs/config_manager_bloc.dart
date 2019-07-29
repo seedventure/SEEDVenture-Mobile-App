@@ -1365,10 +1365,11 @@ class ConfigManagerBloc {
           }*/
 
           // check if fp is favorite
-          if(favorites.contains(prevFP['fundingPanelAddress'].toString().toLowerCase())) {
-            String notificationData =
-                'Documents by basket ' + prevFP['fundingPanelName'] +
-                    ' changed!';
+          if (favorites.contains(
+              prevFP['fundingPanelAddress'].toString().toLowerCase())) {
+            String notificationData = 'Documents by basket ' +
+                prevFP['fundingPanelName'] +
+                ' changed!';
             basketsBloc.notification(notificationData);
           }
         }
@@ -1409,8 +1410,7 @@ class ConfigManagerBloc {
             // check if the member disappeared from list on blockchain
             if (prevMember['latestHash'].toString().toLowerCase() !=
                 actualMember['latestHash'].toString().toLowerCase()) {
-
-              if(favorites.contains(fpAddress.toLowerCase())) {
+              if (favorites.contains(fpAddress.toLowerCase())) {
                 String notificationData = 'Documents by startup ' +
                     prevMember['memberName'] +
                     ' changed! (Incubator ' +

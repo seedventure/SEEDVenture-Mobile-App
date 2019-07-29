@@ -33,10 +33,7 @@ class _UnlockAccountPageState extends State<UnlockAccountPage> {
         resizeToAvoidBottomPadding:
             false, // if true, it resize when the keyboard appear/disappear
         key: _scaffoldKey,
-
-        body:
-
-            Stack(children: <Widget>[
+        body: Stack(children: <Widget>[
           Positioned.fill(
             child: Image(
               image: AssetImage('assets/bg-login.png'),
@@ -50,31 +47,29 @@ class _UnlockAccountPageState extends State<UnlockAccountPage> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: <Widget>[
                     Container(
-                      margin: const EdgeInsets.only(top: 50.0, bottom: 10.0),
+                        margin: const EdgeInsets.only(top: 50.0, bottom: 10.0),
                         child: Image.asset(
-                      'assets/seed-logo.png',
-                      height: 100,
-                      width: 100,
-                    )
-                    )
+                          'assets/seed-logo.png',
+                          height: 100,
+                          width: 100,
+                        ))
                   ],
                 ),
                 Container(
-                  margin: const EdgeInsets.only(bottom: 20.0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: <Widget>[
-                      Expanded(
-                          child: Center(
-                            child: Text(
-                              'The first decentralized venture capital investment platform',
-                              textAlign: TextAlign.center,
-                              style: TextStyle(color: Colors.white),
-                            ),
-                          ))
-                    ],
-                  )
-                ),
+                    margin: const EdgeInsets.only(bottom: 20.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: <Widget>[
+                        Expanded(
+                            child: Center(
+                          child: Text(
+                            'The first decentralized venture capital investment platform',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(color: Colors.white),
+                          ),
+                        ))
+                      ],
+                    )),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: <Widget>[
@@ -103,17 +98,18 @@ class _UnlockAccountPageState extends State<UnlockAccountPage> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: <Widget>[
                     Container(
-                      margin: const EdgeInsets.only(bottom: 16.0),
+                        margin: const EdgeInsets.only(bottom: 16.0),
                         child: RaisedButton(
-                      color: Colors.white,
-                      onPressed: () {
-                        FocusScope.of(context).requestFocus(new FocusNode());
-                        unlockAccountBloc
-                            .isPasswordCorrect(passwordController.text);
-                      },
-                      child: Text('Unlock',
-                          style: TextStyle(color: Color(0xFF006B97))),
-                    ))
+                          color: Colors.white,
+                          onPressed: () {
+                            FocusScope.of(context)
+                                .requestFocus(new FocusNode());
+                            unlockAccountBloc
+                                .isPasswordCorrect(passwordController.text);
+                          },
+                          child: Text('Unlock',
+                              style: TextStyle(color: Color(0xFF006B97))),
+                        ))
                   ],
                 ),
                 Row(
@@ -133,8 +129,7 @@ class _UnlockAccountPageState extends State<UnlockAccountPage> {
               ],
             ),
           )
-        ])
-        );
+        ]));
   }
 
   void _showForgetAlertDialog() {
@@ -143,8 +138,8 @@ class _UnlockAccountPageState extends State<UnlockAccountPage> {
       builder: (BuildContext context) {
         return AlertDialog(
           title: new Text("Forget Credentials"),
-          content: new Text(
-              "All your data will be lost, do you want to continue?"),
+          content:
+              new Text("All your data will be lost, do you want to continue?"),
           actions: <Widget>[
             new FlatButton(
               child: new Text("Cancel"),

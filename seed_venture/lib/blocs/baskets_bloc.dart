@@ -10,7 +10,6 @@ import 'package:decimal/decimal.dart';
 import 'package:seed_venture/models/basket_token_balance_item.dart';
 import 'package:flutter/material.dart';
 import 'package:seed_venture/utils/utils.dart';
-import 'dart:math';
 
 final BasketsBloc basketsBloc = BasketsBloc();
 
@@ -278,8 +277,8 @@ class BasketsBloc {
     var iOSPlatformChannelSpecifics = new IOSNotificationDetails();
     var platformChannelSpecifics = new NotificationDetails(
         androidPlatformChannelSpecifics, iOSPlatformChannelSpecifics);
-    await flutterLocalNotificationsPlugin.show(
-        rng.nextInt(1000), 'SeedVenture', notificationData, platformChannelSpecifics,
+    await flutterLocalNotificationsPlugin.show(rng.nextInt(1000), 'SeedVenture',
+        notificationData, platformChannelSpecifics,
         payload: '');
   }
 
@@ -297,28 +296,6 @@ class BasketsBloc {
 
     _inNotificationsiOS.add(params);
   }
-
-  /*void getBaskets() {
-    SharedPreferences.getInstance().then((prefs) {
-      List maps = jsonDecode(prefs.getString('funding_panels_data'));
-      List<FundingPanelItem> fundingPanelItems = List();
-
-      for (int i = 0; i < maps.length; i++) {
-        // no need for members in this case
-        fundingPanelItems.add(FundingPanelItem(
-            tokenAddress: maps[i]['token_address'],
-            fundingPanelAddress: maps[i]['funding_panel_address'],
-            adminToolsAddress: maps[i]['admin_tools_address'],
-            latestDexQuotation: maps[i]['latest_dex_price'],
-            imgBase64: maps[i]['imgBase64'],
-            name: maps[i]['name'],
-            description: maps[i]['description'],
-            url: maps[i]['url']));
-      }
-
-      _inFundingPanelsDetails.add(fundingPanelItems);
-    });
-  }*/
 
   void getFavoritesBasketsTokenBalances() {
     List<BasketTokenBalanceItem> basketTokenBalances = List();
@@ -354,18 +331,17 @@ class BasketsBloc {
           }
 
           basketTokenBalances.add(BasketTokenBalanceItem(
-            quotation: quotation,
-            name: name,
-            basketTags: tags,
-            symbol: symbol,
-            balance: balance,
-            tokenLogo: tokenLogo,
-            isWhitelisted: isWhitelisted,
-            isBlacklisted: isBlacklisted,
-            fpAddress: fundingPanelAddress,
-            imgBase64: imgBase64,
-            seedTotalRaised: seedTotalRaised
-          ));
+              quotation: quotation,
+              name: name,
+              basketTags: tags,
+              symbol: symbol,
+              balance: balance,
+              tokenLogo: tokenLogo,
+              isWhitelisted: isWhitelisted,
+              isBlacklisted: isBlacklisted,
+              fpAddress: fundingPanelAddress,
+              imgBase64: imgBase64,
+              seedTotalRaised: seedTotalRaised));
         }
       }
 
@@ -375,7 +351,8 @@ class BasketsBloc {
     });
   }
 
-  void getBasketsTokenBalances({String fpAddressToHighlight}) { // fpAddressToHighlight is used to make a balance BOLD if recently contributed by the user
+  void getBasketsTokenBalances({String fpAddressToHighlight}) {
+    // fpAddressToHighlight is used to make a balance BOLD if recently contributed by the user
     List<BasketTokenBalanceItem> basketTokenBalances = List();
 
     SharedPreferences.getInstance().then((prefs) {
@@ -407,13 +384,16 @@ class BasketsBloc {
 
         bool isHighlighted = false;
 
-        if(fpAddressToHighlight != null && fundingPanelAddress.toLowerCase() == fpAddressToHighlight.toLowerCase()) {
+        if (fpAddressToHighlight != null &&
+            fundingPanelAddress.toLowerCase() ==
+                fpAddressToHighlight.toLowerCase()) {
           isHighlighted = true;
-        }
-        else {
-          if(_prevBasketTokenBalances != null) {
-            for(int j = 0; j < _prevBasketTokenBalances.length; j++) {
-              if(_prevBasketTokenBalances[j].fpAddress.toLowerCase() == fundingPanelAddress.toLowerCase() && _prevBasketTokenBalances[j].isHighlighted){
+        } else {
+          if (_prevBasketTokenBalances != null) {
+            for (int j = 0; j < _prevBasketTokenBalances.length; j++) {
+              if (_prevBasketTokenBalances[j].fpAddress.toLowerCase() ==
+                      fundingPanelAddress.toLowerCase() &&
+                  _prevBasketTokenBalances[j].isHighlighted) {
                 isHighlighted = true;
                 break;
               }
@@ -422,19 +402,18 @@ class BasketsBloc {
         }
 
         basketTokenBalances.add(BasketTokenBalanceItem(
-          quotation: quotation,
-          name: name,
-          basketTags: tags,
-          symbol: symbol,
-          balance: balance,
-          tokenLogo: tokenLogo,
-          isWhitelisted: isWhitelisted,
-          isBlacklisted: isBlacklisted,
-          fpAddress: fundingPanelAddress,
-          imgBase64: imgBase64,
-          isHighlighted: isHighlighted,
-          seedTotalRaised: seedTotalRaised
-        ));
+            quotation: quotation,
+            name: name,
+            basketTags: tags,
+            symbol: symbol,
+            balance: balance,
+            tokenLogo: tokenLogo,
+            isWhitelisted: isWhitelisted,
+            isBlacklisted: isBlacklisted,
+            fpAddress: fundingPanelAddress,
+            imgBase64: imgBase64,
+            isHighlighted: isHighlighted,
+            seedTotalRaised: seedTotalRaised));
       }
 
       _prevBasketTokenBalances = basketTokenBalances;
@@ -443,7 +422,6 @@ class BasketsBloc {
   }
 
   void dispose() {
-    //_getFundingPanelsDetails.close();
     _notificationsiOS.close();
     _seedEthBalances.close();
     _basketsTokenBalances.close();
@@ -455,17 +433,6 @@ class BasketsBloc {
     if (searchText == '') return _prevBasketTokenBalances;
     List items = List();
     for (int i = 0; i < _prevBasketTokenBalances.length; i++) {
-      /*if(_prevBasketTokenBalances[i].basketTags.contains(searchText)){
-        items.add(_prevBasketTokenBalances[i]);
-      }*/
-
-      /*else if(_prevBasketTokenBalances[i].symbol.toLowerCase() == searchText.toLowerCase()) {
-    items.add(_prevBasketTokenBalances[i]);
-    }
-    else if(_prevBasketTokenBalances[i].name.toLowerCase() == searchText.toLowerCase()) {
-    items.add(_prevBasketTokenBalances[i]);
-    }*/
-
       bool added = false;
       _prevBasketTokenBalances[i].basketTags.forEach((tag) {
         if (!added &&

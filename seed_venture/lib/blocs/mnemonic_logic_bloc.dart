@@ -33,10 +33,8 @@ class MnemonicLogicBloc {
   Stream<String> get outSetCustomMnemonic => _setCustomMnemonic.stream;
   Sink<String> get inSetCustomMnemonic => _setCustomMnemonic.sink;
 
-  Stream<String> get outCheckConfirmPassword =>
-      _checkConfirmPassword.stream;
-  Sink<String> get _inCheckConfirmPassword =>
-      _checkConfirmPassword.sink;
+  Stream<String> get outCheckConfirmPassword => _checkConfirmPassword.stream;
+  Sink<String> get _inCheckConfirmPassword => _checkConfirmPassword.sink;
 
   String _lastMnemonic;
 
@@ -59,10 +57,13 @@ class MnemonicLogicBloc {
     return randomMnemonic;
   }
 
-  void checkConfirmPassword(String pass, String passConfirm){
-    if(pass.length == 0) _inCheckConfirmPassword.add('empty');
-    else if(pass == passConfirm) _inCheckConfirmPassword.add('ok');
-    else _inCheckConfirmPassword.add('not_equal');
+  void checkConfirmPassword(String pass, String passConfirm) {
+    if (pass.length == 0)
+      _inCheckConfirmPassword.add('empty');
+    else if (pass == passConfirm)
+      _inCheckConfirmPassword.add('ok');
+    else
+      _inCheckConfirmPassword.add('not_equal');
   }
 
   void isMnemonicCorrect(String typedMnemonic) {

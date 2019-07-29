@@ -113,7 +113,8 @@ class _InsertPasswordMnemonicPageState
               ),
               RaisedButton(
                 onPressed: () {
-                  mnemonicLogicBloc.checkConfirmPassword(passwordController.text, repeatPasswordController.text);
+                  mnemonicLogicBloc.checkConfirmPassword(
+                      passwordController.text, repeatPasswordController.text);
                 },
                 child: Text('Continue', style: TextStyle(color: Colors.white)),
               )

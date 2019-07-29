@@ -1,7 +1,6 @@
 import 'package:seed_venture/models/member_item.dart';
 
 class FundingPanelItem {
-
   // data for configuration file
   final String tokenAddress;
   final String fundingPanelAddress;
@@ -28,13 +27,29 @@ class FundingPanelItem {
   final String seedLiquidity;
   final String totalUnlockedForStartup;
 
-  void setFavorite(bool favorite){
+  void setFavorite(bool favorite) {
     this.favorite = favorite;
   }
 
-
-
-  FundingPanelItem({this.tokenAddress, this.fundingPanelAddress, this.adminToolsAddress, this.fundingPanelUpdates,
-      this.name, this.description, this.url, this.imgBase64, this.favorite, this.latestDexQuotation, this.members, this.tags, this.documents, this.seedWhitelistThreshold, this.whitelisted, this.blacklisted,
-  this.seedTotalRaised, this.seedMaxSupply, this.seedLiquidity, this.totalUnlockedForStartup});
+  FundingPanelItem(
+      {this.tokenAddress,
+      this.fundingPanelAddress,
+      this.adminToolsAddress,
+      this.fundingPanelUpdates,
+      this.name,
+      this.description,
+      this.url,
+      this.imgBase64,
+      this.favorite,
+      this.latestDexQuotation,
+      this.members,
+      this.tags,
+      this.documents,
+      this.seedWhitelistThreshold,
+      this.whitelisted,
+      this.blacklisted,
+      this.seedTotalRaised,
+      this.seedMaxSupply,
+      this.seedLiquidity,
+      this.totalUnlockedForStartup});
 }

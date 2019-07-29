@@ -122,10 +122,14 @@ class _SingleBasketPageState extends State<SingleBasketPage> {
                       decoration: InputDecoration(
                           border: InputBorder.none, hintText: 'SEED...'),
                       controller: amountControllerSEED,
-                      onChanged: (value){
-                        if(value.isEmpty) amountControllerBasketToken.text = '';
+                      onChanged: (value) {
+                        if (value.isEmpty)
+                          amountControllerBasketToken.text = '';
                         else
-                          amountControllerBasketToken.text = (double.parse(value) / fundingPanel.latestDexQuotation).toString();
+                          amountControllerBasketToken.text =
+                              (double.parse(value) /
+                                      fundingPanel.latestDexQuotation)
+                                  .toString();
                       },
                     ),
                     height: 50,
@@ -135,19 +139,24 @@ class _SingleBasketPageState extends State<SingleBasketPage> {
                   Container(
                     child: TextField(
                       keyboardType:
-                      TextInputType.numberWithOptions(decimal: true),
+                          TextInputType.numberWithOptions(decimal: true),
                       decoration: InputDecoration(
-                          border: InputBorder.none, hintText: 'Basket Token...'),
+                          border: InputBorder.none,
+                          hintText: 'Basket Token...'),
                       controller: amountControllerBasketToken,
-                      onChanged: (value){
-                        if(value.isEmpty) amountControllerSEED.text = '';
+                      onChanged: (value) {
+                        if (value.isEmpty)
+                          amountControllerSEED.text = '';
                         else
-                          amountControllerSEED.text = (double.parse(value) * fundingPanel.latestDexQuotation).toString();
+                          amountControllerSEED.text = (double.parse(value) *
+                                  fundingPanel.latestDexQuotation)
+                              .toString();
                       },
                     ),
                     height: 50,
                     width: double.infinity,
-                    margin: EdgeInsets.only(left: 20.0, right: 20.0, bottom: 20.0),
+                    margin:
+                        EdgeInsets.only(left: 20.0, right: 20.0, bottom: 20.0),
                   ),
                   Container(
                     margin:
@@ -160,7 +169,8 @@ class _SingleBasketPageState extends State<SingleBasketPage> {
                             amountControllerSEED.text, fundingPanel)) {
                           if (contributionBloc
                               .hasEnoughFunds(amountControllerSEED.text)) {
-                            _showConfigPasswordDialog(amountControllerSEED.text);
+                            _showConfigPasswordDialog(
+                                amountControllerSEED.text);
                           } else {
                             SnackBar error =
                                 SnackBar(content: Text('Insufficient Funds'));
@@ -294,19 +304,31 @@ class _SingleBasketPageState extends State<SingleBasketPage> {
                     ),
                     Container(
                       margin: const EdgeInsets.only(left: 8.0, top: 12.0),
-                      child: Text('Max Supply: ' + formatter.format(double.parse(snapshot.data.seedMaxSupply)) + ' SEED'),
+                      child: Text('Max Supply: ' +
+                          formatter.format(
+                              double.parse(snapshot.data.seedMaxSupply)) +
+                          ' SEED'),
                     ),
                     Container(
                       margin: const EdgeInsets.only(left: 8.0, top: 12.0),
-                      child: Text('Total Raised: ' + formatter.format(double.parse(snapshot.data.seedTotalRaised)) + ' SEED'),
+                      child: Text('Total Raised: ' +
+                          formatter.format(
+                              double.parse(snapshot.data.seedTotalRaised)) +
+                          ' SEED'),
                     ),
                     Container(
                       margin: const EdgeInsets.only(left: 8.0, top: 12.0),
-                      child: Text('SEED Liquidity: ' + formatter.format(double.parse(snapshot.data.seedLiquidity)) + ' SEED'),
+                      child: Text('SEED Liquidity: ' +
+                          formatter.format(
+                              double.parse(snapshot.data.seedLiquidity)) +
+                          ' SEED'),
                     ),
                     Container(
                       margin: const EdgeInsets.only(left: 8.0, top: 12.0),
-                      child: Text('Total SEED Unlocked: ' + formatter.format(double.parse(snapshot.data.totalUnlockedForStartup)) + ' SEED'),
+                      child: Text('Total SEED Unlocked: ' +
+                          formatter.format(double.parse(
+                              snapshot.data.totalUnlockedForStartup)) +
+                          ' SEED'),
                     ),
                     Container(
                       margin: EdgeInsets.only(top: 8.0),
@@ -316,7 +338,13 @@ class _SingleBasketPageState extends State<SingleBasketPage> {
                     ),
                     Container(
                       child: Text('Latest Quotation: ' +
-                          snapshot.data.latestDexQuotation.toStringAsFixed(snapshot.data.latestDexQuotation.truncateToDouble() == snapshot.data.latestDexQuotation ? 0 : 2) + ' SEED'),
+                          snapshot.data.latestDexQuotation.toStringAsFixed(
+                              snapshot.data.latestDexQuotation
+                                          .truncateToDouble() ==
+                                      snapshot.data.latestDexQuotation
+                                  ? 0
+                                  : 2) +
+                          ' SEED'),
                       margin: const EdgeInsets.only(
                           top: 15.0, left: 8.0, right: 8.0),
                     ),
@@ -408,8 +436,7 @@ class _SingleBasketPageState extends State<SingleBasketPage> {
         child: AutoSizeText(
           snapshot.data.tags[i],
           textAlign: TextAlign.center,
-          style:
-              TextStyle(fontWeight: FontWeight.bold),
+          style: TextStyle(fontWeight: FontWeight.bold),
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
           softWrap: false,

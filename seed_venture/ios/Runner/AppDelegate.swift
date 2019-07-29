@@ -61,29 +61,7 @@ import Flutter
         self.exportFile(result: result, path: add!)
     })
     
-    let createMainDirChannel = FlutterMethodChannel(name: "seedventure.io/create_main_dir",
-                                             binaryMessenger: controller)
-    
-    createMainDirChannel.setMethodCallHandler({
-        (call: FlutterMethodCall, result: FlutterResult) -> Void in
-        guard call.method == "createMainDir" else {
-            result(FlutterMethodNotImplemented)
-            return
-        }
-        
-        let documentsPath1 = NSURL(fileURLWithPath: NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true)[0])
-        let logsPath = documentsPath1.appendingPathComponent("SeedVenture")
-        do
-        {
-            try FileManager.default.createDirectory(atPath: logsPath!.path, withIntermediateDirectories: true, attributes: nil)
-        }
-        catch let error as NSError
-        {
-            NSLog("Unable to create directory \(error.debugDescription)")
-        }
-    })
-    
-    
+   
     GeneratedPluginRegistrant.register(with: self)
     return super.application(application, didFinishLaunchingWithOptions: launchOptions)
   }

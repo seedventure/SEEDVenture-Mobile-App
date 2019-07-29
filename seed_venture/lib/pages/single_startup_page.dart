@@ -84,7 +84,10 @@ class _SingleStartupPageState extends State<SingleStartupPage> {
                     ),
                     Container(
                       margin: const EdgeInsets.only(left: 8.0, top: 12.0),
-                      child: Text('SEED Unlocked: ' + formatter.format(double.parse(snapshot.data.seedsUnlocked)) + ' SEED'),
+                      child: Text('SEED Unlocked: ' +
+                          formatter.format(
+                              double.parse(snapshot.data.seedsUnlocked)) +
+                          ' SEED'),
                     ),
                     Container(
                       margin: EdgeInsets.only(top: 15.0),

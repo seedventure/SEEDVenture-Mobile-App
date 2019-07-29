@@ -6,7 +6,6 @@ import 'package:flutter/gestures.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:seed_venture/utils/constants.dart';
 
-
 class WalletInfoPage extends StatefulWidget {
   @override
   State<StatefulWidget> createState() => _WalletInfoPageState();
@@ -35,8 +34,6 @@ class _WalletInfoPageState extends State<WalletInfoPage> {
                     color: Color(0xFFF5F5F5),
                   ),
                   Container(
-                      //height: 50.0,
-                      //width: 50.0,
                       margin: EdgeInsets.only(top: 25.0),
                       child: Align(
                           alignment: Alignment.topCenter,
@@ -132,8 +129,8 @@ class _WalletInfoPageState extends State<WalletInfoPage> {
                                 fontFamily: 'Poppins-Regular'),
                             recognizer: new TapGestureRecognizer()
                               ..onTap = () {
-                                launch(EtherscanURL + 'address/' +
-                                    snapshot.data);
+                                launch(
+                                    EtherscanURL + 'address/' + snapshot.data);
                               },
                           ),
                         ),
