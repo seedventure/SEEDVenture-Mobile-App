@@ -1,14 +1,15 @@
 class MemberItem {
   final String memberAddress;
   final String fundingPanelAddress;
-  final String ipfsUrl;
-  final String hash;
-  final String name;
-  final String description;
-  final String url;
-  final String imgBase64;
-  final List documents;
-  final String seedsUnlocked;
+  String ipfsUrl;
+  String hash;
+  String name;
+  String description;
+  String url;
+  String imgBase64;
+  List documents;
+  String seedsUnlocked;
+
 
   MemberItem(
       {this.memberAddress,

@@ -305,8 +305,7 @@ class _SingleBasketPageState extends State<SingleBasketPage> {
                     Container(
                       margin: const EdgeInsets.only(left: 8.0, top: 12.0),
                       child: Text('Max Supply: ' +
-                          formatter.format(
-                              double.parse(snapshot.data.seedMaxSupply)) +
+                          _getSeedMaxSupplyText(snapshot.data.seedMaxSupply) +
                           ' SEED'),
                     ),
                     Container(
@@ -450,8 +449,6 @@ class _SingleBasketPageState extends State<SingleBasketPage> {
       crossAxisCount: 3,
       staggeredTiles: _staggeredTiles,
       children: _tiles,
-      //mainAxisSpacing: 4.0,
-      //crossAxisSpacing: 4.0,
       padding: const EdgeInsets.all(4.0),
     );
   }
@@ -495,5 +492,20 @@ class _SingleBasketPageState extends State<SingleBasketPage> {
             ))
       ],
     );
+  }
+
+  String _getSeedMaxSupplyText(String maxSupply) {
+    if (!maxSupply.contains('e'))
+      return formatter.format(double.parse(maxSupply));
+    else {
+      String numStr = maxSupply.substring(maxSupply.length - 2);
+      int num = int.parse(numStr) - 1;
+      String mSupply = '0.';
+      for (int i = 0; i < num; i++) {
+        mSupply += '0';
+      }
+      mSupply += '1';
+      return mSupply;
+    }
   }
 }

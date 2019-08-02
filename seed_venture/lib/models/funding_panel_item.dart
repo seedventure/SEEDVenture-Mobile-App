@@ -5,7 +5,7 @@ class FundingPanelItem {
   final String tokenAddress;
   final String fundingPanelAddress;
   final String adminToolsAddress;
-  final List<Map> fundingPanelUpdates;
+  final Map latestOwnerData;
 
   // data for SharedPreferences (visualization)
   final String name;
@@ -16,7 +16,7 @@ class FundingPanelItem {
 
   // shared
   final double latestDexQuotation;
-  final double seedWhitelistThreshold;
+  final double whitelistThreshold;
   final List<MemberItem> members;
   final List tags;
   final List documents;
@@ -35,7 +35,7 @@ class FundingPanelItem {
       {this.tokenAddress,
       this.fundingPanelAddress,
       this.adminToolsAddress,
-      this.fundingPanelUpdates,
+      this.latestOwnerData,
       this.name,
       this.description,
       this.url,
@@ -45,7 +45,7 @@ class FundingPanelItem {
       this.members,
       this.tags,
       this.documents,
-      this.seedWhitelistThreshold,
+      this.whitelistThreshold,
       this.whitelisted,
       this.blacklisted,
       this.seedTotalRaised,

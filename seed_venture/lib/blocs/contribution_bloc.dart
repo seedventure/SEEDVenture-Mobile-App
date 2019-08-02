@@ -40,7 +40,7 @@ class ContributionBloc {
   bool checkWhitelisting(String amount, FundingPanelItem fundingPanel) {
     if (fundingPanel.whitelisted) return true;
     if (double.parse(amount.replaceAll(',', '.')) >=
-        fundingPanel.seedWhitelistThreshold)
+        fundingPanel.whitelistThreshold)
       return false;
     else
       return true;

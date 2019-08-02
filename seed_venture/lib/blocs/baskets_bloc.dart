@@ -126,7 +126,7 @@ class BasketsBloc {
               adminToolsAddress: maps[i]['admin_tools_address'],
               latestDexQuotation: maps[i]['latest_dex_price'],
               imgBase64: maps[i]['imgBase64'],
-              seedWhitelistThreshold: maps[i]['seed_whitelist_threshold'],
+              whitelistThreshold: maps[i]['whitelist_threshold'],
               name: maps[i]['name'],
               description: maps[i]['description'],
               whitelisted: isWhitelisted,
