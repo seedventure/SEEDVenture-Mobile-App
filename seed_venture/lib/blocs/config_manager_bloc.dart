@@ -24,7 +24,9 @@ class ConfigManagerBloc {
   Map _previousConfigurationMap;
   List<FundingPanelItem> _fundingPanelItems;
   int _fromBlockAgain;
+  int _toBlockForced;
   Map _resMapLogsDEX;
+  bool _logsResultsExceeded = false;
 
   /// Configuration creation and update section
 
@@ -302,6 +304,24 @@ class ConfigManagerBloc {
     return null;
   }
 
+  Future<String> _getSeedTotalRaisedFromPreviousSharedPref(
+      String fundingPanelAddress) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+
+    if (prefs.getString('funding_panels_data') == null) return null;
+
+    List maps = jsonDecode(prefs.getString('funding_panels_data'));
+
+    for (int i = 0; i < maps.length; i++) {
+      if (maps[i]['funding_panel_address'].toString().toLowerCase() ==
+          fundingPanelAddress.toLowerCase()) {
+        return maps[i]['seed_total_raised'];
+      }
+    }
+
+    return null;
+  }
+
   Future<FundingPanelItem> _handleNewPanel(
       Map addressMap, int fromBlock, int toBlock, Map logResponseMap) async {
     String fundingPanelAddress = addressMap['funding_panel_address'];
@@ -564,6 +584,14 @@ class ConfigManagerBloc {
     }
 
     Map resMap = jsonDecode(callResponse.body);
+
+    if (resMap['error'] != null &&
+        resMap['error']['message'].toString().contains('query returned more')) {
+      _logsResultsExceeded = true;
+      return null;
+    } else
+      _logsResultsExceeded = false;
+
     List result = resMap['result'];
 
     // Check for new funding panels created
@@ -857,7 +885,28 @@ class ConfigManagerBloc {
                   fundingPanelAddress);
         }
 
-        seedTotalRaised = await _getSeedTotalRaised(fundingPanelAddress);
+        // check for total raised changes (has _holderSendSeeds been called?)
+        changed = false;
+
+        for (int j = 0; j < result.length; j++) {
+          if (result[j]['topics'].contains(tokenMintedTopic) &&
+              result[j]['address'].toString().toLowerCase() ==
+                  fundingPanelAddress.toString().toLowerCase()) {
+            changed = true;
+            break;
+          }
+        }
+
+        if (changed) {
+          print('totalRaised changed');
+
+          seedTotalRaised =
+          await _getSeedTotalRaised(fundingPanelAddress);
+        } else {
+          seedTotalRaised =
+          await _getSeedTotalRaisedFromPreviousSharedPref(fundingPanelAddress);
+        }
+
         seedLiquidity = await _getSeedLiquidity(fundingPanelAddress);
 
         // check for WL threshold changes
@@ -1509,7 +1558,13 @@ class ConfigManagerBloc {
       fromBlock++;
     }
 
-    int currentBlockNumber = await _getCurrentBlockNumber();
+    int currentBlockNumber;
+
+    if (_toBlockForced != null) {
+      currentBlockNumber = _toBlockForced;
+    } else {
+      currentBlockNumber = await _getCurrentBlockNumber();
+    }
 
     Map lastCheckedBlockNumberMap = {
       'lastCheckedBlockNumber': currentBlockNumber
@@ -1544,10 +1599,15 @@ class ConfigManagerBloc {
           fromBlock, currentBlockNumber, configurationMap);
 
       if (fundingPanelItems == null) {
+        if (_logsResultsExceeded) {
+          int window = currentBlockNumber - fromBlock;
+          _toBlockForced = currentBlockNumber - (window ~/ 2);
+        }
         _fromBlockAgain = fromBlock;
         return;
       } else {
         _fromBlockAgain = null;
+        _toBlockForced = null;
       }
 
       List<String> encryptedParams = await _getEncryptedParamsFromConfigFile();

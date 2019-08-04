@@ -20,6 +20,7 @@ const String tokenExchangeRateChangedTopic = "0x09384e57f5d53342da2bbb810e7f68d5
 const String memberAddedTopic = "0x94d9b0a056867efca93631b338c7fde3befc3f54db36b90b8456b069385c30be";
 const String memberHashChangedTopic = "0x4ae00b988cb3b798b8bc44e759790a289c70af1275d958aafd5938e2da3592f9";
 const String fundsUnlockedTopic = "0x77a5b70f4e0aa62836a5593ff0f7bea03fbd7a17df0a63cf6cd5ce0a7a25ca1c";
+const String tokenMintedTopic = "0xa010600a2b0cad80fbba6228184e39b1090d487cbcde96700c76857648fa6479"; // _holderSendSeeds
 
 // AT events
 const String WLThresholdChangedTopic = "0x10b2a5b108c7f1e07744f78d98a096424f89c30fca6176cb114052d552ea4650";
