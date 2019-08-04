@@ -132,6 +132,12 @@ class _UnlockAccountPageState extends State<UnlockAccountPage> {
         ]));
   }
 
+  @override
+  void dispose() {
+    unlockAccountBloc.dispose();
+    super.dispose();
+  }
+
   void _showForgetAlertDialog() {
     showDialog(
       context: context,

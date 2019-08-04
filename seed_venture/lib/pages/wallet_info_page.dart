@@ -146,4 +146,10 @@ class _WalletInfoPageState extends State<WalletInfoPage> {
           stream: walletInfoBloc.outAddress,
         ));
   }
+
+  @override
+  void dispose() {
+    walletInfoBloc.dispose();
+    super.dispose();
+  }
 }

@@ -57,4 +57,10 @@ class _SettingsStatePage extends State<SettingsPage> {
           stream: settingsBloc.outNotificationSettings,
         ));
   }
+
+  @override
+  void dispose() {
+    settingsBloc.dispose();
+    super.dispose();
+  }
 }
