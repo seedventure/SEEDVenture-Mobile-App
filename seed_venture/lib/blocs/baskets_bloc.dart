@@ -124,7 +124,8 @@ class BasketsBloc {
               tokenAddress: maps[i]['token_address'],
               fundingPanelAddress: maps[i]['funding_panel_address'],
               adminToolsAddress: maps[i]['admin_tools_address'],
-              latestDexQuotation: maps[i]['latest_dex_price'],
+              seedExchangeRate: maps[i]['seed_exchange_rate'],
+              seedExchangeRateDEX: maps[i]['seed_exchange_rate_dex'],
               imgBase64: maps[i]['imgBase64'],
               whitelistThreshold: maps[i]['whitelist_threshold'],
               name: maps[i]['name'],
@@ -317,7 +318,10 @@ class BasketsBloc {
           bool isBlacklisted = basketBalanceMap['is_blacklisted'];
           String imgBase64 = basketBalanceMap['imgBase64'];
           List tags = basketBalanceMap['basket_tags'];
-          double quotation = basketBalanceMap['quotation'];
+          double quotation = basketBalanceMap['quotation_dex'];
+
+          if (quotation == null) quotation = basketBalanceMap['quotation'];
+
           String seedTotalRaised = basketBalanceMap['seed_total_raised'];
 
           Image tokenLogo;
@@ -369,7 +373,12 @@ class BasketsBloc {
         String fundingPanelAddress = basketBalanceMap['funding_panel_address'];
         String imgBase64 = basketBalanceMap['imgBase64'];
         List tags = basketBalanceMap['basket_tags'];
-        double quotation = basketBalanceMap['quotation'];
+        double quotation = basketBalanceMap['quotation_dex'];
+
+        if (quotation == null) {
+          quotation = basketBalanceMap['quotation'];
+        }
+
         String seedTotalRaised = basketBalanceMap['seed_total_raised'];
 
         Image tokenLogo;
@@ -442,8 +451,6 @@ class BasketsBloc {
         }
       });
 
-      if (_prevBasketTokenBalances[i].name == null) print('NAME IS NULL!!!!!');
-
       if (!added) {
         if (_prevBasketTokenBalances[i]
             .symbol
@@ -476,9 +483,6 @@ class BasketsBloc {
             added = true;
           }
         });
-
-        if (_prevBasketTokenBalancesFavorites[i].name == null)
-          print('NAME IS NULL!!!!!');
 
         if (!added) {
           if (_prevBasketTokenBalancesFavorites[i]

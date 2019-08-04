@@ -2,7 +2,7 @@
 
 const String GlobalFactoryAddress = '0xd7f7c1206cf5dd94d6a2565dc1d078cdeaefb8c8';
 const String SeedTokenAddress = '0x029eb9c1810a97431200c08b827944b30f615325';
-const String DexAddress = '0x523b0dff8294e09ef0763805861e64593c4a4468';
+const String DexAddress = '0x5eefabec644776a33f4bd1859b66f338d48ed255';
 const String infuraWSS = 'wss://testnet.seedventure.io'; // websocket
 const String infuraHTTP = 'https://testnet.seedventure.io';
 const String EtherscanURL = 'https://ropsten.etherscan.io/';
@@ -23,3 +23,6 @@ const String fundsUnlockedTopic = "0x77a5b70f4e0aa62836a5593ff0f7bea03fbd7a17df0
 
 // AT events
 const String WLThresholdChangedTopic = "0x10b2a5b108c7f1e07744f78d98a096424f89c30fca6176cb114052d552ea4650";
+
+// DEX events
+const String tradeTopic = "0x2638e35398adb60ee17f08c67a76f9c02a9a7621f1b421a0def2c5f77292b546";

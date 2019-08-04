@@ -15,7 +15,8 @@ class FundingPanelItem {
   bool favorite;
 
   // shared
-  final double latestDexQuotation;
+  final double seedExchangeRate;
+  final double seedExchangeRateDEX;
   final double whitelistThreshold;
   final List<MemberItem> members;
   final List tags;
@@ -41,7 +42,8 @@ class FundingPanelItem {
       this.url,
       this.imgBase64,
       this.favorite,
-      this.latestDexQuotation,
+      this.seedExchangeRate,
+      this.seedExchangeRateDEX,
       this.members,
       this.tags,
       this.documents,

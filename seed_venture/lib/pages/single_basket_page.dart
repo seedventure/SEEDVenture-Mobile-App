@@ -85,6 +85,10 @@ class _SingleBasketPageState extends State<SingleBasketPage> {
     TextEditingController amountControllerSEED = TextEditingController();
     TextEditingController amountControllerBasketToken = TextEditingController();
 
+    double rate = fundingPanel.seedExchangeRateDEX != null
+        ? fundingPanel.seedExchangeRateDEX
+        : fundingPanel.seedExchangeRate;
+
     await showDialog(
         context: context,
         builder: (BuildContext context) {
@@ -127,9 +131,7 @@ class _SingleBasketPageState extends State<SingleBasketPage> {
                           amountControllerBasketToken.text = '';
                         else
                           amountControllerBasketToken.text =
-                              (double.parse(value) /
-                                      fundingPanel.latestDexQuotation)
-                                  .toString();
+                              (double.parse(value) / rate).toString();
                       },
                     ),
                     height: 50,
@@ -148,9 +150,8 @@ class _SingleBasketPageState extends State<SingleBasketPage> {
                         if (value.isEmpty)
                           amountControllerSEED.text = '';
                         else
-                          amountControllerSEED.text = (double.parse(value) *
-                                  fundingPanel.latestDexQuotation)
-                              .toString();
+                          amountControllerSEED.text =
+                              (double.parse(value) * rate).toString();
                       },
                     ),
                     height: 50,
@@ -337,12 +338,7 @@ class _SingleBasketPageState extends State<SingleBasketPage> {
                     ),
                     Container(
                       child: Text('Latest Quotation: ' +
-                          snapshot.data.latestDexQuotation.toStringAsFixed(
-                              snapshot.data.latestDexQuotation
-                                          .truncateToDouble() ==
-                                      snapshot.data.latestDexQuotation
-                                  ? 0
-                                  : 2) +
+                          _getQuotation(snapshot) +
                           ' SEED'),
                       margin: const EdgeInsets.only(
                           top: 15.0, left: 8.0, right: 8.0),
@@ -507,5 +503,13 @@ class _SingleBasketPageState extends State<SingleBasketPage> {
       mSupply += '1';
       return mSupply;
     }
+  }
+
+  String _getQuotation(AsyncSnapshot snapshot) {
+    double rate = snapshot.data.seedExchangeRateDEX != null
+        ? snapshot.data.seedExchangeRateDEX
+        : snapshot.data.seedExchangeRate;
+
+    return rate.toStringAsFixed(rate.truncateToDouble() == rate ? 0 : 2);
   }
 }
