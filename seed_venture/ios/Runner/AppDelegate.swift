@@ -55,9 +55,6 @@ import Flutter
         var map = call.arguments as? Dictionary<String, String>
         let add = map?["path"]
         
-        
-        
-        
         self.exportFile(result: result, path: add!)
     })
     

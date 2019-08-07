@@ -38,7 +38,6 @@ dependencies:
   auto_size_text: ^2.0.2
   intl: ^0.15.8
 
-
   flutter:
     sdk: flutter
 

@@ -900,11 +900,10 @@ class ConfigManagerBloc {
         if (changed) {
           print('totalRaised changed');
 
-          seedTotalRaised =
-          await _getSeedTotalRaised(fundingPanelAddress);
+          seedTotalRaised = await _getSeedTotalRaised(fundingPanelAddress);
         } else {
-          seedTotalRaised =
-          await _getSeedTotalRaisedFromPreviousSharedPref(fundingPanelAddress);
+          seedTotalRaised = await _getSeedTotalRaisedFromPreviousSharedPref(
+              fundingPanelAddress);
         }
 
         seedLiquidity = await _getSeedLiquidity(fundingPanelAddress);
@@ -1411,8 +1410,9 @@ class ConfigManagerBloc {
       memberJsonData.add(responseMap['name']);
 
       try {
-        memberJsonData
-            .add(utf8.decode(base64.decode(responseMap['description'])));
+        var base64Dec = base64.decode(responseMap['description']);
+        var descrDec = Uri.decodeFull(utf8.decode(base64Dec));
+        memberJsonData.add(descrDec);
       } catch (e) {
         memberJsonData.add(responseMap['description']);
       }
@@ -1422,8 +1422,9 @@ class ConfigManagerBloc {
 
       if (responseMap['documents'] != null) {
         memberJsonData.add(jsonEncode(responseMap['documents']));
-      } else
+      } else {
         memberJsonData.add('');
+      }
 
       return memberJsonData;
     } catch (e) {
@@ -1448,8 +1449,12 @@ class ConfigManagerBloc {
 
       // 'Description' is base64 encoded and html encoded
       try {
-        returnFpDetails.add(
-            utf8.decode(base64.decode(responseMap['description'].toString())));
+        //returnFpDetails.add(
+        //  utf8.decode(base64.decode(responseMap['description'].toString())));
+
+        var base64Dec = base64.decode(responseMap['description']);
+        var descrDec = Uri.decodeFull(utf8.decode(base64Dec));
+        returnFpDetails.add(descrDec);
       } catch (e) {
         // not base64 encoded
         returnFpDetails.add(responseMap['description']);
@@ -2093,7 +2098,7 @@ class ConfigManagerBloc {
     String hash = resMap['result'].toString().substring(194, 258);
 
     String seedsUnlocked = _getValueFromHex(
-        '00' + resMap['result'].toString().substring(386, 450), 18);
+        '0x' + resMap['result'].toString().substring(386, 450), 18);
 
     HexDecoder a = HexDecoder();
     List byteArray = a.convert(resMap['result'].toString().substring(512));

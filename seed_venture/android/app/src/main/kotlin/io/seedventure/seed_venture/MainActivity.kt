@@ -6,7 +6,6 @@ import android.os.Environment
 import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-
 import io.flutter.app.FlutterActivity
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugins.GeneratedPluginRegistrant
@@ -14,8 +13,6 @@ import java.io.File
 import java.io.IOException
 import java.util.*
 import java.util.UUID.randomUUID
-
-
 
 
 class MainActivity: FlutterActivity() {
@@ -30,8 +27,6 @@ class MainActivity: FlutterActivity() {
     super.onCreate(savedInstanceState)
     GeneratedPluginRegistrant.registerWith(this)
 
-
-
     MethodChannel(flutterView, CHANNEL_PERMISSIONS).setMethodCallHandler { call, result ->
       if(call.method == "getPermission"){
 
@@ -42,14 +37,10 @@ class MainActivity: FlutterActivity() {
                   != PackageManager.PERMISSION_GRANTED) {
             // Permission is not granted
 
-
             // No explanation needed, we can request the permission.
             ActivityCompat.requestPermissions(this,
                     arrayOf(android.Manifest.permission.WRITE_EXTERNAL_STORAGE),
                     PERMISSION)
-
-
-
 
           }
           else{
@@ -60,9 +51,7 @@ class MainActivity: FlutterActivity() {
             }
 
             result.success(true);
-
           }
-
 
         } catch (e: IOException) {
           e.printStackTrace()
@@ -84,13 +73,9 @@ class MainActivity: FlutterActivity() {
 
           result.success(encryptedData)
 
-
-
         } catch (e: IOException) {
           e.printStackTrace()
         }
-
-
 
       }
 
@@ -103,8 +88,6 @@ class MainActivity: FlutterActivity() {
           val decryptedData = AES256.decrypt(encrypted, pass);
 
           result.success(decryptedData)
-
-
 
         } catch (e: IOException) {
           e.printStackTrace()
@@ -143,8 +126,6 @@ class MainActivity: FlutterActivity() {
         } catch (e: IOException) {
           e.printStackTrace()
         }
-
-
 
       }
     }

@@ -40,7 +40,7 @@ class MembersBloc {
                   description: members[j]['description'],
                   imgBase64: members[j]['imgBase64'],
                   url: members[j]['url'],
-                  documents: maps[j]['documents']);
+                  documents: members[j]['documents']);
 
               break;
             }
