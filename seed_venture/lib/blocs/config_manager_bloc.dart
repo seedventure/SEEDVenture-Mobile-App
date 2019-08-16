@@ -27,6 +27,9 @@ class ConfigManagerBloc {
   int _toBlockForced;
   Map _resMapLogsDEX;
   bool _logsResultsExceeded = false;
+  bool _hasToUpdate = true;
+  Timer _balancesUpdateTimer;
+  List<String> _zeroSupplyFP;
 
   /// Configuration creation and update section
 
@@ -43,6 +46,10 @@ class ConfigManagerBloc {
     });
   }
 
+  void setFundingPanels(List fundingPanels) {
+    this._fundingPanelItems = fundingPanels;
+  }
+
   Future createConfiguration(
       Credentials walletCredentials, String password) async {
     _saveAddress(walletCredentials);
@@ -56,7 +63,7 @@ class ConfigManagerBloc {
     };
     configurationMap.addAll(localMap);
 
-    int currentBlockNumber = await _getCurrentBlockNumber();
+    int currentBlockNumber = await getCurrentBlockNumber();
     Map lastCheckedBlockNumberMap = {
       'lastCheckedBlockNumber': currentBlockNumber
     };
@@ -72,7 +79,7 @@ class ConfigManagerBloc {
 
     configurationMap.addAll(additionalInfo);
 
-    await _getFundingPanelItems(
+    await getFundingPanelItems(
         fundingPanelItems, configurationMap, currentBlockNumber);
 
     Map userMapDecrypted = {
@@ -104,7 +111,7 @@ class ConfigManagerBloc {
 
     this._fundingPanelItems = fundingPanelItems;
 
-    await _getBasketTokensBalances(fundingPanelItems, creatingConfig: true);
+    await getBasketTokensBalances(fundingPanelItems, creatingConfig: true);
 
     OnBoardingBloc.setOnBoardingDone();
   }
@@ -145,6 +152,25 @@ class ConfigManagerBloc {
           fundingPanelAddress.toLowerCase()) {
         double exchangeRateSeed = maps[i]['seed_exchange_rate'];
         return exchangeRateSeed;
+      }
+    }
+
+    return null;
+  }
+
+  Future<double> _getExchangeRateOnTopFromPreviousSharedPref(
+      String fundingPanelAddress) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+
+    if (prefs.getString('funding_panels_data') == null) return null;
+
+    List maps = jsonDecode(prefs.getString('funding_panels_data'));
+
+    for (int i = 0; i < maps.length; i++) {
+      if (maps[i]['funding_panel_address'].toString().toLowerCase() ==
+          fundingPanelAddress.toLowerCase()) {
+        double exchangeRateOnTop = maps[i]['exchange_rate_on_top'];
+        return exchangeRateOnTop;
       }
     }
 
@@ -341,13 +367,23 @@ class ConfigManagerBloc {
       return null;
     }
 
+    bool noURLFilter = await SettingsBloc.isNoURLFilterEnabled();
+
+    if (noURLFilter &&
+        fundingPanelVisualData != null &&
+        (fundingPanelVisualData[2] == null ||
+            fundingPanelVisualData[2].toString().isEmpty)) return null;
+
     double exchangeRateSeedDEX = await _getBasketSeedExchangeRateFromDEX(
         tokenAddress, fromBlock, toBlock, logResponseMap);
     double exchangeRateSeed =
         await _getBasketSeedExchangeRate(fundingPanelAddress);
 
+    double exchangeRateOnTop =
+        await _getBasketExchangeRateOnTop(fundingPanelAddress);
+
     String seedTotalRaised = await _getSeedTotalRaised(fundingPanelAddress);
-    String seedLiquidity = await _getSeedLiquidity(fundingPanelAddress);
+    //String seedLiquidity = await _getSeedLiquidity(fundingPanelAddress);
 
     double threshold =
         await _getWhitelistThreshold(adminToolsAddress, exchangeRateSeed);
@@ -375,6 +411,11 @@ class ConfigManagerBloc {
     List<MemberItem> members =
         await _getMembersOfFundingPanel(fundingPanelAddress);
 
+    bool zeroStartupFilter = await SettingsBloc.isZeroStartupFilterEnabled();
+
+    if (zeroStartupFilter && (members == null || members.length == 0))
+      return null;
+
     double totalUnlockedForStartup = 0;
 
     for (int i = 0; i < members.length; i++) {
@@ -385,7 +426,7 @@ class ConfigManagerBloc {
         totalUnlockedForStartup: totalUnlockedForStartup.toString(),
         seedTotalRaised: seedTotalRaised,
         whitelistThreshold: threshold,
-        seedLiquidity: seedLiquidity,
+        //seedLiquidity: seedLiquidity,
         adminToolsAddress: adminToolsAddress,
         tokenAddress: tokenAddress,
         fundingPanelAddress: fundingPanelAddress,
@@ -393,6 +434,7 @@ class ConfigManagerBloc {
         seedMaxSupply: seedMaxSupply,
         seedExchangeRate: exchangeRateSeed,
         seedExchangeRateDEX: exchangeRateSeedDEX,
+        exchangeRateOnTop: exchangeRateOnTop,
         name: fundingPanelVisualData[0],
         description: fundingPanelVisualData[1],
         url: fundingPanelVisualData[2],
@@ -546,11 +588,14 @@ class ConfigManagerBloc {
 
   // address maps is a JSON array with objects like {FPAddress: "", ATAddress: "", TAddress = ""}
   Future<List<FundingPanelItem>> _getLogsUpdate(
+      // Isolate ?
       List addressMaps,
       List addressList,
       int fromBlock,
       int toBlock,
       Map configurationMap) async {
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+    List favorites = sharedPreferences.getStringList('favorites');
     List<FundingPanelItem> fundingPanelItems = List();
     List<Map> fpMapsConfigFile = List();
     List<Map> fpMapsSharedPrefs = List();
@@ -616,8 +661,6 @@ class ConfigManagerBloc {
         addressMaps.add(addressMap);
       }
     }
-
-    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
 
     if (sharedPreferences.getString('fp_check_again_list') == null)
       sharedPreferences.setString('fp_check_again_list', jsonEncode(List()));
@@ -695,7 +738,10 @@ class ConfigManagerBloc {
             'fundingPanelName': FPItem.name,
             'seedExchangeRate': FPItem.seedExchangeRate,
             'seedExchangeRateDEX': FPItem.seedExchangeRateDEX,
+            'exchangeRateOnTop': FPItem.exchangeRateOnTop,
             'fundingPanelData': FPItem.latestOwnerData,
+            'whitelistThreshold': FPItem.whitelistThreshold,
+            'seedMaxSupply': FPItem.seedMaxSupply,
             'members': memberMapsConfigFile
           };
 
@@ -712,11 +758,12 @@ class ConfigManagerBloc {
             'latest_owner_data': FPItem.latestOwnerData,
             'seed_exchange_rate': FPItem.seedExchangeRate,
             'seed_exchange_rate_dex': FPItem.seedExchangeRateDEX,
+            'exchange_rate_on_top': FPItem.exchangeRateOnTop,
             'tags': FPItem.tags,
             'whitelist_threshold': FPItem.whitelistThreshold,
             'seed_total_raised': FPItem.seedTotalRaised,
             'seed_max_supply': FPItem.seedMaxSupply,
-            'seed_liquidity': FPItem.seedLiquidity,
+            //'seed_liquidity': FPItem.seedLiquidity,
             'total_unlocked': FPItem.totalUnlockedForStartup,
             'documents': FPItem.documents,
             'members': membersMapsSharedPrefs
@@ -730,8 +777,9 @@ class ConfigManagerBloc {
         List fundingPanelVisualData;
         double exchangeRateSeed;
         double exchangeRateSeedDEX;
+        double exchangeRateOnTop;
         String seedTotalRaised;
-        String seedLiquidity;
+        //String seedLiquidity;
         double WLThreshold;
         List<MemberItem> members;
 
@@ -755,6 +803,8 @@ class ConfigManagerBloc {
         }
 
         if (seedMaxSupply == null || seedMaxSupply == '0.00') {
+          if (seedMaxSupply == '0.00') _zeroSupplyFP.add(fundingPanelAddress);
+
           _addToFPCheckAgainList(
               fundingPanelAddress, adminToolsAddress, tokenAddress);
           continue;
@@ -785,6 +835,13 @@ class ConfigManagerBloc {
                 await _loadFundingPanelVisualDataFromPreviousSharedPref(
                     fundingPanelAddress);
           }
+
+          bool noURLFilter = await SettingsBloc.isNoURLFilterEnabled();
+
+          if (noURLFilter &&
+              fundingPanelVisualData != null &&
+              (fundingPanelVisualData[2] == null ||
+                  fundingPanelVisualData[2].toString().isEmpty)) continue;
         } else {
           latestOwnerData = await _getLatestOwnerDataFromPreviousSharedPref(
               fundingPanelAddress);
@@ -854,6 +911,34 @@ class ConfigManagerBloc {
           continue;
         }
 
+        // check for token exchange rate on top changes
+        changed = false;
+
+        for (int j = 0; j < result.length; j++) {
+          if (result[j]['topics'].contains(changeTokenExchangeRateOnTopTopic) &&
+              result[j]['address'].toString().toLowerCase() ==
+                  fundingPanelAddress.toString().toLowerCase()) {
+            changed = true;
+            break;
+          }
+        }
+
+        if (changed) {
+          print('exchangeRate on top changed');
+
+          exchangeRateOnTop =
+              await _getBasketExchangeRateOnTop(fundingPanelAddress);
+        } else {
+          exchangeRateOnTop = await _getExchangeRateOnTopFromPreviousSharedPref(
+              fundingPanelAddress);
+        }
+
+        if (exchangeRateOnTop == null) {
+          _addToFPCheckAgainList(
+              fundingPanelAddress, adminToolsAddress, tokenAddress);
+          continue;
+        }
+
         // check for token exchange rate changes (DEX)
         changed = false;
 
@@ -906,7 +991,7 @@ class ConfigManagerBloc {
               fundingPanelAddress);
         }
 
-        seedLiquidity = await _getSeedLiquidity(fundingPanelAddress);
+        // seedLiquidity = await _getSeedLiquidity(fundingPanelAddress);
 
         // check for WL threshold changes
         changed = false;
@@ -962,6 +1047,26 @@ class ConfigManagerBloc {
         if (changed || fundsUnlocked) {
           print('some member hash changed or funds were unlocked');
 
+          if (fundsUnlocked) {
+            // Notification if funds unlocked
+            if (favorites.contains(fundingPanelAddress.toLowerCase())) {
+              String basketName;
+              for (int j = 0; j < _fundingPanelItems.length; j++) {
+                if (_fundingPanelItems[j].fundingPanelAddress.toLowerCase() ==
+                    fundingPanelAddress.toLowerCase()) {
+                  basketName = _fundingPanelItems[j].name;
+                  break;
+                }
+              }
+
+              if (basketName != null) {
+                String notificationData =
+                    'Funds Unlocked by basket $basketName changed!';
+                basketsBloc.notification(notificationData);
+              }
+            }
+          }
+
           members = List();
           List<String> membersAddressList =
               await _getMembersAddressListFromPreviousSharedPref(
@@ -981,6 +1086,12 @@ class ConfigManagerBloc {
                 documentMaps.forEach((document) {
                   documents.add(document);
                 });
+              }
+
+              if (documents.length == 0) {
+                bool zeroDocsStartupFilter =
+                    await SettingsBloc.isZeroDocsStartupFilterEnabled();
+                if (zeroDocsStartupFilter) continue;
               }
 
               members.add(MemberItem(
@@ -1006,6 +1117,12 @@ class ConfigManagerBloc {
           members =
               await _getMembersFromPreviousSharedPref(fundingPanelAddress);
         }
+
+        bool zeroStartupFilter =
+            await SettingsBloc.isZeroStartupFilterEnabled();
+
+        if (zeroStartupFilter && (members == null || members.length == 0))
+          continue;
 
         if (members == null) {
           _addToFPCheckAgainList(
@@ -1091,6 +1208,7 @@ class ConfigManagerBloc {
             latestOwnerData: latestOwnerData,
             seedExchangeRate: exchangeRateSeed,
             seedExchangeRateDEX: exchangeRateSeedDEX,
+            exchangeRateOnTop: exchangeRateOnTop,
             name: fundingPanelVisualData[0],
             description: fundingPanelVisualData[1],
             url: fundingPanelVisualData[2],
@@ -1136,7 +1254,10 @@ class ConfigManagerBloc {
           'fundingPanelName': FPItem.name,
           'seedExchangeRate': FPItem.seedExchangeRate,
           'seedExchangeRateDEX': FPItem.seedExchangeRateDEX,
+          'exchangeRateOnTop': FPItem.exchangeRateOnTop,
           'fundingPanelData': FPItem.latestOwnerData,
+          'whitelistThreshold': WLThreshold,
+          'seedMaxSupply': seedMaxSupply,
           'members': memberMapsConfigFile
         };
 
@@ -1153,11 +1274,12 @@ class ConfigManagerBloc {
           'latest_owner_data': FPItem.latestOwnerData,
           'seed_exchange_rate': FPItem.seedExchangeRate,
           'seed_exchange_rate_dex': FPItem.seedExchangeRateDEX,
+          'exchange_rate_on_top': FPItem.exchangeRateOnTop,
           'tags': FPItem.tags,
           'whitelist_threshold': WLThreshold,
           'seed_total_raised': FPItem.seedTotalRaised,
           'seed_max_supply': seedMaxSupply,
-          'seed_liquidity': seedLiquidity,
+          //'seed_liquidity': seedLiquidity,
           'total_unlocked': FPItem.totalUnlockedForStartup,
           'documents': FPItem.documents,
           'members': membersMapsSharedPrefs
@@ -1179,7 +1301,7 @@ class ConfigManagerBloc {
     return fundingPanelItems;
   }
 
-  Future _getFundingPanelItems(List<FundingPanelItem> fundingPanelItems,
+  Future getFundingPanelItems(List<FundingPanelItem> fundingPanelItems,
       Map configurationMap, int currentBlockNumber) async {
     List<Map> fpMapsConfigFile = List();
     List<Map> fpMapsSharedPrefs = List();
@@ -1210,6 +1332,13 @@ class ConfigManagerBloc {
                 basketContracts[3]);
       }
 
+      bool noURLFilter = await SettingsBloc.isNoURLFilterEnabled();
+
+      if (noURLFilter &&
+          fundingPanelVisualData != null &&
+          (fundingPanelVisualData[2] == null ||
+              fundingPanelVisualData[2].toString().isEmpty)) continue;
+
       if (fundingPanelVisualData != null) {
         double exchangeRateSeedDEX = await _getBasketSeedExchangeRateFromDEX(
             basketContracts[2], 0, currentBlockNumber, _resMapLogsDEX);
@@ -1217,8 +1346,11 @@ class ConfigManagerBloc {
         double exchangeRateSeed =
             await _getBasketSeedExchangeRate(basketContracts[3]);
 
+        double exchangeRateOnTop =
+            await _getBasketExchangeRateOnTop(basketContracts[3]);
+
         String seedTotalRaised = await _getSeedTotalRaised(basketContracts[3]);
-        String seedLiquidity = await _getSeedLiquidity(basketContracts[3]);
+        //String seedLiquidity = await _getSeedLiquidity(basketContracts[3]);
 
         double threshold =
             await _getWhitelistThreshold(basketContracts[1], exchangeRateSeed);
@@ -1248,6 +1380,12 @@ class ConfigManagerBloc {
         List<MemberItem> members =
             await _getMembersOfFundingPanel(basketContracts[3]);
 
+        bool zeroStartupFilter =
+            await SettingsBloc.isZeroStartupFilterEnabled();
+
+        if (zeroStartupFilter && (members == null || members.length == 0))
+          continue;
+
         double totalUnlockedForStartup = 0;
 
         for (int i = 0; i < members.length; i++) {
@@ -1263,6 +1401,7 @@ class ConfigManagerBloc {
             latestOwnerData: latestOwnerData,
             seedExchangeRate: exchangeRateSeed,
             seedExchangeRateDEX: exchangeRateSeedDEX,
+            exchangeRateOnTop: exchangeRateOnTop,
             name: fundingPanelVisualData[0],
             description: fundingPanelVisualData[1],
             url: fundingPanelVisualData[2],
@@ -1307,7 +1446,10 @@ class ConfigManagerBloc {
           'fundingPanelName': FPItem.name,
           'seedExchangeRate': FPItem.seedExchangeRate,
           'seedExchangeRateDEX': FPItem.seedExchangeRateDEX,
+          'exchangeRateOnTop': FPItem.exchangeRateOnTop,
           'fundingPanelData': FPItem.latestOwnerData,
+          'whitelistThreshold': threshold,
+          'seedMaxSupply': seedMaxSupply,
           'members': memberMapsConfigFile
         };
 
@@ -1324,11 +1466,12 @@ class ConfigManagerBloc {
           'latest_owner_data': FPItem.latestOwnerData,
           'seed_exchange_rate': FPItem.seedExchangeRate,
           'seed_exchange_rate_dex': FPItem.seedExchangeRateDEX,
+          'exchange_rate_on_top': FPItem.exchangeRateOnTop,
           'tags': FPItem.tags,
           'whitelist_threshold': threshold,
           'seed_total_raised': FPItem.seedTotalRaised,
           'seed_max_supply': seedMaxSupply,
-          'seed_liquidity': seedLiquidity,
+          //'seed_liquidity': seedLiquidity,
           'total_unlocked': FPItem.totalUnlockedForStartup,
           'documents': FPItem.documents,
           'members': membersMapsSharedPrefs
@@ -1343,16 +1486,16 @@ class ConfigManagerBloc {
       }
     }
 
-    Map FPListMap = {'list': fpMapsConfigFile};
-
-    configurationMap.addAll(FPListMap);
+    if (configurationMap['list'] == null) {
+      Map FPListMap = {'list': fpMapsConfigFile};
+      configurationMap.addAll(FPListMap);
+    } else
+      configurationMap['list'] = fpMapsConfigFile;
 
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
 
     sharedPreferences.setString(
         'funding_panels_data', jsonEncode(fpMapsSharedPrefs));
-
-    sharedPreferences.setStringList('favorites', List());
   }
 
   Future<List<MemberItem>> _getMembersOfFundingPanel(
@@ -1376,6 +1519,12 @@ class ConfigManagerBloc {
           documentMaps.forEach((document) {
             documents.add(document);
           });
+        }
+
+        if (documents.length == 0) {
+          bool zeroDocsStartupFilter =
+              await SettingsBloc.isZeroDocsStartupFilterEnabled();
+          if (zeroDocsStartupFilter) continue;
         }
 
         members.add(MemberItem(
@@ -1447,11 +1596,8 @@ class ConfigManagerBloc {
 
       returnFpDetails.add(responseMap['name']);
 
-      // 'Description' is base64 encoded and html encoded
+      // 'Description' is base64 encoded, URI and html encoded
       try {
-        //returnFpDetails.add(
-        //  utf8.decode(base64.decode(responseMap['description'].toString())));
-
         var base64Dec = base64.decode(responseMap['description']);
         var descrDec = Uri.decodeFull(utf8.decode(base64Dec));
         returnFpDetails.add(descrDec);
@@ -1532,10 +1678,11 @@ class ConfigManagerBloc {
 
   Future _update() async {
     if (_previousConfigurationMap == null) {
-      _previousConfigurationMap = await _loadPreviousConfigFile();
+      _previousConfigurationMap = await loadPreviousConfigFile();
       this._fundingPanelItems = await _getFundingPanelItemsFromPrevSharedPref();
     }
 
+    _zeroSupplyFP = List();
     Map configurationMap = Map();
     List<FundingPanelItem> fundingPanelItems = List();
 
@@ -1568,7 +1715,7 @@ class ConfigManagerBloc {
     if (_toBlockForced != null) {
       currentBlockNumber = _toBlockForced;
     } else {
-      currentBlockNumber = await _getCurrentBlockNumber();
+      currentBlockNumber = await getCurrentBlockNumber();
     }
 
     Map lastCheckedBlockNumberMap = {
@@ -1695,13 +1842,45 @@ class ConfigManagerBloc {
           }
         }
 
+        if (prevFP['whitelistThreshold'].toString() !=
+            actualFP['whitelistThreshold'].toString()) {
+          if (favorites.contains(
+              prevFP['fundingPanelAddress'].toString().toLowerCase())) {
+            String notificationData = 'WL Threshold by basket ' +
+                prevFP['fundingPanelName'] +
+                ' changed!';
+            basketsBloc.notification(notificationData);
+          }
+        }
+
+        if (prevFP['seedMaxSupply'].toString() !=
+            actualFP['seedMaxSupply'].toString()) {
+          if (favorites.contains(
+              prevFP['fundingPanelAddress'].toString().toLowerCase())) {
+            String notificationData = 'Total Supply by basket ' +
+                prevFP['fundingPanelName'] +
+                ' changed!';
+            basketsBloc.notification(notificationData);
+          }
+        }
+
+        if (prevFP['exchangeRateOnTop'].toString() !=
+            actualFP['exchangeRateOnTop'].toString()) {
+          if (favorites.contains(
+              prevFP['fundingPanelAddress'].toString().toLowerCase())) {
+            String notificationData = 'Exchange Rate on Top by basket ' +
+                prevFP['fundingPanelName'] +
+                ' changed!';
+            basketsBloc.notification(notificationData);
+          }
+        }
+
         // here I check important changes (quotation)
 
         if (prevFP['seedExchangeRate'].toString() !=
                 actualFP['seedExchangeRate'].toString() ||
             prevFP['seedExchangeRateDEX'].toString() !=
                 actualFP['seedExchangeRateDEX'].toString()) {
-          // include DEX quotation changes?
           String notificationData =
               'Quotation by basket ' + prevFP['fundingPanelName'] + ' changed!';
           basketsBloc.notification(notificationData);
@@ -1759,9 +1938,13 @@ class ConfigManagerBloc {
           }
         }
       } else {
-        String notificationData =
-            'Basket ' + prevFP['fundingPanelName'] + ' disabled (zero-supply)!';
-        basketsBloc.notification(notificationData);
+        if (_zeroSupplyFP
+            .contains(prevFP['fundingPanelAddress'].toString().toLowerCase())) {
+          String notificationData = 'Basket ' +
+              prevFP['fundingPanelName'] +
+              ' disabled (zero-supply)!';
+          basketsBloc.notification(notificationData);
+        }
       }
     }
 
@@ -1777,9 +1960,20 @@ class ConfigManagerBloc {
   }
 
   void configurationPeriodicUpdate() async {
-    _update().whenComplete(() {
-      new Timer(const Duration(milliseconds: 200), configurationPeriodicUpdate);
-    });
+    if (_hasToUpdate) {
+      _update().whenComplete(() {
+        new Timer(
+            const Duration(milliseconds: 200), configurationPeriodicUpdate);
+      });
+    }
+  }
+
+  void cancelPeriodicUpdate() {
+    _hasToUpdate = false;
+  }
+
+  void enablePeriodicUpdate() {
+    _hasToUpdate = true;
   }
 
   /// Contracts Methods Calls
@@ -2018,6 +2212,32 @@ class ConfigManagerBloc {
     return 1 / rate;
   }
 
+  Future<double> _getBasketExchangeRateOnTop(String fundingPanelAddress) async {
+    String data = "0x3378df78";
+    Map callParams = {
+      "id": "1",
+      "jsonrpc": "2.0",
+      "method": "eth_call",
+      "params": [
+        {
+          "to": fundingPanelAddress,
+          "data": data,
+        },
+        "latest"
+      ]
+    };
+
+    var callResponse = await http.post(infuraHTTP,
+        body: jsonEncode(callParams),
+        headers: {'content-type': 'application/json'});
+
+    Map resMap = jsonDecode(callResponse.body);
+
+    double rateOnTop =
+        numbers.hexToInt(resMap['result']).toDouble() / pow(10, 18);
+    return rateOnTop;
+  }
+
   Future<Map> _getLatestOwnerData(String fundingPanelAddress) async {
     String data = "0xe4b85399"; // getOwnerData
     Map callParams = {
@@ -2215,7 +2435,7 @@ class ConfigManagerBloc {
     return seedTotalRaised;
   }
 
-  Future<String> _getSeedLiquidity(String fundingPanelAddress) async {
+  /*Future<String> _getSeedLiquidity(String fundingPanelAddress) async {
     fundingPanelAddress = fundingPanelAddress.substring(2);
 
     String data = "0x70a08231";
@@ -2248,7 +2468,7 @@ class ConfigManagerBloc {
     String tokenBalance = _getValueFromHex(resMap['result'].toString(), 18);
 
     return tokenBalance;
-  }
+  }*/
 
   Future<double> _getWhitelistThreshold(
       String adminToolsAddress, double exchangeRateSeed) async {
@@ -2312,7 +2532,7 @@ class ConfigManagerBloc {
     return seedMaxSupply;
   }
 
-  Future<int> _getCurrentBlockNumber() async {
+  Future<int> getCurrentBlockNumber() async {
     Map callParams = {
       "id": "1",
       "jsonrpc": "2.0",
@@ -2394,7 +2614,7 @@ class ConfigManagerBloc {
     return encryptedParams;
   }
 
-  Future<Map> _loadPreviousConfigFile() async {
+  Future<Map> loadPreviousConfigFile() async {
     final documentsDir = await getApplicationSupportDirectory();
     String path = documentsDir.path;
     String configFilePath = '$path/configuration.json';
@@ -2408,7 +2628,12 @@ class ConfigManagerBloc {
 
   void balancesPeriodicUpdate() async {
     const secs = const Duration(seconds: 5);
-    new Timer.periodic(secs, (Timer t) => _updateHoldings());
+    _balancesUpdateTimer =
+        new Timer.periodic(secs, (Timer t) => _updateHoldings());
+  }
+
+  void cancelBalancesPeriodicUpdate() {
+    if (_balancesUpdateTimer != null) _balancesUpdateTimer.cancel();
   }
 
   void updateSingleBalanceAfterContribute(String fundingPanelAddress) async {
@@ -2422,7 +2647,7 @@ class ConfigManagerBloc {
     if (_fundingPanelItems != null) {
       print('updating holdings...');
       basketsBloc.getCurrentBalances();
-      await _getBasketTokensBalances(_fundingPanelItems);
+      await getBasketTokensBalances(_fundingPanelItems);
       basketsBloc.getBasketsTokenBalances();
     }
   }
@@ -2431,13 +2656,13 @@ class ConfigManagerBloc {
   Future _getSingleBasketTokenBalance(String fundingPanelAddress) async {
     if (_fundingPanelItems == null) return;
     String tokenAddress;
-    String adminToolsAddress;
+    // String adminToolsAddress;
     List tags;
     for (int i = 0; i < _fundingPanelItems.length; i++) {
       if (_fundingPanelItems[i].fundingPanelAddress.toLowerCase() ==
           fundingPanelAddress.toLowerCase()) {
         tokenAddress = _fundingPanelItems[i].tokenAddress;
-        adminToolsAddress = _fundingPanelItems[i].adminToolsAddress;
+        // adminToolsAddress = _fundingPanelItems[i].adminToolsAddress;
         tags = _fundingPanelItems[i].tags;
         break;
       }
@@ -2463,13 +2688,17 @@ class ConfigManagerBloc {
           fundingPanelAddress.toLowerCase()) {
         int decimals = 18;
         String symbol = prevUserBasketsBalancesSharedPref[i]['token_symbol'];
+
+        // I only need to update the balance after contribute
         String balance =
             await _getTokenBalance(userAddress, tokenAddress, decimals);
+
         bool isWhitelisted =
-            await _isWhitelisted(adminToolsAddress, userAddress);
-        bool isBlacklisted = isWhitelisted == false
-            ? false
-            : await _isBlacklisted(adminToolsAddress, userAddress, decimals);
+            prevUserBasketsBalancesSharedPref[i]['is_whitelisted'];
+        bool isBlacklisted =
+            prevUserBasketsBalancesSharedPref[i]['is_blacklisted'];
+        double maxWLAmount =
+            prevUserBasketsBalancesSharedPref[i]['max_wl_amount'];
 
         Map basketBalance = {
           'name': prevUserBasketsBalancesSharedPref[i]['name'],
@@ -2486,7 +2715,8 @@ class ConfigManagerBloc {
           'is_blacklisted': isBlacklisted,
           'seed_total_raised': prevUserBasketsBalancesSharedPref[i]
               ['seed_total_raised'],
-          'basket_tags': tags
+          'basket_tags': tags,
+          'max_wl_amount': maxWLAmount
         };
 
         userBasketsBalances.add(basketBalance);
@@ -2498,9 +2728,12 @@ class ConfigManagerBloc {
     prefs.setString('user_baskets_balances', jsonEncode(userBasketsBalances));
   }
 
-  Future _getBasketTokensBalances(List<FundingPanelItem> fundingPanels,
+  Future getBasketTokensBalances(List<FundingPanelItem> fundingPanels,
       {bool creatingConfig}) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
+
+    if (prefs.getStringList('favorites') == null)
+      prefs.setStringList('favorites', List());
 
     String userAddress = prefs.getString('address');
 
@@ -2542,6 +2775,12 @@ class ConfigManagerBloc {
           ? false
           : await _isBlacklisted(
               fundingPanels[i].adminToolsAddress, userAddress, decimals);
+      double maxWLAmount = 0.0;
+
+      if (isWhitelisted) {
+        maxWLAmount = await _getWLMaxAmount(
+            fundingPanels[i].adminToolsAddress, userAddress);
+      }
 
       Map basketBalance = {
         'name': fundingPanels[i].name,
@@ -2556,7 +2795,8 @@ class ConfigManagerBloc {
         'is_whitelisted': isWhitelisted,
         'is_blacklisted': isBlacklisted,
         'basket_tags': fundingPanels[i].tags,
-        'seed_total_raised': fundingPanels[i].seedTotalRaised
+        'seed_total_raised': fundingPanels[i].seedTotalRaised,
+        'max_wl_amount': maxWLAmount
       };
 
       userBasketsBalances.add(basketBalance);
@@ -2640,6 +2880,41 @@ class ConfigManagerBloc {
     Map resMap = jsonDecode(callResponse.body);
 
     return resMap['result'].contains('1');
+  }
+
+  Future<double> _getWLMaxAmount(
+      String adminToolsAddress, String userAddress) async {
+    String data = "0xf76912aa";
+
+    userAddress = userAddress.substring(2);
+
+    while (userAddress.length != 64) {
+      userAddress = '0' + userAddress;
+    }
+
+    data = data + userAddress;
+
+    Map callParams = {
+      "id": "1",
+      "jsonrpc": "2.0",
+      "method": "eth_call",
+      "params": [
+        {
+          "to": adminToolsAddress,
+          "data": data,
+        },
+        "latest"
+      ]
+    };
+
+    var callResponse = await http.post(infuraHTTP,
+        body: jsonEncode(callParams),
+        headers: {'content-type': 'application/json'});
+
+    Map resMap = jsonDecode(callResponse.body);
+
+    String maxWLAmount = _getValueFromHex(resMap['result'].toString(), 18);
+    return double.parse(maxWLAmount);
   }
 
   Future<String> _getTokenSymbol(String tokenAddress) async {

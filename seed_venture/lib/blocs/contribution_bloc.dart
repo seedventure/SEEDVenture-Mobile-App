@@ -29,10 +29,10 @@ class ContributionBloc {
   Sink<bool> get _inErrorInContributionTransaction =>
       _errorInContributionTransaction.sink;
 
-  PublishSubject<bool> _transactionSuccess = PublishSubject<bool>();
+  PublishSubject<String> _transactionSuccess = PublishSubject<String>();
 
-  Stream<bool> get outTransactionSuccess => _transactionSuccess.stream;
-  Sink<bool> get _inTransactionSuccess => _transactionSuccess.sink;
+  Stream<String> get outTransactionSuccess => _transactionSuccess.stream;
+  Sink<String> get _inTransactionSuccess => _transactionSuccess.sink;
 
   SharedPreferences _prefs;
   String _fundingPanelAddress;
@@ -278,7 +278,7 @@ class ContributionBloc {
       if (sendSeeds) {
         try {
           if (jsonResponse['result']['status'] == '0x1') {
-            _inTransactionSuccess.add(true);
+            _inTransactionSuccess.add(txHash);
             configManagerBloc
                 .updateSingleBalanceAfterContribute(_fundingPanelAddress);
           } else {

@@ -17,6 +17,7 @@ class FundingPanelItem {
   // shared
   final double seedExchangeRate;
   final double seedExchangeRateDEX;
+  final double exchangeRateOnTop;
   final double whitelistThreshold;
   final List<MemberItem> members;
   final List tags;
@@ -25,8 +26,10 @@ class FundingPanelItem {
   final bool blacklisted;
   final String seedTotalRaised;
   final String seedMaxSupply;
-  final String seedLiquidity;
+  //final String seedLiquidity;
   final String totalUnlockedForStartup;
+  final String tokenSymbol;
+  final double WLMaxAmount;
 
   void setFavorite(bool favorite) {
     this.favorite = favorite;
@@ -44,6 +47,7 @@ class FundingPanelItem {
       this.favorite,
       this.seedExchangeRate,
       this.seedExchangeRateDEX,
+        this.exchangeRateOnTop,
       this.members,
       this.tags,
       this.documents,
@@ -52,6 +56,8 @@ class FundingPanelItem {
       this.blacklisted,
       this.seedTotalRaised,
       this.seedMaxSupply,
-      this.seedLiquidity,
-      this.totalUnlockedForStartup});
+      //this.seedLiquidity,
+      this.totalUnlockedForStartup,
+      this.tokenSymbol,
+      this.WLMaxAmount});
 }

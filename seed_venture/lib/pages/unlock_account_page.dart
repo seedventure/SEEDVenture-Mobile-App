@@ -65,7 +65,7 @@ class _UnlockAccountPageState extends State<UnlockAccountPage> {
                           child: Text(
                             'The first decentralized venture capital investment platform',
                             textAlign: TextAlign.center,
-                            style: TextStyle(color: Colors.white),
+                            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 23),
                           ),
                         ))
                       ],
@@ -91,7 +91,7 @@ class _UnlockAccountPageState extends State<UnlockAccountPage> {
                         style: TextStyle(color: Colors.white),
                         decoration: new InputDecoration(
                             border: InputBorder.none,
-                            hintStyle: TextStyle(color: Colors.white),
+                            hintStyle: TextStyle(color: Colors.white, fontSize: 14.0),
                             labelStyle: new TextStyle(color: Colors.white),
                             hintText: 'Password...'))),
                 Row(

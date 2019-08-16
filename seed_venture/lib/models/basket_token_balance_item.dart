@@ -13,6 +13,7 @@ class BasketTokenBalanceItem {
   final String seedTotalRaised;
   final bool isHighlighted;
   final double quotation;
+  final double maxWLAmount;
 
   BasketTokenBalanceItem(
       {this.name,
@@ -26,7 +27,8 @@ class BasketTokenBalanceItem {
       this.basketTags,
       this.seedTotalRaised,
       this.isHighlighted,
-      this.quotation});
+      this.quotation,
+      this.maxWLAmount});
 
   Color getWhitelistingColor() {
     if (this.isBlacklisted) return Colors.red;

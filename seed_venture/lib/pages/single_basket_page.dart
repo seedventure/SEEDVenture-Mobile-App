@@ -11,6 +11,7 @@ import 'package:seed_venture/models/funding_panel_item.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:intl/intl.dart';
+import 'package:seed_venture/utils/constants.dart';
 
 class SingleBasketPage extends StatefulWidget {
   @override
@@ -220,11 +221,18 @@ class _SingleBasketPageState extends State<SingleBasketPage> {
       }
     });
 
-    contributionBloc.outTransactionSuccess.listen((success) {
-      if (success) {
+    contributionBloc.outTransactionSuccess.listen((txHash) {
+      if (txHash != null) {
         Navigator.pop(context);
-        SnackBar contributedSnackBar =
-            SnackBar(content: Text('You have contributed to this basket!'));
+        SnackBar contributedSnackBar = SnackBar(
+            duration: const Duration(seconds: 15),
+            content: Text('You have contributed to this basket!'),
+            action: SnackBarAction(
+              label: 'View Tx',
+              onPressed: () {
+                launch(EtherscanURL + 'tx/$txHash');
+              },
+            ));
         _scaffoldKey.currentState.showSnackBar(contributedSnackBar);
       }
     });
@@ -247,7 +255,8 @@ class _SingleBasketPageState extends State<SingleBasketPage> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
                     Container(
-                        margin: const EdgeInsets.only(top: 8.0),
+                        color: Colors.white,
+                        padding: const EdgeInsets.only(bottom: 15.0, top: 8.0),
                         child: Row(
                           children: <Widget>[
                             Expanded(
@@ -263,10 +272,11 @@ class _SingleBasketPageState extends State<SingleBasketPage> {
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
                                   softWrap: false,
+                                  style: TextStyle(
+                                      color: Theme.of(context).primaryColor),
                                 ),
                               ),
                             ),
-                            //Spacer()
                             Expanded(
                               flex: 1,
                               child: _getFavoriteIcon(snapshot),
@@ -274,11 +284,39 @@ class _SingleBasketPageState extends State<SingleBasketPage> {
                           ],
                         )),
                     Container(
-                      margin: EdgeInsets.only(top: 15.0),
                       height: 1.0,
                       width: double.infinity,
                       color: Color(0xFFF3F3F3),
                     ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: <Widget>[
+                        Container(
+                          margin: const EdgeInsets.only(left: 8.0, top: 8.0),
+                          child: Text(
+                            'Main Info',
+                            style: TextStyle(
+                                fontSize: 16,
+                                color: Theme.of(context).primaryColor),
+                          ),
+                        )
+                      ],
+                    ),
+                    Container(
+                      child: SingleChildScrollView(
+                          child: Html(
+                        useRichText: true,
+                        data: snapshot.data.description,
+                      )),
+                      margin: const EdgeInsets.only(
+                          left: 8.0, right: 8.0, bottom: 8.0),
+                    ),
+                    /* Container(
+                      margin: EdgeInsets.only(top: 8.0),
+                      height: 1.0,
+                      width: double.infinity,
+                      color: Color(0xFFF3F3F3),
+                    ), */
                     Container(
                       child: RichText(
                         text: TextSpan(
@@ -296,6 +334,13 @@ class _SingleBasketPageState extends State<SingleBasketPage> {
                           top: 15.0, left: 8.0, right: 8.0),
                     ),
                     _getAdditionalLinksUI(snapshot),
+                    Container(
+                      margin: EdgeInsets.only(top: 8.0),
+                      height: 1.0,
+                      width: double.infinity,
+                      color: Color(0xFFF3F3F3),
+                    ),
+                    _getTagsHeader(snapshot),
                     _getTagsWidget(snapshot),
                     Container(
                       margin: EdgeInsets.only(top: 8.0),
@@ -303,9 +348,81 @@ class _SingleBasketPageState extends State<SingleBasketPage> {
                       width: double.infinity,
                       color: Color(0xFFF3F3F3),
                     ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: <Widget>[
+                        Container(
+                          margin: const EdgeInsets.only(left: 8.0, top: 8.0),
+                          child: Text(
+                            'Economic Info',
+                            style: TextStyle(
+                                fontSize: 16,
+                                color: Theme.of(context).primaryColor),
+                          ),
+                        )
+                      ],
+                    ),
+                    Container(
+                      child: Text('Exchange Rate: ' +
+                          snapshot.data.seedExchangeRate.toStringAsFixed(
+                              snapshot.data.seedExchangeRate
+                                          .truncateToDouble() ==
+                                      snapshot.data.seedExchangeRate
+                                  ? 0
+                                  : 2) +
+                          ' SEED'),
+                      margin: const EdgeInsets.only(
+                          top: 15.0, left: 8.0, right: 8.0),
+                    ),
+                    Container(
+                      child: Text('Exchange Rate On Top: ' +
+                          snapshot.data.exchangeRateOnTop.toStringAsFixed(
+                              snapshot.data.exchangeRateOnTop
+                                          .truncateToDouble() ==
+                                      snapshot.data.exchangeRateOnTop
+                                  ? 0
+                                  : 2) +
+                          ' ' +
+                          snapshot.data.tokenSymbol),
+                      margin: const EdgeInsets.only(
+                          top: 15.0, left: 8.0, right: 8.0),
+                    ),
+                    Container(
+                      child: Text('WL Threshold Balance: ' +
+                          snapshot.data.whitelistThreshold.toStringAsFixed(
+                              snapshot.data.whitelistThreshold
+                                          .truncateToDouble() ==
+                                      snapshot.data.whitelistThreshold
+                                  ? 0
+                                  : 2) +
+                          ' ' +
+                          snapshot.data.tokenSymbol),
+                      margin: const EdgeInsets.only(
+                          top: 15.0, left: 8.0, right: 8.0),
+                    ),
+                    Container(
+                      margin: EdgeInsets.only(top: 8.0),
+                      height: 1.0,
+                      width: double.infinity,
+                      color: Color(0xFFF3F3F3),
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: <Widget>[
+                        Container(
+                          margin: const EdgeInsets.only(left: 8.0, top: 8.0),
+                          child: Text(
+                            'Basket Info',
+                            style: TextStyle(
+                                fontSize: 16,
+                                color: Theme.of(context).primaryColor),
+                          ),
+                        )
+                      ],
+                    ),
                     Container(
                       margin: const EdgeInsets.only(left: 8.0, top: 12.0),
-                      child: Text('Max Supply: ' +
+                      child: Text('Total Supply: ' +
                           _getSeedMaxSupplyText(snapshot.data.seedMaxSupply) +
                           ' SEED'),
                     ),
@@ -316,13 +433,13 @@ class _SingleBasketPageState extends State<SingleBasketPage> {
                               double.parse(snapshot.data.seedTotalRaised)) +
                           ' SEED'),
                     ),
-                    Container(
+                    /*Container(
                       margin: const EdgeInsets.only(left: 8.0, top: 12.0),
                       child: Text('SEED Liquidity: ' +
                           formatter.format(
                               double.parse(snapshot.data.seedLiquidity)) +
                           ' SEED'),
-                    ),
+                    ),*/
                     Container(
                       margin: const EdgeInsets.only(left: 8.0, top: 12.0),
                       child: Text('Total SEED Unlocked: ' +
@@ -331,10 +448,11 @@ class _SingleBasketPageState extends State<SingleBasketPage> {
                           ' SEED'),
                     ),
                     Container(
-                      margin: EdgeInsets.only(top: 8.0),
-                      height: 1.0,
-                      width: double.infinity,
-                      color: Color(0xFFF3F3F3),
+                      margin: const EdgeInsets.only(left: 8.0, top: 12.0),
+                      child: Text('Max WL Amount: ' +
+                          formatter.format(snapshot.data.WLMaxAmount) +
+                          ' ' +
+                          snapshot.data.tokenSymbol),
                     ),
                     Container(
                       child: Text('Latest Quotation: ' +
@@ -349,19 +467,11 @@ class _SingleBasketPageState extends State<SingleBasketPage> {
                       width: double.infinity,
                       color: Color(0xFFF3F3F3),
                     ),
-                    Container(
-                      child: SingleChildScrollView(
-                          child: Html(
-                        useRichText: true,
-                        data: snapshot.data.description,
-                      )),
-                      margin: const EdgeInsets.all(8.0),
-                    ),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: <Widget>[
                         Container(
-                            margin: EdgeInsets.only(top: 50.0),
+                            margin: EdgeInsets.only(top: 20.0),
                             child: RaisedButton(
                               onPressed: () {
                                 membersBloc.getMembers(
@@ -417,6 +527,25 @@ class _SingleBasketPageState extends State<SingleBasketPage> {
     );
   }
 
+  Widget _getTagsHeader(AsyncSnapshot snapshot) {
+    if (snapshot.data.tags == null || snapshot.data.tags.length == 0)
+      return Container();
+
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.start,
+      children: <Widget>[
+        Container(
+          margin: const EdgeInsets.only(left: 8.0, top: 8.0),
+          child: Text(
+            'Tags',
+            style:
+                TextStyle(fontSize: 16, color: Theme.of(context).primaryColor),
+          ),
+        )
+      ],
+    );
+  }
+
   Widget _getTagsWidget(AsyncSnapshot snapshot) {
     if (snapshot.data.tags == null || snapshot.data.tags.length == 0)
       return Container();
@@ -454,7 +583,7 @@ class _SingleBasketPageState extends State<SingleBasketPage> {
       return IconButton(
         icon: Icon(
           Icons.star,
-          color: Colors.blue,
+          color: Theme.of(context).primaryColor,
           size: 20.0,
         ),
         onPressed: () => basketsBloc.removeFromFavorites(),
@@ -463,7 +592,7 @@ class _SingleBasketPageState extends State<SingleBasketPage> {
       return IconButton(
         icon: Icon(
           Icons.star_border,
-          color: Colors.blue,
+          color: Theme.of(context).primaryColor,
           size: 20.0,
         ),
         onPressed: () => basketsBloc.setFavorite(),

@@ -72,18 +72,18 @@ class _HomeBasketsTokenBalancesPageState
       await showDialog(
         context: context,
         builder: (BuildContext context) => CupertinoAlertDialog(
-              title: Text(title),
-              content: Text(body),
-              actions: [
-                CupertinoDialogAction(
-                  isDefaultAction: true,
-                  child: Text('Ok'),
-                  onPressed: () async {
-                    Navigator.of(context, rootNavigator: true).pop();
-                  },
-                )
-              ],
-            ),
+          title: Text(title),
+          content: Text(body),
+          actions: [
+            CupertinoDialogAction(
+              isDefaultAction: true,
+              child: Text('Ok'),
+              onPressed: () async {
+                Navigator.of(context, rootNavigator: true).pop();
+              },
+            )
+          ],
+        ),
       );
     });
     super.initState();
@@ -147,7 +147,7 @@ class _HomeBasketsTokenBalancesPageState
           ],
           title: _appBarTitle,
         ),
-        body: new Padding(
+        /*body: new Padding(
             padding: const EdgeInsets.only(top: 12.0),
             child: StreamBuilder(
               builder: (BuildContext context, AsyncSnapshot snapshot) {
@@ -160,7 +160,21 @@ class _HomeBasketsTokenBalancesPageState
                 }
               },
               stream: basketsBloc.outBasketTokenBalances,
-            )));
+            )
+        )*/
+        body: StreamBuilder(
+          builder: (BuildContext context, AsyncSnapshot snapshot) {
+            if (snapshot.hasData) {
+              // Snapshot -> List<BasketTokenBalance>
+
+              return _getUI(this.filterText);
+            } else {
+              return Container();
+            }
+          },
+          stream: basketsBloc.outBasketTokenBalances,
+        )
+    );
   }
 
   Widget _getUI(String filteredText) {
@@ -168,42 +182,47 @@ class _HomeBasketsTokenBalancesPageState
     if (data.length != 0) {
       return Column(
         children: <Widget>[
-          Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: <Widget>[
-              Spacer(),
-              Spacer(),
-              StreamBuilder(
-                builder: (BuildContext context, AsyncSnapshot snapshot) {
-                  if (snapshot.hasData) {
-                    return Container(
-                      child: Row(
-                        children: <Widget>[
-                          Container(
-                            child: Text(_getFormattedQuantity(
-                                    double.parse(snapshot.data[0])) +
-                                ' SEED'),
-                            margin: const EdgeInsets.only(right: 8.0),
-                          ),
-                          Container(
-                            child: Text(_getFormattedQuantity(
-                                    double.parse(snapshot.data[1])) +
-                                ' ETH'),
-                          ),
-                        ],
-                      ),
-                      margin: const EdgeInsets.only(right: 15.0, bottom: 15.0),
-                    );
-                  } else {
-                    return Container();
-                  }
-                },
-                stream: basketsBloc.outSeedEthBalance,
-              ),
-            ],
+
+          Container(
+            color: Theme.of(context).accentColor,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: <Widget>[
+                Spacer(),
+                Spacer(),
+                StreamBuilder(
+                  builder: (BuildContext context, AsyncSnapshot snapshot) {
+                    if (snapshot.hasData) {
+                      return Container(
+                        child: Row(
+                          children: <Widget>[
+                            Container(
+                              child: Text(_getFormattedQuantity(
+                                      double.parse(snapshot.data[0])) +
+                                  ' SEED', style: TextStyle(color: Colors.white, fontSize: 15.0),),
+                              margin: const EdgeInsets.only(right: 8.0),
+                            ),
+                            Container(
+                              child: Text(_getFormattedQuantity(
+                                      double.parse(snapshot.data[1])) +
+                                  ' ETH', style: TextStyle(color: Colors.white, fontSize: 15.0)),
+                            ),
+                          ],
+                        ),
+                        margin:
+                            const EdgeInsets.only(right: 15.0, bottom: 15.0, top: 12.0),
+                      );
+                    } else {
+                      return Container();
+                    }
+                  },
+                  stream: basketsBloc.outSeedEthBalance,
+                ),
+              ],
+            ),
           ),
           Container(
-              margin: const EdgeInsets.only(bottom: 8.0),
+              margin: const EdgeInsets.only(bottom: 8.0, top: 8.0),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.start,
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -343,7 +362,7 @@ class _HomeBasketsTokenBalancesPageState
                                 margin:
                                     const EdgeInsets.only(left: 8.0, top: 8.0),
                                 child: Text('Total Raised: ' +
-                                    data[position].seedTotalRaised +
+                                    _getFormattedQuantity(double.parse(data[position].seedTotalRaised)) +
                                     ' SEED'),
                               )
                             ],

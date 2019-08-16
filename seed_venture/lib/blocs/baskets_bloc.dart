@@ -96,19 +96,22 @@ class BasketsBloc {
         if (maps[i]['funding_panel_address'].toString().toLowerCase() ==
             fundingPanelAddress.toLowerCase()) {
           bool favorite = false;
-          ;
           List favorites = prefs.getStringList('favorites');
           if (favorites.contains(fundingPanelAddress.toLowerCase()))
             favorite = true;
 
           bool isWhitelisted;
           bool isBlacklisted;
+          String tokenSymbol;
+          double WLMaxAmount;
 
           for (int i = 0; i < _prevBasketTokenBalances.length; i++) {
             if (_prevBasketTokenBalances[i].fpAddress.toLowerCase() ==
                 fundingPanelAddress.toLowerCase()) {
               isWhitelisted = _prevBasketTokenBalances[i].isWhitelisted;
               isBlacklisted = _prevBasketTokenBalances[i].isBlacklisted;
+              tokenSymbol = _prevBasketTokenBalances[i].symbol;
+              WLMaxAmount = _prevBasketTokenBalances[i].maxWLAmount;
               break;
             }
           }
@@ -116,7 +119,7 @@ class BasketsBloc {
           basket = FundingPanelItem(
               seedMaxSupply: maps[i]['seed_max_supply'],
               seedTotalRaised: maps[i]['seed_total_raised'],
-              seedLiquidity: maps[i]['seed_liquidity'],
+             // seedLiquidity: maps[i]['seed_liquidity'],
               totalUnlockedForStartup: maps[i]['total_unlocked'],
               favorite: favorite,
               tags: maps[i]['tags'],
@@ -126,13 +129,16 @@ class BasketsBloc {
               adminToolsAddress: maps[i]['admin_tools_address'],
               seedExchangeRate: maps[i]['seed_exchange_rate'],
               seedExchangeRateDEX: maps[i]['seed_exchange_rate_dex'],
+              exchangeRateOnTop: maps[i]['exchange_rate_on_top'],
               imgBase64: maps[i]['imgBase64'],
               whitelistThreshold: maps[i]['whitelist_threshold'],
               name: maps[i]['name'],
               description: maps[i]['description'],
               whitelisted: isWhitelisted,
               blacklisted: isBlacklisted,
-              url: maps[i]['url']);
+              url: maps[i]['url'],
+              tokenSymbol: tokenSymbol,
+              WLMaxAmount: WLMaxAmount);
 
           break;
         }
@@ -374,6 +380,7 @@ class BasketsBloc {
         String imgBase64 = basketBalanceMap['imgBase64'];
         List tags = basketBalanceMap['basket_tags'];
         double quotation = basketBalanceMap['quotation_dex'];
+        double maxWLAmount = basketBalanceMap['max_wl_amount'];
 
         if (quotation == null) {
           quotation = basketBalanceMap['quotation'];
@@ -422,6 +429,7 @@ class BasketsBloc {
             fpAddress: fundingPanelAddress,
             imgBase64: imgBase64,
             isHighlighted: isHighlighted,
+            maxWLAmount: maxWLAmount,
             seedTotalRaised: seedTotalRaised));
       }
 
