@@ -61,13 +61,13 @@ class _SettingsStatePage extends State<SettingsPage> {
                                   onChanged: (newValue) async {
                                     settingsBloc
                                         .onChangeZeroStartupSettings(newValue);
-                                    Navigator.of(context).push(
+                                    /*Navigator.of(context).push(
                                         ProgressBarOverlay(
-                                            ProgressBarOverlay.applyingFilter));
+                                            ProgressBarOverlay.applyingFilter));*/
 
-                                    await settingsBloc.applyFilter();
+                                    settingsBloc.applyFilter();
 
-                                    Navigator.pop(context);
+                                    //Navigator.pop(context);
 
                                     SnackBar copySnack = SnackBar(
                                         content: Text('Filter Applied'));

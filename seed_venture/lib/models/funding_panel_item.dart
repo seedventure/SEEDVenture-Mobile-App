@@ -47,7 +47,7 @@ class FundingPanelItem {
       this.favorite,
       this.seedExchangeRate,
       this.seedExchangeRateDEX,
-        this.exchangeRateOnTop,
+      this.exchangeRateOnTop,
       this.members,
       this.tags,
       this.documents,

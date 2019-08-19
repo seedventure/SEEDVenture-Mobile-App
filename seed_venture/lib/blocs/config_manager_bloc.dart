@@ -17,6 +17,7 @@ import 'package:seed_venture/models/member_item.dart';
 import 'package:seed_venture/blocs/settings_bloc.dart';
 import 'package:decimal/decimal.dart';
 import 'dart:math';
+import 'package:flutter/foundation.dart';
 
 final ConfigManagerBloc configManagerBloc = ConfigManagerBloc();
 
@@ -120,7 +121,7 @@ class ConfigManagerBloc {
     return crypto.md5.convert(utf8.encode(input)).toString();
   }
 
-  Future<String> _getSeedMaxSupplyFromPreviousSharedPref(
+  static Future<String> _getSeedMaxSupplyFromPreviousSharedPref(
       String fundingPanelAddress) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
 
@@ -139,7 +140,7 @@ class ConfigManagerBloc {
     return null;
   }
 
-  Future<double> _getExchangeRateSeedFromPreviousSharedPref(
+  static Future<double> _getExchangeRateSeedFromPreviousSharedPref(
       String fundingPanelAddress) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
 
@@ -158,7 +159,7 @@ class ConfigManagerBloc {
     return null;
   }
 
-  Future<double> _getExchangeRateOnTopFromPreviousSharedPref(
+  static Future<double> _getExchangeRateOnTopFromPreviousSharedPref(
       String fundingPanelAddress) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
 
@@ -177,7 +178,7 @@ class ConfigManagerBloc {
     return null;
   }
 
-  Future<double> _getExchangeRateSeedDEXFromPreviousSharedPref(
+  static Future<double> _getExchangeRateSeedDEXFromPreviousSharedPref(
       String fundingPanelAddress) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
 
@@ -196,7 +197,7 @@ class ConfigManagerBloc {
     return null;
   }
 
-  Future<double> _getWLThresholdFromPreviousSharedPref(
+  static Future<double> _getWLThresholdFromPreviousSharedPref(
       String fundingPanelAddress) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
 
@@ -215,7 +216,7 @@ class ConfigManagerBloc {
     return null;
   }
 
-  Future<List<MemberItem>> _getMembersFromPreviousSharedPref(
+  static Future<List<MemberItem>> _getMembersFromPreviousSharedPref(
       String fundingPanelAddress) async {
     List<MemberItem> members = List();
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -251,7 +252,7 @@ class ConfigManagerBloc {
     return null;
   }
 
-  Future<MemberItem> _getSingleMemberFromPreviousSharedPref(
+  static Future<MemberItem> _getSingleMemberFromPreviousSharedPref(
       String fundingPanelAddress, String memberAddress) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
 
@@ -287,7 +288,7 @@ class ConfigManagerBloc {
     return null;
   }
 
-  Future<List<String>> _getMembersAddressListFromPreviousSharedPref(
+  static Future<List<String>> _getMembersAddressListFromPreviousSharedPref(
       String fundingPanelAddress) async {
     List<String> addressList = List();
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -312,7 +313,7 @@ class ConfigManagerBloc {
     return null;
   }
 
-  Future<Map> _getLatestOwnerDataFromPreviousSharedPref(
+  static Future<Map> _getLatestOwnerDataFromPreviousSharedPref(
       String fundingPanelAddress) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
 
@@ -330,7 +331,7 @@ class ConfigManagerBloc {
     return null;
   }
 
-  Future<String> _getSeedTotalRaisedFromPreviousSharedPref(
+  static Future<String> _getSeedTotalRaisedFromPreviousSharedPref(
       String fundingPanelAddress) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
 
@@ -348,7 +349,7 @@ class ConfigManagerBloc {
     return null;
   }
 
-  Future<FundingPanelItem> _handleNewPanel(
+  static Future<FundingPanelItem> _handleNewPanel(
       Map addressMap, int fromBlock, int toBlock, Map logResponseMap) async {
     String fundingPanelAddress = addressMap['funding_panel_address'];
     String adminToolsAddress = addressMap['admin_tools_address'];
@@ -367,15 +368,11 @@ class ConfigManagerBloc {
       return null;
     }
 
-    bool noURLFilter = await SettingsBloc.isNoURLFilterEnabled();
-
-    if (noURLFilter &&
-        fundingPanelVisualData != null &&
-        (fundingPanelVisualData[2] == null ||
-            fundingPanelVisualData[2].toString().isEmpty)) return null;
-
-    double exchangeRateSeedDEX = await _getBasketSeedExchangeRateFromDEX(
+    List retParams = await _getBasketSeedExchangeRateFromDEX(
         tokenAddress, fromBlock, toBlock, logResponseMap);
+    double exchangeRateSeedDEX = retParams[0];
+    //this._resMapLogsDEX = resMap;
+
     double exchangeRateSeed =
         await _getBasketSeedExchangeRate(fundingPanelAddress);
 
@@ -411,11 +408,6 @@ class ConfigManagerBloc {
     List<MemberItem> members =
         await _getMembersOfFundingPanel(fundingPanelAddress);
 
-    bool zeroStartupFilter = await SettingsBloc.isZeroStartupFilterEnabled();
-
-    if (zeroStartupFilter && (members == null || members.length == 0))
-      return null;
-
     double totalUnlockedForStartup = 0;
 
     for (int i = 0; i < members.length; i++) {
@@ -446,7 +438,7 @@ class ConfigManagerBloc {
     return FPItem;
   }
 
-  void _addToFPCheckAgainList(String fundingPanelAddress,
+  static void _addToFPCheckAgainList(String fundingPanelAddress,
       String adminToolsAddress, String tokenAddress) async {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     if (sharedPreferences.getString('fp_check_again_list') == null) {
@@ -480,7 +472,7 @@ class ConfigManagerBloc {
     }
   }
 
-  void _addToMembersCheckAgainList(
+  static void _addToMembersCheckAgainList(
       String fundingPanelAddress, String memberAddress) async {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     if (sharedPreferences.getString('members_check_again_list') == null) {
@@ -514,7 +506,7 @@ class ConfigManagerBloc {
     }
   }
 
-  Future<List<MemberItem>> _checkAgainMembers(
+  static Future<List<MemberItem>> _checkAgainMembers(
       List<MemberItem> members, String fundingPanelAddress) async {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     if (sharedPreferences.getString('members_check_again_list') == null) {
@@ -587,13 +579,22 @@ class ConfigManagerBloc {
   }
 
   // address maps is a JSON array with objects like {FPAddress: "", ATAddress: "", TAddress = ""}
-  Future<List<FundingPanelItem>> _getLogsUpdate(
+  static Future<List> _getLogsUpdate(
       // Isolate ?
-      List addressMaps,
-      List addressList,
-      int fromBlock,
-      int toBlock,
-      Map configurationMap) async {
+      List params) async {
+    List addressMaps = params[0];
+    List addressList = params[1];
+    int fromBlock = params[2];
+    int toBlock = params[3];
+    Map configurationMap = params[4];
+    List fundingPanelItemsPrev = params[5];
+
+    // favorites = params[6]
+    // fp_check_again_list = params[7]
+
+    bool _logsResultsExceeded = false;
+    List<String> _zeroSupplyFP;
+
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     List favorites = sharedPreferences.getStringList('favorites');
     List<FundingPanelItem> fundingPanelItems = List();
@@ -835,13 +836,6 @@ class ConfigManagerBloc {
                 await _loadFundingPanelVisualDataFromPreviousSharedPref(
                     fundingPanelAddress);
           }
-
-          bool noURLFilter = await SettingsBloc.isNoURLFilterEnabled();
-
-          if (noURLFilter &&
-              fundingPanelVisualData != null &&
-              (fundingPanelVisualData[2] == null ||
-                  fundingPanelVisualData[2].toString().isEmpty)) continue;
         } else {
           latestOwnerData = await _getLatestOwnerDataFromPreviousSharedPref(
               fundingPanelAddress);
@@ -962,8 +956,9 @@ class ConfigManagerBloc {
         if (changed) {
           print('exchangeRateSeed changed (DEX)');
 
-          exchangeRateSeedDEX = await _getBasketSeedExchangeRateFromDEX(
+          List retParams = await _getBasketSeedExchangeRateFromDEX(
               tokenAddress, fromBlock, toBlock, resMap);
+          exchangeRateSeedDEX = retParams[0];
         } else {
           exchangeRateSeedDEX =
               await _getExchangeRateSeedDEXFromPreviousSharedPref(
@@ -1051,10 +1046,12 @@ class ConfigManagerBloc {
             // Notification if funds unlocked
             if (favorites.contains(fundingPanelAddress.toLowerCase())) {
               String basketName;
-              for (int j = 0; j < _fundingPanelItems.length; j++) {
-                if (_fundingPanelItems[j].fundingPanelAddress.toLowerCase() ==
+              for (int j = 0; j < fundingPanelItemsPrev.length; j++) {
+                if (fundingPanelItemsPrev[j]
+                        .fundingPanelAddress
+                        .toLowerCase() ==
                     fundingPanelAddress.toLowerCase()) {
-                  basketName = _fundingPanelItems[j].name;
+                  basketName = fundingPanelItemsPrev[j].name;
                   break;
                 }
               }
@@ -1088,12 +1085,6 @@ class ConfigManagerBloc {
                 });
               }
 
-              if (documents.length == 0) {
-                bool zeroDocsStartupFilter =
-                    await SettingsBloc.isZeroDocsStartupFilterEnabled();
-                if (zeroDocsStartupFilter) continue;
-              }
-
               members.add(MemberItem(
                   seedsUnlocked: memberData[2],
                   memberAddress: membersAddressList[j],
@@ -1117,12 +1108,6 @@ class ConfigManagerBloc {
           members =
               await _getMembersFromPreviousSharedPref(fundingPanelAddress);
         }
-
-        bool zeroStartupFilter =
-            await SettingsBloc.isZeroStartupFilterEnabled();
-
-        if (zeroStartupFilter && (members == null || members.length == 0))
-          continue;
 
         if (members == null) {
           _addToFPCheckAgainList(
@@ -1298,7 +1283,12 @@ class ConfigManagerBloc {
     sharedPreferences.setString(
         'funding_panels_data', jsonEncode(fpMapsSharedPrefs));
 
-    return fundingPanelItems;
+    List returnParams = List();
+    returnParams.add(fundingPanelItems);
+    returnParams.add(_logsResultsExceeded);
+    returnParams.add(_zeroSupplyFP);
+
+    return returnParams;
   }
 
   Future getFundingPanelItems(List<FundingPanelItem> fundingPanelItems,
@@ -1332,16 +1322,11 @@ class ConfigManagerBloc {
                 basketContracts[3]);
       }
 
-      bool noURLFilter = await SettingsBloc.isNoURLFilterEnabled();
-
-      if (noURLFilter &&
-          fundingPanelVisualData != null &&
-          (fundingPanelVisualData[2] == null ||
-              fundingPanelVisualData[2].toString().isEmpty)) continue;
-
       if (fundingPanelVisualData != null) {
-        double exchangeRateSeedDEX = await _getBasketSeedExchangeRateFromDEX(
+        List retParams = await _getBasketSeedExchangeRateFromDEX(
             basketContracts[2], 0, currentBlockNumber, _resMapLogsDEX);
+        double exchangeRateSeedDEX = retParams[0];
+        this._resMapLogsDEX = retParams[1];
 
         double exchangeRateSeed =
             await _getBasketSeedExchangeRate(basketContracts[3]);
@@ -1379,12 +1364,6 @@ class ConfigManagerBloc {
 
         List<MemberItem> members =
             await _getMembersOfFundingPanel(basketContracts[3]);
-
-        bool zeroStartupFilter =
-            await SettingsBloc.isZeroStartupFilterEnabled();
-
-        if (zeroStartupFilter && (members == null || members.length == 0))
-          continue;
 
         double totalUnlockedForStartup = 0;
 
@@ -1498,7 +1477,7 @@ class ConfigManagerBloc {
         'funding_panels_data', jsonEncode(fpMapsSharedPrefs));
   }
 
-  Future<List<MemberItem>> _getMembersOfFundingPanel(
+  static Future<List<MemberItem>> _getMembersOfFundingPanel(
       String fundingPanelAddress) async {
     List<MemberItem> members = List();
     int membersLength = await _getMembersLength(fundingPanelAddress);
@@ -1521,12 +1500,6 @@ class ConfigManagerBloc {
           });
         }
 
-        if (documents.length == 0) {
-          bool zeroDocsStartupFilter =
-              await SettingsBloc.isZeroDocsStartupFilterEnabled();
-          if (zeroDocsStartupFilter) continue;
-        }
-
         members.add(MemberItem(
             seedsUnlocked: memberData[2],
             memberAddress: memberAddress,
@@ -1546,7 +1519,7 @@ class ConfigManagerBloc {
     return members;
   }
 
-  Future<List<String>> _getMemberJSONDataFromIPFS(String ipfsURL) async {
+  static Future<List<String>> _getMemberJSONDataFromIPFS(String ipfsURL) async {
     List<String> memberJsonData = List();
 
     try {
@@ -1581,7 +1554,7 @@ class ConfigManagerBloc {
     }
   }
 
-  Future<List> _getFundingPanelDetails(String ipfsUrl) async {
+  static Future<List> _getFundingPanelDetails(String ipfsUrl) async {
     try {
       print('AAAAA IPFS: ' + ipfsUrl);
       var response = await http.get(ipfsUrl).timeout(Duration(seconds: 10));
@@ -1626,7 +1599,7 @@ class ConfigManagerBloc {
     }
   }
 
-  Future<List<String>> _loadFundingPanelVisualDataFromPreviousSharedPref(
+  static Future<List<String>> _loadFundingPanelVisualDataFromPreviousSharedPref(
       String fundingPanelAddress) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
 
@@ -1652,15 +1625,19 @@ class ConfigManagerBloc {
   }
 
   // Used in _update to load fundingPanelItems from previous sp before actually updating, so that updateHoldings() can be called
-  Future<List<FundingPanelItem>>
-      _getFundingPanelItemsFromPrevSharedPref() async {
+  // Used by BasketsBloc to load FundingPanels in order to filter baskets
+  static Future<List<FundingPanelItem>>
+      getFundingPanelItemsFromPrevSharedPref() async {
     List<FundingPanelItem> fundingPanelItems = List();
     SharedPreferences prefs = await SharedPreferences.getInstance();
     if (prefs.getString('funding_panels_data') == null) return null;
 
     List maps = jsonDecode(prefs.getString('funding_panels_data'));
     for (int i = 0; i < maps.length; i++) {
-      // I only set parameters used by updateHoldings()
+      List<MemberItem> members = await _getMembersFromPreviousSharedPref(
+          maps[i]['funding_panel_address']);
+
+      // I only set parameters used by updateHoldings() and to filter baskets
       fundingPanelItems.add(FundingPanelItem(
           seedTotalRaised: maps[i]['seed_total_raised'],
           seedExchangeRate: maps[i]['seed_exchange_rate'],
@@ -1670,7 +1647,9 @@ class ConfigManagerBloc {
           fundingPanelAddress: maps[i]['funding_panel_address'],
           imgBase64: maps[i]['imgBase64'],
           tags: maps[i]['tags'],
-          documents: maps[i]['documents']));
+          documents: maps[i]['documents'],
+          url: maps[i]['url'],
+          members: members));
     }
 
     return fundingPanelItems;
@@ -1679,7 +1658,7 @@ class ConfigManagerBloc {
   Future _update() async {
     if (_previousConfigurationMap == null) {
       _previousConfigurationMap = await loadPreviousConfigFile();
-      this._fundingPanelItems = await _getFundingPanelItemsFromPrevSharedPref();
+      this._fundingPanelItems = await getFundingPanelItemsFromPrevSharedPref();
     }
 
     _zeroSupplyFP = List();
@@ -1747,8 +1726,25 @@ class ConfigManagerBloc {
       print('FROM BLOCK: ' + fromBlock.toString());
       print('TO BLOCK: ' + currentBlockNumber.toString());
 
-      fundingPanelItems = await _getLogsUpdate(addressMaps, addressList,
-          fromBlock, currentBlockNumber, configurationMap);
+      List updateParams = List();
+      updateParams.add(addressMaps);
+      updateParams.add(addressList);
+      updateParams.add(fromBlock);
+      updateParams.add(currentBlockNumber);
+      updateParams.add(configurationMap);
+      updateParams.add(_fundingPanelItems);
+
+      //List returnParams = await compute(_getLogsUpdate, updateParams);
+      List returnParams = await _getLogsUpdate(updateParams);
+      if (returnParams.length > 1) {
+        fundingPanelItems = returnParams[0];
+        _logsResultsExceeded = returnParams[1];
+        _zeroSupplyFP = returnParams[2];
+      } else
+        _logsResultsExceeded = returnParams[0];
+
+      /*fundingPanelItems = await _getLogsUpdate(addressMaps, addressList,
+          fromBlock, currentBlockNumber, configurationMap);*/
 
       if (fundingPanelItems == null) {
         if (_logsResultsExceeded) {
@@ -1803,8 +1799,12 @@ class ConfigManagerBloc {
     List favorites = prefs.getStringList('favorites');
 
     for (int i = 0; i < maps.length; i++) {
+      List<MemberItem> members = await _getMembersFromPreviousSharedPref(
+          maps[i]['funding_panel_address']);
       fundingPanelItems.add(FundingPanelItem(
-          // I only need name + fpAddress for notifications
+          documents: maps[i]['documents'],
+          url: maps[i]['url'],
+          members: members,
           name: maps[i]['name'],
           fundingPanelAddress: maps[i]['funding_panel_address']));
     }
@@ -1823,6 +1823,19 @@ class ConfigManagerBloc {
           actualListUsedIndexes.add(k);
           break;
         }
+      }
+
+      bool noUrlFilter = await SettingsBloc.isNoURLFilterEnabled();
+      if (noUrlFilter &&
+          (fundingPanelItems[i].url == null ||
+              fundingPanelItems[i].url.isEmpty)) {
+        continue;
+      }
+
+      bool noMembersFilter = await SettingsBloc.isZeroStartupFilterEnabled();
+      if (noMembersFilter) {
+        if (fundingPanelItems[i].members == null ||
+            fundingPanelItems[i].members.length == 0) continue;
       }
 
       if (actualFP != null) {
@@ -1910,10 +1923,21 @@ class ConfigManagerBloc {
           }
 
           if (actualMember != null) {
-            // check if the member disappeared from list on blockchain
-            if (prevMember['latestHash'].toString().toLowerCase() !=
+            bool noDocs = false;
+            bool zeroDocsStartupFilter =
+                await SettingsBloc.isZeroDocsStartupFilterEnabled();
+            if (zeroDocsStartupFilter) {
+              fundingPanelItems[i].members.forEach((member) {
+                if (member.memberAddress.toLowerCase() ==
+                        prevMember['memberAddress'].toString().toLowerCase() &&
+                    member.documents.length == 0) noDocs = true;
+              });
+            }
+
+
+            if (!noDocs && prevMember['latestHash'].toString().toLowerCase() !=
                 actualMember['latestHash'].toString().toLowerCase()) {
-              if (favorites.contains(fpAddress.toLowerCase())) {
+              if (!noDocs && favorites.contains(fpAddress.toLowerCase())) {
                 String notificationData = 'Documents by startup ' +
                     prevMember['memberName'] +
                     ' changed! (Incubator ' +
@@ -2060,7 +2084,7 @@ class ConfigManagerBloc {
     return addresses;
   }
 
-  Future<double> _getBasketSeedExchangeRateFromDEX(
+  static Future<List> _getBasketSeedExchangeRateFromDEX(
       String tokenAddress, int fromBlock, int toBlock, Map res) async {
     Map resMap;
     if (res == null) {
@@ -2146,7 +2170,7 @@ class ConfigManagerBloc {
     } else
       resMap = res;
 
-    this._resMapLogsDEX = resMap;
+    //this._resMapLogsDEX = resMap;
 
     List result = resMap['result'];
 
@@ -2175,19 +2199,28 @@ class ConfigManagerBloc {
         double amountGet = double.parse(_getValueFromHex(amountGetHex, 18));
         double amountGive = double.parse(_getValueFromHex(amountGiveHex, 18));
 
+        List retParams = List();
+
         if (tokenGetAddress.toLowerCase() == tokenAddress.toLowerCase()) {
           // Baskets token was bought
-          return amountGive / amountGet;
+
+          //return amountGive / amountGet;
+          retParams.add(amountGive / amountGet);
         } else {
-          return amountGet / amountGive;
+          //return amountGet / amountGive;
+          retParams.add(amountGet / amountGive);
         }
+
+        retParams.add(resMap);
+        return retParams;
       }
     }
 
     return null;
   }
 
-  Future<double> _getBasketSeedExchangeRate(String fundingPanelAddress) async {
+  static Future<double> _getBasketSeedExchangeRate(
+      String fundingPanelAddress) async {
     String data = "0x18bf6abc"; // get exchangeRateSeed
     Map callParams = {
       "id": "1",
@@ -2212,7 +2245,8 @@ class ConfigManagerBloc {
     return 1 / rate;
   }
 
-  Future<double> _getBasketExchangeRateOnTop(String fundingPanelAddress) async {
+  static Future<double> _getBasketExchangeRateOnTop(
+      String fundingPanelAddress) async {
     String data = "0x3378df78";
     Map callParams = {
       "id": "1",
@@ -2238,7 +2272,7 @@ class ConfigManagerBloc {
     return rateOnTop;
   }
 
-  Future<Map> _getLatestOwnerData(String fundingPanelAddress) async {
+  static Future<Map> _getLatestOwnerData(String fundingPanelAddress) async {
     String data = "0xe4b85399"; // getOwnerData
     Map callParams = {
       "id": "1",
@@ -2288,7 +2322,7 @@ class ConfigManagerBloc {
     return latestDataUpdate;
   }
 
-  Future<List<String>> _getMemberDataByAddress(
+  static Future<List<String>> _getMemberDataByAddress(
       String fundingPanelAddress, String memberAddress) async {
     String data = "0xca87a8a1000000000000000000000000";
 
@@ -2346,7 +2380,7 @@ class ConfigManagerBloc {
     return memberData;
   }
 
-  Future<String> _getMemberAddressByIndex(
+  static Future<String> _getMemberAddressByIndex(
       int index, String fundingPanelAddress) async {
     String data = "0x3c8c3ca6";
 
@@ -2384,7 +2418,7 @@ class ConfigManagerBloc {
     return address;
   }
 
-  Future<int> _getMembersLength(String fundingPanelAddress) async {
+  static Future<int> _getMembersLength(String fundingPanelAddress) async {
     String data = "0x7351262f"; // get deployerListLength
     Map callParams = {
       "id": "1",
@@ -2408,7 +2442,7 @@ class ConfigManagerBloc {
     return numbers.hexToInt(resMap['result']).toInt();
   }
 
-  Future<String> _getSeedTotalRaised(String fundingPanelAddress) async {
+  static Future<String> _getSeedTotalRaised(String fundingPanelAddress) async {
     String data = "0x8f5f695f";
 
     Map callParams = {
@@ -2470,7 +2504,7 @@ class ConfigManagerBloc {
     return tokenBalance;
   }*/
 
-  Future<double> _getWhitelistThreshold(
+  static Future<double> _getWhitelistThreshold(
       String adminToolsAddress, double exchangeRateSeed) async {
     String data = "0x6163607e";
 
@@ -2497,7 +2531,7 @@ class ConfigManagerBloc {
     return double.parse(threshold);
   }
 
-  Future<String> _getSeedMaxSupply(String fundingPanelAddress) async {
+  static Future<String> _getSeedMaxSupply(String fundingPanelAddress) async {
     String data = "0x8f8361ea";
 
     Map callParams = {
@@ -2984,7 +3018,8 @@ class ConfigManagerBloc {
     return tokenBalance;
   }
 
-  String _getValueFromHex(String hexValue, int decimals, {bool seedMaxSupply}) {
+  static String _getValueFromHex(String hexValue, int decimals,
+      {bool seedMaxSupply}) {
     hexValue = hexValue.substring(2);
     if (hexValue == '' || hexValue == '0') return '0.00';
 

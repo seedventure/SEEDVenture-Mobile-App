@@ -2,8 +2,7 @@ import 'package:rxdart/rxdart.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/services.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:seed_venture/blocs/config_manager_bloc.dart';
-import 'package:seed_venture/models/funding_panel_item.dart';
+import 'package:seed_venture/blocs/baskets_bloc.dart';
 
 
 final SettingsBloc settingsBloc = SettingsBloc();
@@ -143,8 +142,8 @@ class SettingsBloc {
     return enabled;
   }
 
-  Future applyFilter() async {
-    configManagerBloc.cancelPeriodicUpdate();
+  void applyFilter()  {
+   /* configManagerBloc.cancelPeriodicUpdate();
     configManagerBloc.cancelBalancesPeriodicUpdate();
     int currentBlockNumber = await configManagerBloc.getCurrentBlockNumber();
     Map prevConfig = await configManagerBloc.loadPreviousConfigFile();
@@ -154,8 +153,9 @@ class SettingsBloc {
     await configManagerBloc.getBasketTokensBalances(fundingPanels);
     configManagerBloc.enablePeriodicUpdate();
     configManagerBloc.configurationPeriodicUpdate();
-    configManagerBloc.balancesPeriodicUpdate();
-    return;
+    configManagerBloc.balancesPeriodicUpdate();*/
+
+    basketsBloc.getBasketsTokenBalances();
   }
 
 

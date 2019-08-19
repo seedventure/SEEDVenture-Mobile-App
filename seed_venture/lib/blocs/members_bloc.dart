@@ -2,6 +2,7 @@ import 'package:rxdart/rxdart.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import 'package:seed_venture/models/member_item.dart';
+import 'package:seed_venture/blocs/settings_bloc.dart';
 
 final MembersBloc membersBloc = MembersBloc();
 
@@ -55,7 +56,7 @@ class MembersBloc {
   }
 
   void getMembers(String fpAddress) {
-    SharedPreferences.getInstance().then((prefs) {
+    SharedPreferences.getInstance().then((prefs) async {
       List maps = jsonDecode(prefs.getString('funding_panels_data'));
       List<MemberItem> members = List();
 
@@ -63,6 +64,13 @@ class MembersBloc {
         if (maps[i]['funding_panel_address'] == fpAddress) {
           List membersMaps = maps[i]['members'];
           for (int j = 0; j < membersMaps.length; j++) {
+
+            bool zeroDocsStartupFilter = await SettingsBloc.isZeroDocsStartupFilterEnabled();
+            if(zeroDocsStartupFilter) {
+              if(membersMaps[j]['documents'].length == 0)
+                continue;
+            }
+
             members.add(MemberItem(
                 memberAddress: membersMaps[j]['member_address'],
                 fundingPanelAddress: fpAddress,

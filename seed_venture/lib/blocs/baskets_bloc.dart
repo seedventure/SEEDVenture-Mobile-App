@@ -10,6 +10,8 @@ import 'package:decimal/decimal.dart';
 import 'package:seed_venture/models/basket_token_balance_item.dart';
 import 'package:flutter/material.dart';
 import 'package:seed_venture/utils/utils.dart';
+import 'package:seed_venture/blocs/config_manager_bloc.dart';
+import 'package:seed_venture/blocs/settings_bloc.dart';
 
 final BasketsBloc basketsBloc = BasketsBloc();
 
@@ -62,18 +64,26 @@ class BasketsBloc {
   // Last funding panel opened by the user
   FundingPanelItem _currentFundingPanelItem;
 
+  // FundingPanel List
+  List<FundingPanelItem> _fundingPanelItems;
+
   List _favorites;
 
   FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin;
 
   BasketsBloc() {
-    getBasketsTokenBalances();
+    ConfigManagerBloc.getFundingPanelItemsFromPrevSharedPref().then((fundingPanelItems){
+      this._fundingPanelItems = fundingPanelItems;
+      getBasketsTokenBalances();
 
-    // SEED and ETH balances fetching
-    _getOldBalances();
-    getCurrentBalances();
+      // SEED and ETH balances fetching
+      _getOldBalances();
+      getCurrentBalances();
 
-    _initNotifications();
+      _initNotifications();
+
+    });
+
   }
 
   String getCurrentFundingPanelAddress() {
@@ -365,11 +375,43 @@ class BasketsBloc {
     // fpAddressToHighlight is used to make a balance BOLD if recently contributed by the user
     List<BasketTokenBalanceItem> basketTokenBalances = List();
 
-    SharedPreferences.getInstance().then((prefs) {
+    SharedPreferences.getInstance().then((prefs) async {
       List balancesMaps = jsonDecode(prefs.getString('user_baskets_balances'));
 
       for (int i = 0; i < balancesMaps.length; i++) {
         Map basketBalanceMap = balancesMaps[i];
+
+        String url;
+        List members;
+
+        for(int j = 0; j < _fundingPanelItems.length; j++) {
+          if(_fundingPanelItems[j].fundingPanelAddress.toLowerCase() == basketBalanceMap['funding_panel_address'].toString().toLowerCase()) {
+            url = _fundingPanelItems[j].url;
+            members = _fundingPanelItems[j].members;
+            break;
+          }
+        }
+
+        bool noUrlFilter = await SettingsBloc.isNoURLFilterEnabled();
+        if(noUrlFilter && (url == null || url.isEmpty)) {
+          continue;
+        }
+
+        bool noMembersFilter = await SettingsBloc.isZeroStartupFilterEnabled();
+        if(noMembersFilter) {
+          if(members == null || members.length == 0)
+            continue;
+
+          bool allDocsEmpty = true;
+          members.forEach((member){
+            if(member.documents.length != 0) {
+              allDocsEmpty = false;
+            }
+          });
+
+          if(allDocsEmpty)
+            continue;
+        }
 
         String name = basketBalanceMap['name'];
         String balance = basketBalanceMap['token_balance'];
