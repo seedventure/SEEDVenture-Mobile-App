@@ -370,8 +370,11 @@ class ConfigManagerBloc {
 
     List retParams = await _getBasketSeedExchangeRateFromDEX(
         tokenAddress, fromBlock, toBlock, logResponseMap);
-    double exchangeRateSeedDEX = retParams[0];
+    double exchangeRateSeedDEX;
     //this._resMapLogsDEX = resMap;
+
+    if(retParams != null)
+      exchangeRateSeedDEX = retParams[0];
 
     double exchangeRateSeed =
         await _getBasketSeedExchangeRate(fundingPanelAddress);
@@ -958,7 +961,9 @@ class ConfigManagerBloc {
 
           List retParams = await _getBasketSeedExchangeRateFromDEX(
               tokenAddress, fromBlock, toBlock, resMap);
-          exchangeRateSeedDEX = retParams[0];
+
+          if(retParams != null)
+            exchangeRateSeedDEX = retParams[0];
         } else {
           exchangeRateSeedDEX =
               await _getExchangeRateSeedDEXFromPreviousSharedPref(
@@ -1325,8 +1330,14 @@ class ConfigManagerBloc {
       if (fundingPanelVisualData != null) {
         List retParams = await _getBasketSeedExchangeRateFromDEX(
             basketContracts[2], 0, currentBlockNumber, _resMapLogsDEX);
-        double exchangeRateSeedDEX = retParams[0];
-        this._resMapLogsDEX = retParams[1];
+
+        double exchangeRateSeedDEX;
+
+        if(retParams != null) {
+          exchangeRateSeedDEX = retParams[0];
+          this._resMapLogsDEX = retParams[1];
+        }
+
 
         double exchangeRateSeed =
             await _getBasketSeedExchangeRate(basketContracts[3]);
