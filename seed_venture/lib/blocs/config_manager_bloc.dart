@@ -2185,16 +2185,22 @@ class ConfigManagerBloc {
 
     List result = resMap['result'];
 
-    for (int i = 0; i < result.length; i++) {
-      String tokenGetAddress =
+    for (int i = result.length - 1; i >= 0; i--) {
+     /* String tokenGetAddress =
           EthereumAddress(result[i]['data'].toString().substring(2, 66)).hex;
       String tokenGiveAddress =
-          EthereumAddress(result[i]['data'].toString().substring(130, 194)).hex;
+          EthereumAddress(result[i]['data'].toString().substring(130, 194)).hex; */
+
+     String tokenGetAddress = EthereumAddress(result[i]['topics'][1]).hex;
+     String tokenGiveAddress = EthereumAddress(result[i]['topics'][2]).hex;
 
       if (tokenGetAddress.toLowerCase() == tokenAddress.toLowerCase() ||
           tokenGiveAddress.toLowerCase() == tokenAddress.toLowerCase()) {
-        String amountGetHex = result[i]['data'].toString().substring(66, 130);
-        String amountGiveHex = result[i]['data'].toString().substring(194, 258);
+       // String amountGetHex = result[i]['data'].toString().substring(66, 130);
+       // String amountGiveHex = result[i]['data'].toString().substring(194, 258);
+
+        String amountGetHex = result[i]['data'].toString().substring(2, 66);
+        String amountGiveHex = result[i]['data'].toString().substring(66, 130);
 
         while (amountGetHex.codeUnitAt(0) == '0'.codeUnitAt(0)) {
           amountGetHex = amountGetHex.substring(1);
@@ -2204,11 +2210,11 @@ class ConfigManagerBloc {
           amountGiveHex = amountGiveHex.substring(1);
         }
 
-        amountGetHex += '0x';
-        amountGiveHex += '0x';
+        amountGetHex = '0x' + amountGetHex;
+        amountGiveHex = '0x' + amountGiveHex;
 
-        double amountGet = double.parse(_getValueFromHex(amountGetHex, 18));
-        double amountGive = double.parse(_getValueFromHex(amountGiveHex, 18));
+        double amountGet = double.parse(_getValueFromHex(amountGetHex, 18, morePrecision: true));
+        double amountGive = double.parse(_getValueFromHex(amountGiveHex, 18, morePrecision:  true));
 
         List retParams = List();
 
@@ -2565,7 +2571,7 @@ class ConfigManagerBloc {
     Map resMap = jsonDecode(callResponse.body);
 
     String seedMaxSupply =
-        _getValueFromHex(resMap['result'].toString(), 18, seedMaxSupply: true);
+        _getValueFromHex(resMap['result'].toString(), 18, morePrecision: true);
 
     if (seedMaxSupply.codeUnitAt(seedMaxSupply.length - 1) ==
             '0'.codeUnitAt(0) &&
@@ -3030,7 +3036,7 @@ class ConfigManagerBloc {
   }
 
   static String _getValueFromHex(String hexValue, int decimals,
-      {bool seedMaxSupply}) {
+      {bool morePrecision}) {
     hexValue = hexValue.substring(2);
     if (hexValue == '' || hexValue == '0') return '0.00';
 
@@ -3042,7 +3048,7 @@ class ConfigManagerBloc {
 
     double doubleValue = double.parse(value);
 
-    if (seedMaxSupply != null && seedMaxSupply) {
+    if (morePrecision != null && morePrecision) {
       return doubleValue.toString();
     } else {
       return doubleValue.toStringAsFixed(

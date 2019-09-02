@@ -639,6 +639,13 @@ class _SingleBasketPageState extends State<SingleBasketPage> {
         ? snapshot.data.seedExchangeRateDEX
         : snapshot.data.seedExchangeRate;
 
-    return rate.toStringAsFixed(rate.truncateToDouble() == rate ? 0 : 2);
+    int k = 2;
+    String s = '0.00';
+    while(rate.toStringAsFixed(rate.truncateToDouble() == rate ? 0 : k) == s && k <= 10) {
+      s += '0';
+      k++;
+    }
+
+    return rate.toStringAsFixed(rate.truncateToDouble() == rate ? 0 : k);
   }
 }
