@@ -941,12 +941,19 @@ class ConfigManagerBloc {
 
         for (int j = 0; j < result.length; j++) {
           if (result[j]['topics'].contains(tradeTopic)) {
-            String tokenGetAddress =
+
+
+
+            String tokenGetAddress = EthereumAddress(result[j]['topics'][1]).hex;
+            String tokenGiveAddress = EthereumAddress(result[j]['topics'][2]).hex;
+
+
+         /*   String tokenGetAddress =
                 EthereumAddress(result[i]['data'].toString().substring(2, 66))
                     .hex;
             String tokenGiveAddress = EthereumAddress(
                     result[i]['data'].toString().substring(130, 194))
-                .hex;
+                .hex; */
 
             if (tokenGetAddress.toLowerCase() == tokenAddress.toLowerCase() ||
                 tokenGiveAddress.toLowerCase() == tokenAddress.toLowerCase()) {
@@ -2181,56 +2188,54 @@ class ConfigManagerBloc {
     } else
       resMap = res;
 
-    //this._resMapLogsDEX = resMap;
 
     List result = resMap['result'];
 
     for (int i = result.length - 1; i >= 0; i--) {
-     /* String tokenGetAddress =
-          EthereumAddress(result[i]['data'].toString().substring(2, 66)).hex;
-      String tokenGiveAddress =
-          EthereumAddress(result[i]['data'].toString().substring(130, 194)).hex; */
 
-     String tokenGetAddress = EthereumAddress(result[i]['topics'][1]).hex;
-     String tokenGiveAddress = EthereumAddress(result[i]['topics'][2]).hex;
+      if(result[i]['topics'].contains(tradeTopic)) {
+        String tokenGetAddress = EthereumAddress(result[i]['topics'][1]).hex;
+        String tokenGiveAddress = EthereumAddress(result[i]['topics'][2]).hex;
 
-      if (tokenGetAddress.toLowerCase() == tokenAddress.toLowerCase() ||
-          tokenGiveAddress.toLowerCase() == tokenAddress.toLowerCase()) {
-       // String amountGetHex = result[i]['data'].toString().substring(66, 130);
-       // String amountGiveHex = result[i]['data'].toString().substring(194, 258);
+        if (tokenGetAddress.toLowerCase() == tokenAddress.toLowerCase() ||
+            tokenGiveAddress.toLowerCase() == tokenAddress.toLowerCase()) {
 
-        String amountGetHex = result[i]['data'].toString().substring(2, 66);
-        String amountGiveHex = result[i]['data'].toString().substring(66, 130);
 
-        while (amountGetHex.codeUnitAt(0) == '0'.codeUnitAt(0)) {
-          amountGetHex = amountGetHex.substring(1);
+
+          String amountGetHex = result[i]['data'].toString().substring(2, 66);
+          String amountGiveHex = result[i]['data'].toString().substring(66, 130);
+
+          while (amountGetHex.codeUnitAt(0) == '0'.codeUnitAt(0)) {
+            amountGetHex = amountGetHex.substring(1);
+          }
+
+          while (amountGiveHex.codeUnitAt(0) == '0'.codeUnitAt(0)) {
+            amountGiveHex = amountGiveHex.substring(1);
+          }
+
+          amountGetHex = '0x' + amountGetHex;
+          amountGiveHex = '0x' + amountGiveHex;
+
+          double amountGet = double.parse(_getValueFromHex(amountGetHex, 18, morePrecision: true));
+          double amountGive = double.parse(_getValueFromHex(amountGiveHex, 18, morePrecision:  true));
+
+          List retParams = List();
+
+          if (tokenGetAddress.toLowerCase() == tokenAddress.toLowerCase()) {
+            // Baskets token was bought
+
+            //return amountGive / amountGet;
+            retParams.add(amountGive / amountGet);
+          } else {
+            //return amountGet / amountGive;
+            retParams.add(amountGet / amountGive);
+          }
+
+          retParams.add(resMap);
+          return retParams;
         }
-
-        while (amountGiveHex.codeUnitAt(0) == '0'.codeUnitAt(0)) {
-          amountGiveHex = amountGiveHex.substring(1);
-        }
-
-        amountGetHex = '0x' + amountGetHex;
-        amountGiveHex = '0x' + amountGiveHex;
-
-        double amountGet = double.parse(_getValueFromHex(amountGetHex, 18, morePrecision: true));
-        double amountGive = double.parse(_getValueFromHex(amountGiveHex, 18, morePrecision:  true));
-
-        List retParams = List();
-
-        if (tokenGetAddress.toLowerCase() == tokenAddress.toLowerCase()) {
-          // Baskets token was bought
-
-          //return amountGive / amountGet;
-          retParams.add(amountGive / amountGet);
-        } else {
-          //return amountGet / amountGive;
-          retParams.add(amountGet / amountGive);
-        }
-
-        retParams.add(resMap);
-        return retParams;
       }
+
     }
 
     return null;
