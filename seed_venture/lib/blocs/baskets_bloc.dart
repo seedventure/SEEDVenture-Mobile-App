@@ -283,7 +283,10 @@ class BasketsBloc {
   }
 
   void notification(String notificationData) async {
-    await _launchNotification(notificationData);
+    bool areNotitificationEnabled = await SettingsBloc.areNotificationsEnabled();
+
+    if(areNotitificationEnabled)
+      await _launchNotification(notificationData);
   }
 
   Future<void> _launchNotification(String notificationData) async {

@@ -596,7 +596,7 @@ class ConfigManagerBloc {
     // fp_check_again_list = params[7]
 
     bool _logsResultsExceeded = false;
-    List<String> _zeroSupplyFP;
+    List<String> _zeroSupplyFP = List();
 
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     List favorites = sharedPreferences.getStringList('favorites');
@@ -774,6 +774,10 @@ class ConfigManagerBloc {
           };
 
           fpMapsSharedPrefs.add(fpMapSP);
+
+          String notificationData =
+              'Basket ' + FPItem.name + ' added!';
+          basketsBloc.notification(notificationData);
         }
       } else {
         Map latestOwnerData;
@@ -786,6 +790,17 @@ class ConfigManagerBloc {
         //String seedLiquidity;
         double WLThreshold;
         List<MemberItem> members;
+
+        String basketName;
+        for (int j = 0; j < fundingPanelItemsPrev.length; j++) {
+          if (fundingPanelItemsPrev[j]
+              .fundingPanelAddress
+              .toLowerCase() ==
+              fundingPanelAddress.toLowerCase()) {
+            basketName = fundingPanelItemsPrev[j].name;
+            break;
+          }
+        }
 
         // check for seed max supply changes
         bool changed = false;
@@ -801,6 +816,18 @@ class ConfigManagerBloc {
         if (changed) {
           print('seed max supply changed');
           seedMaxSupply = await _getSeedMaxSupply(fundingPanelAddress);
+
+          if(seedMaxSupply != null) {
+
+            if(favorites.contains(fundingPanelAddress.toLowerCase())) {
+              String notificationData = 'Total Supply by basket ' +
+                  basketName +
+                  ' changed!';
+              basketsBloc.notification(notificationData);
+            }
+
+          }
+
         } else {
           seedMaxSupply = await _getSeedMaxSupplyFromPreviousSharedPref(
               fundingPanelAddress);
@@ -808,6 +835,11 @@ class ConfigManagerBloc {
 
         if (seedMaxSupply == null || seedMaxSupply == '0.00') {
           if (seedMaxSupply == '0.00') _zeroSupplyFP.add(fundingPanelAddress);
+
+          String notificationData = 'Basket ' +
+              basketName +
+              ' disabled (zero-supply)!';
+          basketsBloc.notification(notificationData);
 
           _addToFPCheckAgainList(
               fundingPanelAddress, adminToolsAddress, tokenAddress);
@@ -838,6 +870,18 @@ class ConfigManagerBloc {
             fundingPanelVisualData =
                 await _loadFundingPanelVisualDataFromPreviousSharedPref(
                     fundingPanelAddress);
+
+          }
+          else {
+            if (favorites.contains(fundingPanelAddress.toLowerCase())) {
+
+              if (basketName != null) {
+                String notificationData = 'Documents by basket ' +
+                    basketName +
+                    ' changed!';
+                basketsBloc.notification(notificationData);
+              }
+            }
           }
         } else {
           latestOwnerData = await _getLatestOwnerDataFromPreviousSharedPref(
@@ -897,6 +941,12 @@ class ConfigManagerBloc {
 
           exchangeRateSeed =
               await _getBasketSeedExchangeRate(fundingPanelAddress);
+
+          if(exchangeRateSeed != null) {
+            String notificationData =
+                'Quotation by basket ' + basketName + ' changed!';
+            basketsBloc.notification(notificationData);
+          }
         } else {
           exchangeRateSeed = await _getExchangeRateSeedFromPreviousSharedPref(
               fundingPanelAddress);
@@ -925,6 +975,16 @@ class ConfigManagerBloc {
 
           exchangeRateOnTop =
               await _getBasketExchangeRateOnTop(fundingPanelAddress);
+
+          if(exchangeRateOnTop != null) {
+            if (favorites.contains(
+                fundingPanelAddress.toLowerCase())) {
+              String notificationData = 'Exchange Rate on Top by basket ' +
+                  basketName +
+                  ' changed!';
+              basketsBloc.notification(notificationData);
+            }
+          }
         } else {
           exchangeRateOnTop = await _getExchangeRateOnTopFromPreviousSharedPref(
               fundingPanelAddress);
@@ -942,18 +1002,8 @@ class ConfigManagerBloc {
         for (int j = 0; j < result.length; j++) {
           if (result[j]['topics'].contains(tradeTopic)) {
 
-
-
             String tokenGetAddress = EthereumAddress(result[j]['topics'][1]).hex;
             String tokenGiveAddress = EthereumAddress(result[j]['topics'][2]).hex;
-
-
-         /*   String tokenGetAddress =
-                EthereumAddress(result[i]['data'].toString().substring(2, 66))
-                    .hex;
-            String tokenGiveAddress = EthereumAddress(
-                    result[i]['data'].toString().substring(130, 194))
-                .hex; */
 
             if (tokenGetAddress.toLowerCase() == tokenAddress.toLowerCase() ||
                 tokenGiveAddress.toLowerCase() == tokenAddress.toLowerCase()) {
@@ -969,8 +1019,13 @@ class ConfigManagerBloc {
           List retParams = await _getBasketSeedExchangeRateFromDEX(
               tokenAddress, fromBlock, toBlock, resMap);
 
-          if(retParams != null)
+          if(retParams != null) {
             exchangeRateSeedDEX = retParams[0];
+
+            String notificationData =
+                'Quotation by basket ' + basketName + ' changed!';
+            basketsBloc.notification(notificationData);
+          }
         } else {
           exchangeRateSeedDEX =
               await _getExchangeRateSeedDEXFromPreviousSharedPref(
@@ -1017,6 +1072,15 @@ class ConfigManagerBloc {
 
           WLThreshold =
               await _getWhitelistThreshold(adminToolsAddress, exchangeRateSeed);
+
+          if(WLThreshold != null) {
+            if (basketName != null) {
+              String notificationData = 'WL Threshold by basket ' +
+                  basketName +
+                  ' changed!';
+              basketsBloc.notification(notificationData);
+            }
+          }
         } else {
           WLThreshold =
               await _getWLThresholdFromPreviousSharedPref(fundingPanelAddress);
@@ -1057,16 +1121,6 @@ class ConfigManagerBloc {
           if (fundsUnlocked) {
             // Notification if funds unlocked
             if (favorites.contains(fundingPanelAddress.toLowerCase())) {
-              String basketName;
-              for (int j = 0; j < fundingPanelItemsPrev.length; j++) {
-                if (fundingPanelItemsPrev[j]
-                        .fundingPanelAddress
-                        .toLowerCase() ==
-                    fundingPanelAddress.toLowerCase()) {
-                  basketName = fundingPanelItemsPrev[j].name;
-                  break;
-                }
-              }
 
               if (basketName != null) {
                 String notificationData =
@@ -1076,46 +1130,57 @@ class ConfigManagerBloc {
             }
           }
 
-          members = List();
-          List<String> membersAddressList =
-              await _getMembersAddressListFromPreviousSharedPref(
-                  fundingPanelAddress);
+          if(changed) {
+            members = List();
+            List<String> membersAddressList =
+            await _getMembersAddressListFromPreviousSharedPref(
+                fundingPanelAddress);
 
-          for (int j = 0; j < membersAddressList.length; j++) {
-            List<String> memberData = await _getMemberDataByAddress(
-                fundingPanelAddress, membersAddressList[j]);
-            List<String> memberJsonData =
-                await _getMemberJSONDataFromIPFS(memberData[0]);
+            for (int j = 0; j < membersAddressList.length; j++) {
+              List<String> memberData = await _getMemberDataByAddress(
+                  fundingPanelAddress, membersAddressList[j]);
+              List<String> memberJsonData =
+              await _getMemberJSONDataFromIPFS(memberData[0]);
 
-            if (memberJsonData != null) {
-              List documents = List();
+              if (memberJsonData != null) {
+                List documents = List();
 
-              if (memberJsonData[4] != null && memberJsonData[4] != '') {
-                List documentMaps = jsonDecode(memberJsonData[4]);
-                documentMaps.forEach((document) {
-                  documents.add(document);
-                });
+                if (memberJsonData[4] != null && memberJsonData[4] != '') {
+                  List documentMaps = jsonDecode(memberJsonData[4]);
+                  documentMaps.forEach((document) {
+                    documents.add(document);
+                  });
+                }
+
+                members.add(MemberItem(
+                    seedsUnlocked: memberData[2],
+                    memberAddress: membersAddressList[j],
+                    fundingPanelAddress: fundingPanelAddress,
+                    ipfsUrl: memberData[0],
+                    hash: memberData[1],
+                    name: memberJsonData[0],
+                    description: memberJsonData[1],
+                    url: memberJsonData[2],
+                    documents: documents,
+                    imgBase64: memberJsonData[3]));
+              } else {
+                _addToMembersCheckAgainList(
+                    fundingPanelAddress, membersAddressList[j]);
+                MemberItem member = await _getSingleMemberFromPreviousSharedPref(
+                    fundingPanelAddress, membersAddressList[j]);
+                members.add(member);
               }
+            }
 
-              members.add(MemberItem(
-                  seedsUnlocked: memberData[2],
-                  memberAddress: membersAddressList[j],
-                  fundingPanelAddress: fundingPanelAddress,
-                  ipfsUrl: memberData[0],
-                  hash: memberData[1],
-                  name: memberJsonData[0],
-                  description: memberJsonData[1],
-                  url: memberJsonData[2],
-                  documents: documents,
-                  imgBase64: memberJsonData[3]));
-            } else {
-              _addToMembersCheckAgainList(
-                  fundingPanelAddress, membersAddressList[j]);
-              MemberItem member = await _getSingleMemberFromPreviousSharedPref(
-                  fundingPanelAddress, membersAddressList[j]);
-              members.add(member);
+            if(favorites.contains(fundingPanelAddress.toLowerCase())) {
+              String notificationData = 'Documents by Startup changed! (Basket ' +
+                  basketName +
+                  ')';
+              basketsBloc.notification(notificationData);
             }
           }
+
+
         } else {
           members =
               await _getMembersFromPreviousSharedPref(fundingPanelAddress);
@@ -1178,6 +1243,15 @@ class ConfigManagerBloc {
                   url: memberJsonData[2],
                   imgBase64: memberJsonData[3],
                   documents: documents));
+
+              String notificationData = 'Startup ' +
+                  memberJsonData[0] +
+                  ' added! (Basket ' +
+                  basketName +
+                  ')';
+              basketsBloc.notification(notificationData);
+
+
             } else {
               _addToMembersCheckAgainList(fundingPanelAddress, memberAddress);
             }
@@ -1761,9 +1835,6 @@ class ConfigManagerBloc {
       } else
         _logsResultsExceeded = returnParams[0];
 
-      /*fundingPanelItems = await _getLogsUpdate(addressMaps, addressList,
-          fromBlock, currentBlockNumber, configurationMap);*/
-
       if (fundingPanelItems == null) {
         if (_logsResultsExceeded) {
           int window = currentBlockNumber - fromBlock;
@@ -1790,13 +1861,13 @@ class ConfigManagerBloc {
 
       print('configuration updated!');
 
-      bool areNotificationsEnabled =
+      /*bool areNotificationsEnabled =
           await SettingsBloc.areNotificationsEnabled();
 
       if (areNotificationsEnabled) {
         await _checkDifferencesBetweenConfigurations(
             _previousConfigurationMap, configurationMap);
-      }
+      }*/
 
       _previousConfigurationMap = configurationMap;
     }
@@ -1958,7 +2029,7 @@ class ConfigManagerBloc {
               if (!noDocs && favorites.contains(fpAddress.toLowerCase())) {
                 String notificationData = 'Documents by startup ' +
                     prevMember['memberName'] +
-                    ' changed! (Incubator ' +
+                    ' changed! (Basket ' +
                     incubatorName +
                     ')';
                 basketsBloc.notification(notificationData);
