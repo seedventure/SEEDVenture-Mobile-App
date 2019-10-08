@@ -134,6 +134,7 @@ class BasketsBloc {
               favorite: favorite,
               tags: maps[i]['tags'],
               documents: maps[i]['documents'],
+              basketSuccessFee: maps[i]['basket_success_fee'],
               tokenAddress: maps[i]['token_address'],
               fundingPanelAddress: maps[i]['funding_panel_address'],
               adminToolsAddress: maps[i]['admin_tools_address'],
@@ -292,12 +293,12 @@ class BasketsBloc {
   Future<void> _launchNotification(String notificationData) async {
     var rng = new Random();
     var androidPlatformChannelSpecifics = new AndroidNotificationDetails(
-        'SeedVenture', 'SeedVenture update', 'Seedventure',
+        'SEEDVenture', 'SEEDVenture update', 'SEEDVenture',
         importance: Importance.Max, priority: Priority.High);
     var iOSPlatformChannelSpecifics = new IOSNotificationDetails();
     var platformChannelSpecifics = new NotificationDetails(
         androidPlatformChannelSpecifics, iOSPlatformChannelSpecifics);
-    await flutterLocalNotificationsPlugin.show(rng.nextInt(1000), 'SeedVenture',
+    await flutterLocalNotificationsPlugin.show(rng.nextInt(1000), 'SEEDVenture',
         notificationData, platformChannelSpecifics,
         payload: '');
   }

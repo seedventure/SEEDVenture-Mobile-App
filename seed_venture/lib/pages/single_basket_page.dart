@@ -391,8 +391,8 @@ class _SingleBasketPageState extends State<SingleBasketPage> {
                       child: Text('WL Threshold Balance: ' +
                           snapshot.data.whitelistThreshold.toStringAsFixed(
                               snapshot.data.whitelistThreshold
-                                          .truncateToDouble() ==
-                                      snapshot.data.whitelistThreshold
+                                  .truncateToDouble() ==
+                                  snapshot.data.whitelistThreshold
                                   ? 0
                                   : 2) +
                           ' ' +
@@ -400,6 +400,7 @@ class _SingleBasketPageState extends State<SingleBasketPage> {
                       margin: const EdgeInsets.only(
                           top: 15.0, left: 8.0, right: 8.0),
                     ),
+                    _getBasketSuccessFeeWidget(snapshot),
                     Container(
                       margin: EdgeInsets.only(top: 8.0),
                       height: 1.0,
@@ -619,6 +620,20 @@ class _SingleBasketPageState extends State<SingleBasketPage> {
     );
   }
 
+  Widget _getBasketSuccessFeeWidget(AsyncSnapshot snapshot) {
+    if(snapshot.data.basketSuccessFee == null)
+      return Container();
+
+    return Container(
+      child: Text('Basket Success Fee: ' +
+          snapshot.data.basketSuccessFee.toString() +
+          ' %'),
+      margin: const EdgeInsets.only(
+          top: 15.0, left: 8.0, right: 8.0),
+    );
+
+  }
+
   String _getSeedMaxSupplyText(String maxSupply) {
     if (!maxSupply.contains('e'))
       return formatter.format(double.parse(maxSupply));
@@ -648,4 +663,6 @@ class _SingleBasketPageState extends State<SingleBasketPage> {
 
     return rate.toStringAsFixed(rate.truncateToDouble() == rate ? 0 : k);
   }
+
+
 }

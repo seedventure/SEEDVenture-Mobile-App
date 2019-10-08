@@ -30,6 +30,7 @@ class FundingPanelItem {
   final String totalUnlockedForStartup;
   final String tokenSymbol;
   final double WLMaxAmount;
+  final double basketSuccessFee;
 
   void setFavorite(bool favorite) {
     this.favorite = favorite;
@@ -59,5 +60,6 @@ class FundingPanelItem {
       //this.seedLiquidity,
       this.totalUnlockedForStartup,
       this.tokenSymbol,
-      this.WLMaxAmount});
+      this.WLMaxAmount,
+      this.basketSuccessFee});
 }
