@@ -412,6 +412,18 @@ class ConfigManagerBloc {
       basketSuccessFee = double.parse(fundingPanelVisualData[6]);
     }
 
+    double portfolioValue;
+
+    if (fundingPanelVisualData[7] != null && fundingPanelVisualData[7] != '') {
+      portfolioValue = double.parse(fundingPanelVisualData[7]);
+    }
+
+    String portfolioCurrency;
+
+    if (fundingPanelVisualData[8] != null && fundingPanelVisualData[8] != '') {
+      portfolioCurrency = fundingPanelVisualData[8];
+    }
+
     List<MemberItem> members =
         await _getMembersOfFundingPanel(fundingPanelAddress);
 
@@ -440,7 +452,9 @@ class ConfigManagerBloc {
         members: members,
         tags: tags,
         documents: documents,
-        basketSuccessFee: basketSuccessFee);
+        basketSuccessFee: basketSuccessFee,
+        portfolioValue: portfolioValue,
+        portfolioCurrency: portfolioCurrency);
 
     return FPItem;
   }
@@ -768,6 +782,8 @@ class ConfigManagerBloc {
             'total_unlocked': FPItem.totalUnlockedForStartup,
             'documents': FPItem.documents,
             'basket_success_fee': FPItem.basketSuccessFee,
+            'portfolio_value': FPItem.portfolioValue,
+            'portfolio_currency': FPItem.portfolioCurrency,
             'members': membersMapsSharedPrefs
           };
 
@@ -875,9 +891,28 @@ class ConfigManagerBloc {
                       ' changed!';
                   basketsBloc.notification(notificationData);
                 } else {
-                  String notificationData =
-                      'Documents by basket ' + basketName + ' changed!';
-                  basketsBloc.notification(notificationData);
+                  bool portfolioValueChanged = prevVisualData[7] != null &&
+                      prevVisualData[7] != 'null' &&
+                      fundingPanelVisualData[7] != null &&
+                      fundingPanelVisualData[7] != 'null' &&
+                      double.parse(prevVisualData[7]) !=
+                          double.parse(fundingPanelVisualData[7]);
+
+                  bool portfolioCurrencyChanged = prevVisualData[8] != null &&
+                      prevVisualData[8] != 'null' &&
+                      fundingPanelVisualData[8] != null &&
+                      fundingPanelVisualData[8] != 'null' &&
+                      prevVisualData[8] != fundingPanelVisualData[8];
+
+                  if (portfolioValueChanged || portfolioCurrencyChanged) {
+                    String notificationData =
+                        'Portfolio Value by basket ' + basketName + ' changed!';
+                    basketsBloc.notification(notificationData);
+                  } else {
+                    String notificationData =
+                        'Document by basket ' + basketName + ' changed!';
+                    basketsBloc.notification(notificationData);
+                  }
                 }
               }
             }
@@ -929,6 +964,22 @@ class ConfigManagerBloc {
             fundingPanelVisualData[6] != 'null' &&
             fundingPanelVisualData[6] != '') {
           basketSuccessFee = double.parse(fundingPanelVisualData[6]);
+        }
+
+        double portfolioValue;
+
+        if (fundingPanelVisualData[7] != null &&
+            fundingPanelVisualData[7] != 'null' &&
+            fundingPanelVisualData[7] != '') {
+          portfolioValue = double.parse(fundingPanelVisualData[7]);
+        }
+
+        String portfolioCurrency;
+
+        if (fundingPanelVisualData[8] != null &&
+            fundingPanelVisualData[8] != 'null' &&
+            fundingPanelVisualData[8] != '') {
+          portfolioCurrency = fundingPanelVisualData[8];
         }
 
         // check for token exchange rate changes
@@ -1177,7 +1228,7 @@ class ConfigManagerBloc {
 
             if (favorites.contains(fundingPanelAddress.toLowerCase())) {
               String notificationData =
-                  'Documents by Startup changed! (Basket ' + basketName + ')';
+                  'Document by Startup changed! (Basket ' + basketName + ')';
               basketsBloc.notification(notificationData);
             }
           }
@@ -1285,7 +1336,9 @@ class ConfigManagerBloc {
             tags: tags,
             documents: documents,
             members: members,
-            basketSuccessFee: basketSuccessFee);
+            basketSuccessFee: basketSuccessFee,
+            portfolioValue: portfolioValue,
+            portfolioCurrency: portfolioCurrency);
 
         fundingPanelItems.add(FPItem);
 
@@ -1349,10 +1402,11 @@ class ConfigManagerBloc {
           'whitelist_threshold': WLThreshold,
           'seed_total_raised': FPItem.seedTotalRaised,
           'seed_max_supply': seedMaxSupply,
-          //'seed_liquidity': seedLiquidity,
           'total_unlocked': FPItem.totalUnlockedForStartup,
           'documents': FPItem.documents,
           'basket_success_fee': FPItem.basketSuccessFee,
+          'portfolio_value': FPItem.portfolioValue,
+          'portfolio_currency': FPItem.portfolioCurrency,
           'members': membersMapsSharedPrefs
         };
 
@@ -1458,6 +1512,20 @@ class ConfigManagerBloc {
           basketSuccessFee = double.parse(fundingPanelVisualData[6]);
         }
 
+        double portfolioValue;
+
+        if (fundingPanelVisualData[7] != null &&
+            fundingPanelVisualData[7] != '') {
+          portfolioValue = double.parse(fundingPanelVisualData[7]);
+        }
+
+        String portfolioCurrency;
+
+        if (fundingPanelVisualData[8] != null &&
+            fundingPanelVisualData[8] != '') {
+          portfolioCurrency = fundingPanelVisualData[8];
+        }
+
         List<MemberItem> members =
             await _getMembersOfFundingPanel(basketContracts[3]);
 
@@ -1484,7 +1552,9 @@ class ConfigManagerBloc {
             members: members,
             tags: tags,
             documents: documents,
-            basketSuccessFee: basketSuccessFee);
+            basketSuccessFee: basketSuccessFee,
+            portfolioValue: portfolioValue,
+            portfolioCurrency: portfolioCurrency);
 
         fundingPanelItems.add(FPItem);
         List<Map> memberMapsConfigFile = List();
@@ -1550,6 +1620,8 @@ class ConfigManagerBloc {
           'total_unlocked': FPItem.totalUnlockedForStartup,
           'documents': FPItem.documents,
           'basket_success_fee': FPItem.basketSuccessFee,
+          'portfolio_value': FPItem.portfolioValue,
+          'portfolio_currency': FPItem.portfolioCurrency,
           'members': membersMapsSharedPrefs
         };
 
@@ -1694,6 +1766,16 @@ class ConfigManagerBloc {
       } else
         returnFpDetails.add('');
 
+      if (responseMap['portfolioValue'] != null) {
+        returnFpDetails.add(jsonEncode(responseMap['portfolioValue']));
+      } else
+        returnFpDetails.add('');
+
+      if (responseMap['portfolioCurrency'] != null) {
+        returnFpDetails.add(responseMap['portfolioCurrency']);
+      } else
+        returnFpDetails.add('');
+
       return returnFpDetails;
     } catch (e) {
       print('error http get ' + e.toString() + ' FROM ' + ipfsUrl);
@@ -1720,6 +1802,9 @@ class ConfigManagerBloc {
         ret.add(jsonEncode(maps[i]['documents']));
         ret.add(jsonEncode(maps[i]['tags']));
         ret.add(jsonEncode(maps[i]['basket_success_fee']));
+        ret.add(jsonEncode(maps[i]['portfolio_value']));
+        ret.add(maps[i]['portfolio_currency']);
+
         return ret;
       }
     }
@@ -1742,6 +1827,7 @@ class ConfigManagerBloc {
 
       // I only set parameters used by updateHoldings() and to filter baskets
       fundingPanelItems.add(FundingPanelItem(
+          name: maps[i]['name'],
           seedTotalRaised: maps[i]['seed_total_raised'],
           seedExchangeRate: maps[i]['seed_exchange_rate'],
           seedExchangeRateDEX: maps[i]['seed_exchange_rate_dex'],
@@ -1752,6 +1838,8 @@ class ConfigManagerBloc {
           tags: maps[i]['tags'],
           documents: maps[i]['documents'],
           basketSuccessFee: maps[i]['basket_success_fee'],
+          portfolioValue: maps[i]['portfolio_value'],
+          portfolioCurrency: maps[i]['portfolio_currency'],
           url: maps[i]['url'],
           members: members));
     }

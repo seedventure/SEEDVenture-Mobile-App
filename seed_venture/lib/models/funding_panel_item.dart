@@ -26,11 +26,12 @@ class FundingPanelItem {
   final bool blacklisted;
   final String seedTotalRaised;
   final String seedMaxSupply;
-  //final String seedLiquidity;
   final String totalUnlockedForStartup;
   final String tokenSymbol;
   final double WLMaxAmount;
   final double basketSuccessFee;
+  final double portfolioValue;
+  final String portfolioCurrency;
 
   void setFavorite(bool favorite) {
     this.favorite = favorite;
@@ -57,9 +58,10 @@ class FundingPanelItem {
       this.blacklisted,
       this.seedTotalRaised,
       this.seedMaxSupply,
-      //this.seedLiquidity,
       this.totalUnlockedForStartup,
       this.tokenSymbol,
       this.WLMaxAmount,
-      this.basketSuccessFee});
+      this.basketSuccessFee,
+      this.portfolioValue,
+      this.portfolioCurrency});
 }

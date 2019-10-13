@@ -311,12 +311,6 @@ class _SingleBasketPageState extends State<SingleBasketPage> {
                       margin: const EdgeInsets.only(
                           left: 8.0, right: 8.0, bottom: 8.0),
                     ),
-                    /* Container(
-                      margin: EdgeInsets.only(top: 8.0),
-                      height: 1.0,
-                      width: double.infinity,
-                      color: Color(0xFFF3F3F3),
-                    ), */
                     Container(
                       child: RichText(
                         text: TextSpan(
@@ -387,12 +381,13 @@ class _SingleBasketPageState extends State<SingleBasketPage> {
                       margin: const EdgeInsets.only(
                           top: 15.0, left: 8.0, right: 8.0),
                     ),
+                    _getPortfolioValueWidget(snapshot),
                     Container(
                       child: Text('WL Threshold Balance: ' +
                           snapshot.data.whitelistThreshold.toStringAsFixed(
                               snapshot.data.whitelistThreshold
-                                  .truncateToDouble() ==
-                                  snapshot.data.whitelistThreshold
+                                          .truncateToDouble() ==
+                                      snapshot.data.whitelistThreshold
                                   ? 0
                                   : 2) +
                           ' ' +
@@ -621,17 +616,27 @@ class _SingleBasketPageState extends State<SingleBasketPage> {
   }
 
   Widget _getBasketSuccessFeeWidget(AsyncSnapshot snapshot) {
-    if(snapshot.data.basketSuccessFee == null)
-      return Container();
+    if (snapshot.data.basketSuccessFee == null) return Container();
 
     return Container(
       child: Text('Basket Success Fee: ' +
           snapshot.data.basketSuccessFee.toString() +
           ' %'),
-      margin: const EdgeInsets.only(
-          top: 15.0, left: 8.0, right: 8.0),
+      margin: const EdgeInsets.only(top: 15.0, left: 8.0, right: 8.0),
     );
+  }
 
+  Widget _getPortfolioValueWidget(AsyncSnapshot snapshot) {
+    if (snapshot.data.portfolioValue == null ||
+        snapshot.data.portfolioCurrency == null) return Container();
+
+    return Container(
+      child: Text('Portfolio Value: ' +
+          snapshot.data.portfolioValue.toString() +
+          ' ' +
+          snapshot.data.portfolioCurrency),
+      margin: const EdgeInsets.only(top: 15.0, left: 8.0, right: 8.0),
+    );
   }
 
   String _getSeedMaxSupplyText(String maxSupply) {
@@ -656,13 +661,12 @@ class _SingleBasketPageState extends State<SingleBasketPage> {
 
     int k = 2;
     String s = '0.00';
-    while(rate.toStringAsFixed(rate.truncateToDouble() == rate ? 0 : k) == s && k <= 10) {
+    while (rate.toStringAsFixed(rate.truncateToDouble() == rate ? 0 : k) == s &&
+        k <= 10) {
       s += '0';
       k++;
     }
 
     return rate.toStringAsFixed(rate.truncateToDouble() == rate ? 0 : k);
   }
-
-
 }

@@ -72,7 +72,8 @@ class BasketsBloc {
   FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin;
 
   BasketsBloc() {
-    ConfigManagerBloc.getFundingPanelItemsFromPrevSharedPref().then((fundingPanelItems){
+    ConfigManagerBloc.getFundingPanelItemsFromPrevSharedPref()
+        .then((fundingPanelItems) {
       this._fundingPanelItems = fundingPanelItems;
       getBasketsTokenBalances();
 
@@ -81,9 +82,7 @@ class BasketsBloc {
       getCurrentBalances();
 
       _initNotifications();
-
     });
-
   }
 
   String getCurrentFundingPanelAddress() {
@@ -129,12 +128,13 @@ class BasketsBloc {
           basket = FundingPanelItem(
               seedMaxSupply: maps[i]['seed_max_supply'],
               seedTotalRaised: maps[i]['seed_total_raised'],
-             // seedLiquidity: maps[i]['seed_liquidity'],
               totalUnlockedForStartup: maps[i]['total_unlocked'],
               favorite: favorite,
               tags: maps[i]['tags'],
               documents: maps[i]['documents'],
               basketSuccessFee: maps[i]['basket_success_fee'],
+              portfolioValue: maps[i]['portfolio_value'],
+              portfolioCurrency: maps[i]['portfolio_currency'],
               tokenAddress: maps[i]['token_address'],
               fundingPanelAddress: maps[i]['funding_panel_address'],
               adminToolsAddress: maps[i]['admin_tools_address'],
@@ -284,10 +284,10 @@ class BasketsBloc {
   }
 
   void notification(String notificationData) async {
-    bool areNotitificationEnabled = await SettingsBloc.areNotificationsEnabled();
+    bool areNotitificationEnabled =
+        await SettingsBloc.areNotificationsEnabled();
 
-    if(areNotitificationEnabled)
-      await _launchNotification(notificationData);
+    if (areNotitificationEnabled) await _launchNotification(notificationData);
   }
 
   Future<void> _launchNotification(String notificationData) async {
@@ -388,8 +388,11 @@ class BasketsBloc {
         String url;
         List members;
 
-        for(int j = 0; j < _fundingPanelItems.length; j++) {
-          if(_fundingPanelItems[j].fundingPanelAddress.toLowerCase() == basketBalanceMap['funding_panel_address'].toString().toLowerCase()) {
+        for (int j = 0; j < _fundingPanelItems.length; j++) {
+          if (_fundingPanelItems[j].fundingPanelAddress.toLowerCase() ==
+              basketBalanceMap['funding_panel_address']
+                  .toString()
+                  .toLowerCase()) {
             url = _fundingPanelItems[j].url;
             members = _fundingPanelItems[j].members;
             break;
@@ -397,24 +400,22 @@ class BasketsBloc {
         }
 
         bool noUrlFilter = await SettingsBloc.isNoURLFilterEnabled();
-        if(noUrlFilter && (url == null || url.isEmpty)) {
+        if (noUrlFilter && (url == null || url.isEmpty)) {
           continue;
         }
 
         bool noMembersFilter = await SettingsBloc.isZeroStartupFilterEnabled();
-        if(noMembersFilter) {
-          if(members == null || members.length == 0)
-            continue;
+        if (noMembersFilter) {
+          if (members == null || members.length == 0) continue;
 
           bool allDocsEmpty = true;
-          members.forEach((member){
-            if(member.documents.length != 0) {
+          members.forEach((member) {
+            if (member.documents.length != 0) {
               allDocsEmpty = false;
             }
           });
 
-          if(allDocsEmpty)
-            continue;
+          if (allDocsEmpty) continue;
         }
 
         String name = basketBalanceMap['name'];
