@@ -6,12 +6,12 @@ import 'package:seed_venture/blocs/import_logic_bloc.dart';
 import 'package:seed_venture/blocs/import_from_private_key_logic_bloc.dart';
 import 'package:seed_venture/blocs/import_from_config_file_bloc.dart';
 
-class ImportConfigPage extends StatefulWidget {
+class ImportWalletPage extends StatefulWidget {
   @override
-  State<StatefulWidget> createState() => _ImportConfigPageState();
+  State<StatefulWidget> createState() => _ImportWalletPageState();
 }
 
-class _ImportConfigPageState extends State<ImportConfigPage> {
+class _ImportWalletPageState extends State<ImportWalletPage> {
   final TextEditingController mnemonicController = TextEditingController();
   final TextEditingController privateKeyController = TextEditingController();
   final _scaffoldKey = GlobalKey<ScaffoldState>();
@@ -22,10 +22,7 @@ class _ImportConfigPageState extends State<ImportConfigPage> {
       if (success) {
         importLogicBloc.setCurrentImportMode(ImportLogicBloc.fromJSONFile);
 
-        Navigator.of(context)
-            .push(MaterialPageRoute(builder: (BuildContext context) {
-          return InsertPasswordImportPage();
-        }));
+        Navigator.pushNamed(context, '/insert_password_import_page');
       } else {
         SnackBar invalidFileSnackBar =
             SnackBar(content: Text('Invalid Wallet File'));
@@ -37,10 +34,7 @@ class _ImportConfigPageState extends State<ImportConfigPage> {
       if (success) {
         importLogicBloc.setCurrentImportMode(ImportLogicBloc.fromConfigFile);
 
-        Navigator.of(context)
-            .push(MaterialPageRoute(builder: (BuildContext context) {
-          return InsertPasswordImportPage();
-        }));
+        Navigator.pushNamed(context, '/insert_password_import_page');
       } else {
         SnackBar invalidFileSnackBar =
             SnackBar(content: Text('Invalid Config File'));
@@ -94,10 +88,7 @@ class _ImportConfigPageState extends State<ImportConfigPage> {
                   importLogicBloc
                       .setCurrentImportMode(ImportLogicBloc.fromMnemonicWords);
 
-                  Navigator.of(context)
-                      .push(MaterialPageRoute(builder: (BuildContext context) {
-                    return InsertPasswordImportPage();
-                  }));
+                  Navigator.pushNamed(context, '/insert_password_import_page');
                 },
                 child: Text('Import', style: TextStyle(color: Colors.white)),
               ),
@@ -131,10 +122,7 @@ class _ImportConfigPageState extends State<ImportConfigPage> {
                       .setCurrentPrivateKey(privateKeyController.text);
                   importLogicBloc
                       .setCurrentImportMode(ImportLogicBloc.fromPrivateKey);
-                  Navigator.of(context)
-                      .push(MaterialPageRoute(builder: (BuildContext context) {
-                    return InsertPasswordImportPage();
-                  }));
+                  Navigator.pushNamed(context, '/insert_password_import_page');
                 },
                 child: Text('Import', style: TextStyle(color: Colors.white)),
               ),

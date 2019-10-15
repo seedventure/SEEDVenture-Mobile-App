@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:seed_venture/blocs/mnemonic_logic_bloc.dart';
-import 'package:seed_venture/widgets/progress_bar_overlay.dart';
 import 'dart:async';
+import 'package:seed_venture/pages/choose_network_page.dart';
 
 class InsertPasswordMnemonicPage extends StatefulWidget {
   @override
@@ -43,9 +43,11 @@ class _InsertPasswordMnemonicPageState
   void initState() {
     mnemonicLogicBloc.outCheckConfirmPassword.listen((equal) {
       if (equal == 'ok') {
+        mnemonicLogicBloc.setPassword(passwordController.text);
         Navigator.of(context)
-            .push(ProgressBarOverlay(ProgressBarOverlay.generatingConfig));
-        mnemonicLogicBloc.deriveKeysFromMnemonic(passwordController.text);
+            .push(MaterialPageRoute(builder: (BuildContext context) {
+          return ChooseNetworkPage(mode: ChooseNetworkPage.FromCreate);
+        }));
       } else {
         SnackBar snack;
         if (equal == 'empty') {

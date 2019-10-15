@@ -24,7 +24,7 @@ class JSONWalletLogicBloc {
       if (filePath == '' || filePath == null) {
         return null;
       }
-      print("File path: " + filePath);
+      //print("File path: " + filePath);
 
       File walletFile = File(filePath);
 

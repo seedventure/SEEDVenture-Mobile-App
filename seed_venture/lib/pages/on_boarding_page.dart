@@ -7,7 +7,7 @@ class OnBoardingPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          title: Text('Welcome to SEEDVenture'),
+          title: Text('Welcome to SEED Venture'),
         ),
         body: Container(
           width: double.infinity,
@@ -27,10 +27,7 @@ class OnBoardingPage extends StatelessWidget {
                   )),
               RaisedButton(
                 onPressed: () {
-                  Navigator.of(context)
-                      .push(MaterialPageRoute(builder: (BuildContext context) {
-                    return CreateConfigPage();
-                  }));
+                  Navigator.pushNamed(context, '/create_wallet_page');
                 },
                 child: Text(
                   'Create Wallet',
@@ -39,26 +36,11 @@ class OnBoardingPage extends StatelessWidget {
               ),
               RaisedButton(
                 onPressed: () {
-                  Navigator.of(context)
-                      .push(MaterialPageRoute(builder: (BuildContext context) {
-                    return ImportConfigPage();
-                  }));
+                  Navigator.pushNamed(context, '/import_wallet_page');
                 },
                 child: Text('Import Wallet',
                     style: TextStyle(color: Colors.white)),
               ),
-              /*Container(
-                  margin: const EdgeInsets.only(top: 25.0),
-                  child: RaisedButton(
-                    color: Theme.of(context).accentColor,
-                    onPressed: () {
-                      OnBoardingBloc.setOnBoardingDone();
-                      Navigator.of(context).pushNamedAndRemoveUntil(
-                          '/home', (Route<dynamic> route) => false);
-                    },
-                    child: Text('Continue without Config',
-                        style: TextStyle(color: Colors.white)),
-                  ))*/
             ],
           ),
         ));

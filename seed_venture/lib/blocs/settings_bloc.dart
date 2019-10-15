@@ -4,8 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:seed_venture/blocs/baskets_bloc.dart';
 
-
-final SettingsBloc settingsBloc = SettingsBloc();
+SettingsBloc settingsBloc = SettingsBloc();
 
 class SettingsBloc {
   BehaviorSubject<bool> _notificationsSettings = BehaviorSubject<bool>();
@@ -27,8 +26,18 @@ class SettingsBloc {
 
   BehaviorSubject<bool> _zeroDocsStartupsSettings = BehaviorSubject<bool>();
 
-  Stream<bool> get outZeroDocsStartupsSettings => _zeroDocsStartupsSettings.stream;
+  Stream<bool> get outZeroDocsStartupsSettings =>
+      _zeroDocsStartupsSettings.stream;
   Sink<bool> get _inZeroDocsStartupsSettings => _zeroDocsStartupsSettings.sink;
+
+  BehaviorSubject<String> _currentNetwork = BehaviorSubject<String>();
+
+  Stream<String> get outCurrentNetwork => _currentNetwork.stream;
+  Sink<String> get _inCurrentNetwork => _currentNetwork.sink;
+
+  void initBloc() {
+    settingsBloc = SettingsBloc();
+  }
 
   SettingsBloc() {
     SharedPreferences.getInstance().then((prefs) {
@@ -52,6 +61,8 @@ class SettingsBloc {
       }
       _inZeroDocsStartupsSettings
           .add(prefs.getBool('filter_zero_docs_startup'));
+
+      _inCurrentNetwork.add(prefs.getString("network"));
     });
   }
 
@@ -100,6 +111,7 @@ class SettingsBloc {
     _zeroStartupsSettings.close();
     _withoutURLBasketsSettings.close();
     _zeroDocsStartupsSettings.close();
+    _currentNetwork.close();
   }
 
   static Future<bool> areNotificationsEnabled() async {
@@ -142,22 +154,24 @@ class SettingsBloc {
     return enabled;
   }
 
-  void applyFilter()  {
-   /* configManagerBloc.cancelPeriodicUpdate();
-    configManagerBloc.cancelBalancesPeriodicUpdate();
-    int currentBlockNumber = await configManagerBloc.getCurrentBlockNumber();
-    Map prevConfig = await configManagerBloc.loadPreviousConfigFile();
-    List<FundingPanelItem> fundingPanels = List();
-    await configManagerBloc.getFundingPanelItems(fundingPanels, prevConfig, currentBlockNumber);
-    configManagerBloc.setFundingPanels(fundingPanels);
-    await configManagerBloc.getBasketTokensBalances(fundingPanels);
-    configManagerBloc.enablePeriodicUpdate();
-    configManagerBloc.configurationPeriodicUpdate();
-    configManagerBloc.balancesPeriodicUpdate();*/
-
+  void applyFilter() {
     basketsBloc.getBasketsTokenBalances();
   }
 
-
-
+  static Future resetPreferences() async {
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+    sharedPreferences.setString("address", null);
+    sharedPreferences.setString("sha256_pass", null);
+    sharedPreferences.setString("funding_panels_data", null);
+    sharedPreferences.setString("eth_balance", null);
+    sharedPreferences.setString("seed_balance", null);
+    sharedPreferences.setStringList("favorites", null);
+    sharedPreferences.setString("user_baskets_balances", null);
+    sharedPreferences.setString("fp_check_again_list", null);
+    sharedPreferences.setString("members_check_again_list", null);
+    sharedPreferences.setBool("notifications_enabled", null);
+    sharedPreferences.setBool("filter_zero_startups", null);
+    sharedPreferences.setBool("filter_no_url", null);
+    sharedPreferences.setBool("filter_zero_docs_startup", null);
+  }
 }

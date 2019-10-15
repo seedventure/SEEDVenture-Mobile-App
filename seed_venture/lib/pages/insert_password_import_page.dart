@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:seed_venture/blocs/import_logic_bloc.dart';
 import 'package:seed_venture/widgets/progress_bar_overlay.dart';
+import 'package:seed_venture/pages/choose_network_page.dart';
 
 class InsertPasswordImportPage extends StatefulWidget {
   @override
@@ -27,6 +28,12 @@ class _InsertPasswordImportPageState extends State<InsertPasswordImportPage> {
         SnackBar wrongPasswordSnackBar =
             SnackBar(content: Text('Wrong Password'));
         _scaffoldKey.currentState.showSnackBar(wrongPasswordSnackBar);
+      } else {
+        Navigator.pop(context);
+        Navigator.of(context)
+            .push(MaterialPageRoute(builder: (BuildContext context) {
+          return ChooseNetworkPage(mode: ChooseNetworkPage.FromImport);
+        }));
       }
     });
 
@@ -58,7 +65,7 @@ class _InsertPasswordImportPageState extends State<InsertPasswordImportPage> {
               RaisedButton(
                 onPressed: () {
                   Navigator.of(context).push(
-                      ProgressBarOverlay(ProgressBarOverlay.generatingConfig));
+                      ProgressBarOverlay(ProgressBarOverlay.checkingPassword));
                   importLogicBloc.import(passwordController.text);
                 },
                 child: Text('Import', style: TextStyle(color: Colors.white)),

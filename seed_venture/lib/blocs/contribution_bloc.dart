@@ -11,6 +11,7 @@ import 'package:rxdart/rxdart.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:math';
 import 'package:seed_venture/models/funding_panel_item.dart';
+import 'package:seed_venture/blocs/address_manager_bloc.dart';
 
 final ContributionBloc contributionBloc = ContributionBloc();
 
@@ -76,7 +77,7 @@ class ContributionBloc {
     credentials.privateKey.toRadixString(16);
 
     if (approveTxHash != null) {
-      print('approve ok!!!');
+      //print('approve ok!!!');
       Timer waitForApproveTimer = await waitForApproveTx(approveTxHash);
       const oneSec = const Duration(seconds: 1);
       Timer.periodic(oneSec, (Timer thisTimer) async {
@@ -105,7 +106,7 @@ class ContributionBloc {
       "params": ["$address", "latest"]
     };
 
-    var response = await http.post(infuraHTTP,
+    var response = await http.post(addressManagerBloc.infuraEndpoint,
         body: jsonEncode(txCountParams),
         headers: {'content-type': 'application/json'});
 
@@ -157,7 +158,7 @@ class ContributionBloc {
       nonce: nonce.toInt(),
       gasPrice: DefaultGasPrice * pow(10, 9),
       gasLimit: DefaultGasLimit,
-      to: EthereumAddress(SeedTokenAddress).number,
+      to: EthereumAddress(addressManagerBloc.seedTokenAddress).number,
       value: BigInt.from(0),
       data: numbers.hexToBytes(data),
     );
@@ -170,7 +171,7 @@ class ContributionBloc {
       "method": "eth_sendRawTransaction",
       "params": [numbers.bytesToHex(signed, include0x: true)]
     };
-    var response = await http.post(infuraHTTP,
+    var response = await http.post(addressManagerBloc.infuraEndpoint,
         body: jsonEncode(sendParams),
         headers: {'content-type': 'application/json'});
     return response.body;
@@ -239,7 +240,7 @@ class ContributionBloc {
       "method": "eth_sendRawTransaction",
       "params": [numbers.bytesToHex(signed, include0x: true)]
     };
-    var response = await http.post(infuraHTTP,
+    var response = await http.post(addressManagerBloc.infuraEndpoint,
         body: jsonEncode(sendParams),
         headers: {'content-type': 'application/json'});
     return response.body;
@@ -267,7 +268,7 @@ class ContributionBloc {
       "method": "eth_getTransactionReceipt",
       "params": [txHash]
     };
-    var response = await http.post(infuraHTTP,
+    var response = await http.post(addressManagerBloc.infuraEndpoint,
         body: jsonEncode(sendParams),
         headers: {'content-type': 'application/json'});
     Map jsonResponse = jsonDecode(response.body);

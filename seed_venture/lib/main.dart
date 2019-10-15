@@ -10,28 +10,30 @@ import 'package:seed_venture/pages/single_basket_page.dart';
 import 'package:seed_venture/pages/startup_list_page.dart';
 import 'package:seed_venture/pages/single_startup_page.dart';
 import 'package:seed_venture/pages/my_wallet_page.dart';
+import 'package:seed_venture/pages/insert_password_import_page.dart';
+import 'package:seed_venture/pages/create_wallet_page.dart';
+import 'package:seed_venture/pages/import_wallet_page.dart';
+import 'package:seed_venture/pages/insert_password_mnemonic_page.dart';
+import 'package:seed_venture/pages/repeat_mnemonic_page.dart';
 
 void main() {
-  return runApp(SeedVentureApp());
+  return runApp(SEEDVentureApp());
 }
 
-class SeedVentureApp extends StatelessWidget {
+class SEEDVentureApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
         debugShowCheckedModeBanner: false,
         theme: ThemeData(
-            // Define the default Brightness and Colors
+
             brightness: Brightness.light,
             primaryColor: Color(0xFF006B97),
             accentColor: Color(0xFF6fd2fb),
             buttonColor: Color(0xFF006B97),
 
-            // Define the default Font Family
             fontFamily: 'Poppins-Regular',
 
-            // Define the default TextTheme. Use this to specify the default
-            // text styling for headlines, titles, bodies of text, and more.
             textTheme: TextTheme(
                 headline:
                     TextStyle(fontSize: 72.0, fontWeight: FontWeight.bold),
@@ -39,7 +41,8 @@ class SeedVentureApp extends StatelessWidget {
                 body1: TextStyle(fontSize: 14.0, fontFamily: 'Hind'),
                 button:
                     TextStyle(fontSize: 15.0, fontWeight: FontWeight.bold))),
-        title: 'SeedVenture',
+
+        title: 'SEED Venture',
         home: HomePage(),
         routes: <String, WidgetBuilder>{
           '/unlock_account': (BuildContext context) {
@@ -47,6 +50,21 @@ class SeedVentureApp extends StatelessWidget {
           },
           '/on_boarding': (BuildContext context) {
             return OnBoardingPage();
+          },
+          '/create_wallet_page': (BuildContext context) {
+            return CreateWalletPage();
+          },
+          '/import_wallet_page': (BuildContext context) {
+            return ImportWalletPage();
+          },
+          '/insert_password_import_page': (BuildContext context) {
+            return InsertPasswordImportPage();
+          },
+          '/insert_password_mnemonic_page': (BuildContext context) {
+            return InsertPasswordMnemonicPage();
+          },
+          '/repeat_mnemonic_page': (BuildContext context) {
+            return RepeatMnemonicPage();
           },
           '/home': (BuildContext context) {
             return HomeBasketsTokenBalancesPage();

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:seed_venture/blocs/mnemonic_logic_bloc.dart';
-import 'package:seed_venture/pages/insert_password_mnemonic_page.dart';
 import 'dart:async';
 
 class RepeatMnemonicPage extends StatefulWidget {
@@ -20,10 +19,7 @@ class _RepeatMnemonicPageState extends State<RepeatMnemonicPage> {
         SnackBar copySnack = SnackBar(content: Text('Wrong Mnemonic!'));
         _scaffoldKey.currentState.showSnackBar(copySnack);
       } else {
-        Navigator.of(context)
-            .push(MaterialPageRoute(builder: (BuildContext context) {
-          return InsertPasswordMnemonicPage();
-        }));
+        Navigator.pushNamed(context, '/insert_password_mnemonic_page');
       }
     });
   }

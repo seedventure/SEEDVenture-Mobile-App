@@ -10,7 +10,6 @@ class MemberItem {
   List documents;
   String seedsUnlocked;
 
-
   MemberItem(
       {this.memberAddress,
       this.fundingPanelAddress,

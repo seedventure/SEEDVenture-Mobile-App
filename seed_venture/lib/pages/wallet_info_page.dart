@@ -4,7 +4,7 @@ import 'package:qr_flutter/qr_flutter.dart';
 import 'package:share/share.dart';
 import 'package:flutter/gestures.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:seed_venture/utils/constants.dart';
+import 'package:seed_venture/blocs/address_manager_bloc.dart';
 
 class WalletInfoPage extends StatefulWidget {
   @override
@@ -129,8 +129,9 @@ class _WalletInfoPageState extends State<WalletInfoPage> {
                                 fontFamily: 'Poppins-Regular'),
                             recognizer: new TapGestureRecognizer()
                               ..onTap = () {
-                                launch(
-                                    EtherscanURL + 'address/' + snapshot.data);
+                                launch(addressManagerBloc.etherscanURL +
+                                    'address/' +
+                                    snapshot.data);
                               },
                           ),
                         ),

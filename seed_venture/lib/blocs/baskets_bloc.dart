@@ -3,7 +3,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import 'package:seed_venture/models/funding_panel_item.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:seed_venture/utils/constants.dart';
 import 'package:http/http.dart' as http;
 import 'dart:math';
 import 'package:decimal/decimal.dart';
@@ -12,8 +11,9 @@ import 'package:flutter/material.dart';
 import 'package:seed_venture/utils/utils.dart';
 import 'package:seed_venture/blocs/config_manager_bloc.dart';
 import 'package:seed_venture/blocs/settings_bloc.dart';
+import 'package:seed_venture/blocs/address_manager_bloc.dart';
 
-final BasketsBloc basketsBloc = BasketsBloc();
+BasketsBloc basketsBloc = BasketsBloc();
 
 class BasketsBloc {
   PublishSubject<List<String>> _notificationsiOS =
@@ -70,6 +70,10 @@ class BasketsBloc {
   List _favorites;
 
   FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin;
+
+  void initBloc() {
+    basketsBloc = BasketsBloc();
+  }
 
   BasketsBloc() {
     ConfigManagerBloc.getFundingPanelItemsFromPrevSharedPref()
@@ -209,7 +213,7 @@ class BasketsBloc {
       "params": [address, "latest"]
     };
 
-    var callResponse = await http.post(infuraHTTP,
+    var callResponse = await http.post(addressManagerBloc.infuraEndpoint,
         body: jsonEncode(callParams),
         headers: {'content-type': 'application/json'});
 
@@ -247,14 +251,14 @@ class BasketsBloc {
       "method": "eth_call",
       "params": [
         {
-          "to": SeedTokenAddress,
+          "to": addressManagerBloc.seedTokenAddress,
           "data": data,
         },
         "latest"
       ]
     };
 
-    var callResponse = await http.post(infuraHTTP,
+    var callResponse = await http.post(addressManagerBloc.infuraEndpoint,
         body: jsonEncode(callParams),
         headers: {'content-type': 'application/json'});
 
@@ -293,13 +297,13 @@ class BasketsBloc {
   Future<void> _launchNotification(String notificationData) async {
     var rng = new Random();
     var androidPlatformChannelSpecifics = new AndroidNotificationDetails(
-        'SEEDVenture', 'SEEDVenture update', 'SEEDVenture',
+        'SEED Venture', 'SEED Venture update', 'SEED Venture',
         importance: Importance.Max, priority: Priority.High);
     var iOSPlatformChannelSpecifics = new IOSNotificationDetails();
     var platformChannelSpecifics = new NotificationDetails(
         androidPlatformChannelSpecifics, iOSPlatformChannelSpecifics);
-    await flutterLocalNotificationsPlugin.show(rng.nextInt(1000), 'SEEDVenture',
-        notificationData, platformChannelSpecifics,
+    await flutterLocalNotificationsPlugin.show(rng.nextInt(1000),
+        'SEED Venture', notificationData, platformChannelSpecifics,
         payload: '');
   }
 

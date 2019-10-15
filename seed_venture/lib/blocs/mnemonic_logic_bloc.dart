@@ -37,6 +37,7 @@ class MnemonicLogicBloc {
   Sink<String> get _inCheckConfirmPassword => _checkConfirmPassword.sink;
 
   String _lastMnemonic;
+  String _lastPassword;
 
   MnemonicLogicBloc() {
     this._lastMnemonic = _getRandomMnemonic();
@@ -47,13 +48,21 @@ class MnemonicLogicBloc {
     });
   }
 
+  void setPassword(String password) {
+    this._lastPassword = password;
+  }
+
+  String getPassword() {
+    return _lastPassword;
+  }
+
   String getCurrentMnemonic() {
     return _lastMnemonic;
   }
 
   String _getRandomMnemonic() {
     String randomMnemonic = bip39.generateMnemonic();
-    print('Random Mnemonic: ' + randomMnemonic);
+    //print('Random Mnemonic: ' + randomMnemonic);
     return randomMnemonic;
   }
 
@@ -90,7 +99,7 @@ class MnemonicLogicBloc {
 
     _inOnDoneCreateConfigurationFromMnemonic.add(true);
 
-    dispose();
+    // dispose();
   }
 
   // params[0] => mnemonic

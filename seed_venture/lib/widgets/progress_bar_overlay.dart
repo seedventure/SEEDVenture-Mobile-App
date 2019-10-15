@@ -6,7 +6,7 @@ class ProgressBarOverlay extends ModalRoute<void> {
   static const int generatingConfig = 0;
   static const int sendingTransaction = 1;
   static const int applyingFilter = 2;
-  //static const int loadingBasketsData = 2; // used for onboarding's 'continue without config' option
+  static const int checkingPassword = 3;
 
   int _mode;
 
@@ -76,10 +76,11 @@ class ProgressBarOverlay extends ModalRoute<void> {
       case ProgressBarOverlay.sendingTransaction:
         return 'Sending Transaction...It may take some minutes';
         break;
-      /*case ProgressBarOverlay.loadingBasketsData:
-        return 'Downloading Baskets and Startups...';*/
       case ProgressBarOverlay.applyingFilter:
         return 'Applying Filter...';
+        break;
+      case ProgressBarOverlay.checkingPassword:
+        return 'Checking Password...';
         break;
       default:
         return '';

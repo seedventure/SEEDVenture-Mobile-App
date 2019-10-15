@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:seed_venture/blocs/settings_bloc.dart';
 import 'package:seed_venture/widgets/progress_bar_overlay.dart';
+import 'package:seed_venture/blocs/onboarding_bloc.dart';
+import 'package:seed_venture/blocs/config_manager_bloc.dart';
 
 class SettingsPage extends StatefulWidget {
   @override
@@ -9,6 +11,13 @@ class SettingsPage extends StatefulWidget {
 
 class _SettingsStatePage extends State<SettingsPage> {
   final _scaffoldKey = new GlobalKey<ScaffoldState>();
+
+  @override
+  void initState() {
+    settingsBloc.initBloc();
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     return new Scaffold(
@@ -61,13 +70,8 @@ class _SettingsStatePage extends State<SettingsPage> {
                                   onChanged: (newValue) async {
                                     settingsBloc
                                         .onChangeZeroStartupSettings(newValue);
-                                    /*Navigator.of(context).push(
-                                        ProgressBarOverlay(
-                                            ProgressBarOverlay.applyingFilter));*/
 
                                     settingsBloc.applyFilter();
-
-                                    //Navigator.pop(context);
 
                                     SnackBar copySnack = SnackBar(
                                         content: Text('Filter Applied'));
@@ -102,7 +106,7 @@ class _SettingsStatePage extends State<SettingsPage> {
                                         ProgressBarOverlay(
                                             ProgressBarOverlay.applyingFilter));
 
-                                    await settingsBloc.applyFilter();
+                                    settingsBloc.applyFilter();
 
                                     Navigator.pop(context);
 
@@ -140,7 +144,7 @@ class _SettingsStatePage extends State<SettingsPage> {
                                         ProgressBarOverlay(
                                             ProgressBarOverlay.applyingFilter));
 
-                                    await settingsBloc.applyFilter();
+                                    settingsBloc.applyFilter();
 
                                     Navigator.pop(context);
 
@@ -161,25 +165,106 @@ class _SettingsStatePage extends State<SettingsPage> {
                         stream: settingsBloc.outZeroDocsStartupsSettings,
                       ),
                       Container(
-                        margin: const EdgeInsets.only(top: 8.0),
                         child: InkWell(
                             onTap: () async {
                               await settingsBloc.exportConfigurationFile();
                             },
-                            child: Row(
-                              children: <Widget>[
-                                Expanded(
-                                  child: Text('Export Configuration File'),
-                                ),
-                              ],
-                            )),
-                      )
+                            child: Padding(
+                                padding: const EdgeInsets.only(
+                                    top: 8.0, bottom: 8.0),
+                                child: Row(
+                                  children: <Widget>[
+                                    Expanded(
+                                      child: Text('Export Configuration File'),
+                                    ),
+                                  ],
+                                ))),
+                      ),
+                      Container(
+                        margin: EdgeInsets.only(top: 12.0),
+                        height: 1.0,
+                        width: double.infinity,
+                        color: Color(0xFFE3DFDF),
+                      ),
+                      Container(
+                        margin: const EdgeInsets.only(top: 12.0),
+                        child: StreamBuilder(
+                          builder:
+                              (BuildContext context, AsyncSnapshot snapshot) {
+                            if (snapshot.hasData) {
+                              return Row(
+                                children: <Widget>[
+                                  Text('Current Network is '),
+                                  Text(
+                                    snapshot.data,
+                                    style:
+                                        TextStyle(fontWeight: FontWeight.bold),
+                                  )
+                                ],
+                              );
+                            } else
+                              return Container();
+                          },
+                          stream: settingsBloc.outCurrentNetwork,
+                        ),
+                      ),
+                      Container(
+                        margin: const EdgeInsets.only(top: 16.0),
+                        child: InkWell(
+                            onTap: () {
+                              _showSwitchNetworkAlertDialog();
+                            },
+                            child: Padding(
+                                padding: const EdgeInsets.only(
+                                    top: 8.0, bottom: 8.0),
+                                child: Row(
+                                  children: <Widget>[
+                                    Expanded(
+                                      child: Text('Switch Network'),
+                                    ),
+                                  ],
+                                ))),
+                      ),
                     ]))));
   }
 
   @override
   void dispose() {
-    //settingsBloc.dispose();
     super.dispose();
+  }
+
+  void _showSwitchNetworkAlertDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: new Text("Switch Network"),
+          content: new Text(
+              "To change the network you have to repeat the account creation. If you don't have a wallet backup "
+              "all your data will be lost, do you want to continue?"),
+          actions: <Widget>[
+            new FlatButton(
+              child: new Text("Cancel"),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            new FlatButton(
+              child: new Text("Yes"),
+              onPressed: () async {
+                Navigator.of(context).pop();
+                configManagerBloc.cancelPeriodicUpdate();
+                configManagerBloc.cancelBalancesPeriodicUpdate();
+                configManagerBloc.deleteConfigFile();
+                await SettingsBloc.resetPreferences();
+                OnBoardingBloc.setOnBoardingToBeDone();
+                Navigator.of(context).pushNamedAndRemoveUntil(
+                    '/on_boarding', (Route<dynamic> route) => false);
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 }

@@ -64,11 +64,10 @@ class MembersBloc {
         if (maps[i]['funding_panel_address'] == fpAddress) {
           List membersMaps = maps[i]['members'];
           for (int j = 0; j < membersMaps.length; j++) {
-
-            bool zeroDocsStartupFilter = await SettingsBloc.isZeroDocsStartupFilterEnabled();
-            if(zeroDocsStartupFilter) {
-              if(membersMaps[j]['documents'].length == 0)
-                continue;
+            bool zeroDocsStartupFilter =
+                await SettingsBloc.isZeroDocsStartupFilterEnabled();
+            if (zeroDocsStartupFilter) {
+              if (membersMaps[j]['documents'].length == 0) continue;
             }
 
             members.add(MemberItem(

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:seed_venture/pages/repeat_mnemonic_page.dart';
 import 'package:seed_venture/blocs/mnemonic_logic_bloc.dart';
 
-class CreateConfigPage extends StatelessWidget {
+class CreateWalletPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -56,10 +56,8 @@ class CreateConfigPage extends StatelessWidget {
                         ),
                         RaisedButton(
                           onPressed: () {
-                            Navigator.of(context).push(MaterialPageRoute(
-                                builder: (BuildContext context) {
-                              return RepeatMnemonicPage();
-                            }));
+                            Navigator.pushNamed(
+                                context, '/repeat_mnemonic_page');
                           },
                           child: Text('Continue',
                               style: TextStyle(color: Colors.white)),

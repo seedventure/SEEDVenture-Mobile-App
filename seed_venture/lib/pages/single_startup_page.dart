@@ -31,7 +31,7 @@ class _SingleStartupPageState extends State<SingleStartupPage> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
                     Container(
-                        margin: const EdgeInsets.only(top: 8.0),
+                        margin: const EdgeInsets.only(top: 12.0),
                         child: Row(
                           children: <Widget>[
                             Expanded(

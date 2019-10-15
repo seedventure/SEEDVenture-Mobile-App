@@ -26,6 +26,8 @@ class ImportLogicBloc {
   static const int fromConfigFile = 3;
 
   int _currentImportMode;
+  Credentials _credentials;
+  String _password;
 
   void dispose() {
     _importStatusSubject.close();
@@ -37,8 +39,6 @@ class ImportLogicBloc {
   }
 
   Future import(String password) async {
-    ConfigManagerBloc configManagerBloc = ConfigManagerBloc();
-
     Credentials credentials;
 
     switch (_currentImportMode) {
@@ -77,19 +77,25 @@ class ImportLogicBloc {
 
     if (credentials == null) {
       _inWrongPassword.add(true);
-
       return;
     }
 
-    print('address: ' + credentials.address.hex);
+    _inWrongPassword.add(false);
 
-    await configManagerBloc.createConfiguration(credentials, password);
+    _credentials = credentials;
+    _password = password;
+  }
 
-    mnemonicLogicBloc.dispose();
-    jsonWalletLogicBloc.dispose();
-    importPrivateKeyLogicBloc.dispose();
-    importFromConfigFileBloc.dispose();
+  Future createConfigFromCredentials() async {
+    if (_credentials != null && _password != null) {
+      await configManagerBloc.createConfiguration(_credentials, _password);
 
-    _inImportStatus.add(true);
+      /* mnemonicLogicBloc.dispose();
+      jsonWalletLogicBloc.dispose();
+      importPrivateKeyLogicBloc.dispose();
+      importFromConfigFileBloc.dispose(); */
+
+      _inImportStatus.add(true);
+    }
   }
 }

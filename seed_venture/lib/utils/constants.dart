@@ -1,15 +1,30 @@
+
+const String Mainnet = 'Mainnet';
+const String Ropsten = 'Ropsten';
+
 // ROPSTEN
 
-const String GlobalFactoryAddress = '0xf5b5042766eeb6dfc5ba8ebbafc61df26f0901da';
-const String SeedTokenAddress = '0x029eb9c1810a97431200c08b827944b30f615325';
-const String DexAddress = '0xe5ce0116743779b871b925db915d32025ccf2248';
-const String infuraWSS = 'wss://testnet.seedventure.io'; // websocket
-const String infuraHTTP = 'https://testnet.seedventure.io'; // change when mainnet
-const String EtherscanURL = 'https://ropsten.etherscan.io/';
+const String RopstenGlobalFactoryAddress = '0xf5b5042766eeb6dfc5ba8ebbafc61df26f0901da';
+const String RopstenSeedTokenAddress = '0x029eb9c1810a97431200c08b827944b30f615325';
+const String RopstenDexAddress = '0xe5ce0116743779b871b925db915d32025ccf2248';
+const String RopstenInfuraHTTP = 'https://testnet.seedventure.io';
+const String RopstenEtherscanURL = 'https://ropsten.etherscan.io/';
+
+// MAINNET
+
+const String MainnetGlobalFactoryAddress = '0x35c8c5D9Bec0DCd50Ce4bd929FA3BeD9eD1f7C89';
+const String MainnetSeedTokenAddress = '0xC969e16e63fF31ad4BCAc3095C616644e6912d79';
+const String MainnetDexAddress = '0x829b36f1C052D7fAb8fbF68B51E1Bf5d65a23e74';
+const String MainnetInfuraHTTP = 'https://mainnet.seedventure.io';
+const String MainnetEtherscanURL = 'https://etherscan.io/';
+
+
 const int DefaultGasPrice = 30;
 const int DefaultGasLimit = 8000000;
 
+
 // topics for eth_getLogs
+
 // Factory events
 const String newPanelCreatedTopic = "0x28e958703d566ea9825155c28c95c3d92a2da219b51404343e4653bccd47525a";
 

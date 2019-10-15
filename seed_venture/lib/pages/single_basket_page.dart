@@ -11,7 +11,7 @@ import 'package:seed_venture/models/funding_panel_item.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:intl/intl.dart';
-import 'package:seed_venture/utils/constants.dart';
+import 'package:seed_venture/blocs/address_manager_bloc.dart';
 
 class SingleBasketPage extends StatefulWidget {
   @override
@@ -230,7 +230,7 @@ class _SingleBasketPageState extends State<SingleBasketPage> {
             action: SnackBarAction(
               label: 'View Tx',
               onPressed: () {
-                launch(EtherscanURL + 'tx/$txHash');
+                launch(addressManagerBloc.etherscanURL + 'tx/$txHash');
               },
             ));
         _scaffoldKey.currentState.showSnackBar(contributedSnackBar);

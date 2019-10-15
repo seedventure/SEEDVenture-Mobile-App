@@ -1,6 +1,7 @@
 import 'package:rxdart/rxdart.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/services.dart';
+import 'package:seed_venture/blocs/address_manager_bloc.dart';
 
 final HomePageBloc homePageBloc = HomePageBloc();
 
@@ -17,6 +18,7 @@ class HomePageBloc {
         _inFirstLaunch.add(0);
       } else {
         _inFirstLaunch.add(1);
+        addressManagerBloc.loadAddressList();
       }
     });
   }
