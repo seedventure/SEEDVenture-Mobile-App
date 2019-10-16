@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:seed_venture/blocs/unlock_account_bloc.dart';
 import 'package:seed_venture/blocs/onboarding_bloc.dart';
+import 'package:seed_venture/blocs/config_manager_bloc.dart';
+import 'package:seed_venture/blocs/settings_bloc.dart';
 
 class UnlockAccountPage extends StatefulWidget {
   @override
@@ -159,8 +161,12 @@ class _UnlockAccountPageState extends State<UnlockAccountPage> {
             ),
             new FlatButton(
               child: new Text("Ok"),
-              onPressed: () {
+              onPressed: () async {
                 Navigator.of(context).pop();
+                configManagerBloc.cancelPeriodicUpdate();
+                configManagerBloc.cancelBalancesPeriodicUpdate();
+                configManagerBloc.deleteConfigFile();
+                await SettingsBloc.resetPreferences();
                 OnBoardingBloc.setOnBoardingToBeDone();
                 Navigator.of(context).pushNamedAndRemoveUntil(
                     '/on_boarding', (Route<dynamic> route) => false);

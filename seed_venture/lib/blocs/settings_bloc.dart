@@ -169,9 +169,5 @@ class SettingsBloc {
     sharedPreferences.setString("user_baskets_balances", null);
     sharedPreferences.setString("fp_check_again_list", null);
     sharedPreferences.setString("members_check_again_list", null);
-    sharedPreferences.setBool("notifications_enabled", null);
-    sharedPreferences.setBool("filter_zero_startups", null);
-    sharedPreferences.setBool("filter_no_url", null);
-    sharedPreferences.setBool("filter_zero_docs_startup", null);
   }
 }
