@@ -89,6 +89,7 @@ class _SingleStartupPageState extends State<SingleStartupPage> {
                               double.parse(snapshot.data.seedsUnlocked)) +
                           ' SEED'),
                     ),
+                    _getPortfolioValueWidget(snapshot),
                     Container(
                       margin: EdgeInsets.only(top: 15.0),
                       height: 1.0,
@@ -141,6 +142,19 @@ class _SingleStartupPageState extends State<SingleStartupPage> {
       child: Column(
         children: elements,
       ),
+    );
+  }
+
+  Widget _getPortfolioValueWidget(AsyncSnapshot snapshot) {
+    if (snapshot.data.portfolioValue == null ||
+        snapshot.data.portfolioCurrency == null) return Container();
+
+    return Container(
+      child: Text('Portfolio Value: ' +
+          snapshot.data.portfolioValue.toString() +
+          ' ' +
+          snapshot.data.portfolioCurrency),
+      margin: const EdgeInsets.only(top: 15.0, left: 8.0, right: 8.0),
     );
   }
 }

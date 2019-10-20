@@ -9,6 +9,9 @@ class MemberItem {
   String imgBase64;
   List documents;
   String seedsUnlocked;
+  double portfolioValue;
+  String portfolioCurrency;
+
 
   MemberItem(
       {this.memberAddress,
@@ -20,5 +23,7 @@ class MemberItem {
       this.url,
       this.imgBase64,
       this.documents,
-      this.seedsUnlocked});
+      this.seedsUnlocked,
+      this.portfolioCurrency,
+      this.portfolioValue});
 }

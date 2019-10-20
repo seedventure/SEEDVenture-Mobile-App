@@ -381,7 +381,7 @@ class _SingleBasketPageState extends State<SingleBasketPage> {
                       margin: const EdgeInsets.only(
                           top: 15.0, left: 8.0, right: 8.0),
                     ),
-                    _getPortfolioValueWidget(snapshot),
+                    _getTotalPortfolioValueWidget(snapshot),
                     Container(
                       child: Text('WL Threshold Balance: ' +
                           snapshot.data.whitelistThreshold.toStringAsFixed(
@@ -626,13 +626,13 @@ class _SingleBasketPageState extends State<SingleBasketPage> {
     );
   }
 
-  Widget _getPortfolioValueWidget(AsyncSnapshot snapshot) {
-    if (snapshot.data.portfolioValue == null ||
+  Widget _getTotalPortfolioValueWidget(AsyncSnapshot snapshot) {
+    if (snapshot.data.totalPortfolioValue == null ||
         snapshot.data.portfolioCurrency == null) return Container();
 
     return Container(
-      child: Text('Portfolio Value: ' +
-          snapshot.data.portfolioValue.toString() +
+      child: Text('Total Portfolio Value: ' +
+          snapshot.data.totalPortfolioValue.toString() +
           ' ' +
           snapshot.data.portfolioCurrency),
       margin: const EdgeInsets.only(top: 15.0, left: 8.0, right: 8.0),

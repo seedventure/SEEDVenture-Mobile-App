@@ -30,7 +30,7 @@ class FundingPanelItem {
   final String tokenSymbol;
   final double WLMaxAmount;
   final double basketSuccessFee;
-  final double portfolioValue;
+  final double totalPortfolioValue;
   final String portfolioCurrency;
 
   void setFavorite(bool favorite) {
@@ -62,6 +62,6 @@ class FundingPanelItem {
       this.tokenSymbol,
       this.WLMaxAmount,
       this.basketSuccessFee,
-      this.portfolioValue,
+      this.totalPortfolioValue,
       this.portfolioCurrency});
 }

@@ -137,7 +137,7 @@ class BasketsBloc {
               tags: maps[i]['tags'],
               documents: maps[i]['documents'],
               basketSuccessFee: maps[i]['basket_success_fee'],
-              portfolioValue: maps[i]['portfolio_value'],
+              totalPortfolioValue: maps[i]['total_portfolio_value'],
               portfolioCurrency: maps[i]['portfolio_currency'],
               tokenAddress: maps[i]['token_address'],
               fundingPanelAddress: maps[i]['funding_panel_address'],

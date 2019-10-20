@@ -41,7 +41,9 @@ class MembersBloc {
                   description: members[j]['description'],
                   imgBase64: members[j]['imgBase64'],
                   url: members[j]['url'],
-                  documents: members[j]['documents']);
+                  documents: members[j]['documents'],
+                  portfolioValue: members[j]['portfolio_value'],
+                  portfolioCurrency: members[j]['portfolio_currency']);
 
               break;
             }

@@ -230,17 +230,18 @@ class ConfigManagerBloc {
 
         for (int j = 0; j < memberMaps.length; j++) {
           members.add(MemberItem(
-            memberAddress: memberMaps[j]['member_address'],
-            fundingPanelAddress: memberMaps[j]['funding_panel_address'],
-            ipfsUrl: memberMaps[j]['ipfsUrl'],
-            hash: memberMaps[j]['hash'],
-            name: memberMaps[j]['name'],
-            description: memberMaps[j]['description'],
-            documents: memberMaps[j]['documents'],
-            url: memberMaps[j]['url'],
-            imgBase64: memberMaps[j]['imgBase64'],
-            seedsUnlocked: memberMaps[j]['seeds_unlocked'],
-          ));
+              memberAddress: memberMaps[j]['member_address'],
+              fundingPanelAddress: memberMaps[j]['funding_panel_address'],
+              ipfsUrl: memberMaps[j]['ipfsUrl'],
+              hash: memberMaps[j]['hash'],
+              name: memberMaps[j]['name'],
+              description: memberMaps[j]['description'],
+              documents: memberMaps[j]['documents'],
+              url: memberMaps[j]['url'],
+              imgBase64: memberMaps[j]['imgBase64'],
+              seedsUnlocked: memberMaps[j]['seeds_unlocked'],
+              portfolioValue: memberMaps[j]['portfolio_value'],
+              portfolioCurrency: memberMaps[j]['portfolio_currency']));
         }
 
         return members;
@@ -411,26 +412,21 @@ class ConfigManagerBloc {
       basketSuccessFee = double.parse(fundingPanelVisualData[6]);
     }
 
-    double portfolioValue;
-
-    if (fundingPanelVisualData[7] != null && fundingPanelVisualData[7] != '') {
-      portfolioValue = double.parse(fundingPanelVisualData[7]);
-    }
-
-    String portfolioCurrency;
-
-    if (fundingPanelVisualData[8] != null && fundingPanelVisualData[8] != '') {
-      portfolioCurrency = fundingPanelVisualData[8];
-    }
-
     List<MemberItem> members =
         await _getMembersOfFundingPanel(fundingPanelAddress);
 
     double totalUnlockedForStartup = 0;
+    double totalPortfolioValue = 0;
+    String portfolioCurrency;
 
     for (int i = 0; i < members.length; i++) {
       totalUnlockedForStartup += double.parse(members[i].seedsUnlocked);
+
+      if (members[i].portfolioValue != null)
+        totalPortfolioValue += members[i].portfolioValue;
     }
+
+    if (members.length > 0) portfolioCurrency = members[0].portfolioCurrency;
 
     FundingPanelItem FPItem = FundingPanelItem(
         totalUnlockedForStartup: totalUnlockedForStartup.toString(),
@@ -452,7 +448,7 @@ class ConfigManagerBloc {
         tags: tags,
         documents: documents,
         basketSuccessFee: basketSuccessFee,
-        portfolioValue: portfolioValue,
+        totalPortfolioValue: totalPortfolioValue,
         portfolioCurrency: portfolioCurrency);
 
     return FPItem;
@@ -555,6 +551,22 @@ class ConfigManagerBloc {
             });
           }
 
+          double portfolioValue;
+
+          if (memberJsonData[5] != null &&
+              memberJsonData[5] != 'null' &&
+              memberJsonData[5] != '') {
+            portfolioValue = double.parse(memberJsonData[5]);
+          }
+
+          String portfolioCurrency;
+
+          if (memberJsonData[6] != null &&
+              memberJsonData[6] != 'null' &&
+              memberJsonData[6] != '') {
+            portfolioCurrency = memberJsonData[6];
+          }
+
           bool contained = false;
           int index;
           for (int k = 0; k < members.length; k++) {
@@ -576,7 +588,9 @@ class ConfigManagerBloc {
                 description: memberJsonData[1],
                 url: memberJsonData[2],
                 documents: documents,
-                imgBase64: memberJsonData[3]));
+                imgBase64: memberJsonData[3],
+                portfolioValue: portfolioValue,
+                portfolioCurrency: portfolioCurrency));
           } else {
             members[index].seedsUnlocked = memberData[2];
             members[index].ipfsUrl = memberData[0];
@@ -586,6 +600,8 @@ class ConfigManagerBloc {
             members[index].url = memberJsonData[2];
             members[index].documents = documents;
             members[index].imgBase64 = memberJsonData[3];
+            members[index].portfolioValue = portfolioValue;
+            members[index].portfolioCurrency = portfolioCurrency;
           }
 
           membersToCheckAgainList.removeAt(i);
@@ -740,7 +756,9 @@ class ConfigManagerBloc {
               'url': members[i].url,
               'imgBase64': members[i].imgBase64,
               'documents': members[i].documents,
-              'seeds_unlocked': members[i].seedsUnlocked
+              'seeds_unlocked': members[i].seedsUnlocked,
+              'portfolio_value': members[i].portfolioValue,
+              'portfolio_currency': members[i].portfolioCurrency
             };
 
             membersMapsSharedPrefs.add(memberMapSP);
@@ -781,7 +799,7 @@ class ConfigManagerBloc {
             'total_unlocked': FPItem.totalUnlockedForStartup,
             'documents': FPItem.documents,
             'basket_success_fee': FPItem.basketSuccessFee,
-            'portfolio_value': FPItem.portfolioValue,
+            'total_portfolio_value': FPItem.totalPortfolioValue,
             'portfolio_currency': FPItem.portfolioCurrency,
             'members': membersMapsSharedPrefs
           };
@@ -892,28 +910,9 @@ class ConfigManagerBloc {
                       ' changed!';
                   basketsBloc.notification(notificationData);
                 } else {
-                  bool portfolioValueChanged = prevVisualData[7] != null &&
-                      prevVisualData[7] != 'null' &&
-                      fundingPanelVisualData[7] != null &&
-                      fundingPanelVisualData[7] != 'null' &&
-                      double.parse(prevVisualData[7]) !=
-                          double.parse(fundingPanelVisualData[7]);
-
-                  bool portfolioCurrencyChanged = prevVisualData[8] != null &&
-                      prevVisualData[8] != 'null' &&
-                      fundingPanelVisualData[8] != null &&
-                      fundingPanelVisualData[8] != 'null' &&
-                      prevVisualData[8] != fundingPanelVisualData[8];
-
-                  if (portfolioValueChanged || portfolioCurrencyChanged) {
-                    String notificationData =
-                        'Portfolio Value by basket ' + basketName + ' changed!';
-                    basketsBloc.notification(notificationData);
-                  } else {
-                    String notificationData =
-                        'Document by basket ' + basketName + ' changed!';
-                    basketsBloc.notification(notificationData);
-                  }
+                  String notificationData =
+                      'Document by basket ' + basketName + ' changed!';
+                  basketsBloc.notification(notificationData);
                 }
               }
             }
@@ -965,22 +964,6 @@ class ConfigManagerBloc {
             fundingPanelVisualData[6] != 'null' &&
             fundingPanelVisualData[6] != '') {
           basketSuccessFee = double.parse(fundingPanelVisualData[6]);
-        }
-
-        double portfolioValue;
-
-        if (fundingPanelVisualData[7] != null &&
-            fundingPanelVisualData[7] != 'null' &&
-            fundingPanelVisualData[7] != '') {
-          portfolioValue = double.parse(fundingPanelVisualData[7]);
-        }
-
-        String portfolioCurrency;
-
-        if (fundingPanelVisualData[8] != null &&
-            fundingPanelVisualData[8] != 'null' &&
-            fundingPanelVisualData[8] != '') {
-          portfolioCurrency = fundingPanelVisualData[8];
         }
 
         // check for token exchange rate changes
@@ -1160,11 +1143,14 @@ class ConfigManagerBloc {
 
         // check for members hash changed
         changed = false;
+        //int memberChangedIndex;
 
         for (int j = 0; j < result.length; j++) {
           if (result[j]['topics'].contains(memberHashChangedTopic) &&
               result[j]['address'].toString().toLowerCase() ==
                   fundingPanelAddress.toString().toLowerCase()) {
+            //int k = numbers.hexToInt(result[j]['data']).toInt();
+
             changed = true;
             break;
           }
@@ -1206,6 +1192,22 @@ class ConfigManagerBloc {
                   });
                 }
 
+                double portfolioValue;
+
+                if (memberJsonData[5] != null &&
+                    memberJsonData[5] != 'null' &&
+                    memberJsonData[5] != '') {
+                  portfolioValue = double.parse(memberJsonData[5]);
+                }
+
+                String portfolioCurrency;
+
+                if (memberJsonData[6] != null &&
+                    memberJsonData[6] != 'null' &&
+                    memberJsonData[6] != '') {
+                  portfolioCurrency = memberJsonData[6];
+                }
+
                 members.add(MemberItem(
                     seedsUnlocked: memberData[2],
                     memberAddress: membersAddressList[j],
@@ -1216,7 +1218,9 @@ class ConfigManagerBloc {
                     description: memberJsonData[1],
                     url: memberJsonData[2],
                     documents: documents,
-                    imgBase64: memberJsonData[3]));
+                    imgBase64: memberJsonData[3],
+                    portfolioValue: portfolioValue,
+                    portfolioCurrency: portfolioCurrency));
               } else {
                 _addToMembersCheckAgainList(
                     fundingPanelAddress, membersAddressList[j]);
@@ -1228,9 +1232,30 @@ class ConfigManagerBloc {
             }
 
             if (favorites.contains(fundingPanelAddress.toLowerCase())) {
-              String notificationData =
-                  'Document by Startup changed! (Basket ' + basketName + ')';
-              basketsBloc.notification(notificationData);
+              List<MemberItem> membersOld =
+                  await _getMembersFromPreviousSharedPref(fundingPanelAddress);
+
+              for (int j = 0; j < members.length; j++) {
+                if (members[j].portfolioValue != membersOld[j].portfolioValue ||
+                    membersOld[j].portfolioCurrency !=
+                        members[j].portfolioCurrency) {
+                  String notificationData = 'Portfolio Value by Startup ' +
+                      membersOld[j].name +
+                      ' changed! (Basket ' +
+                      basketName +
+                      ')';
+                  basketsBloc.notification(notificationData);
+                }
+
+                if (members[j].hash != membersOld[j].hash) {
+                  String notificationData = 'Document by Startup ' +
+                      membersOld[j].name +
+                      ' changed! (Basket ' +
+                      basketName +
+                      ')';
+                  basketsBloc.notification(notificationData);
+                }
+              }
             }
           }
         } else {
@@ -1284,6 +1309,22 @@ class ConfigManagerBloc {
                 });
               }
 
+              double portfolioValue;
+
+              if (memberJsonData[5] != null &&
+                  memberJsonData[5] != 'null' &&
+                  memberJsonData[5] != '') {
+                portfolioValue = double.parse(memberJsonData[5]);
+              }
+
+              String portfolioCurrency;
+
+              if (memberJsonData[6] != null &&
+                  memberJsonData[6] != 'null' &&
+                  memberJsonData[6] != '') {
+                portfolioCurrency = memberJsonData[6];
+              }
+
               members.add(MemberItem(
                   seedsUnlocked: memberData[2],
                   memberAddress: memberAddress,
@@ -1294,7 +1335,9 @@ class ConfigManagerBloc {
                   description: memberJsonData[1],
                   url: memberJsonData[2],
                   imgBase64: memberJsonData[3],
-                  documents: documents));
+                  documents: documents,
+                  portfolioValue: portfolioValue,
+                  portfolioCurrency: portfolioCurrency));
 
               String notificationData = 'Startup ' +
                   memberJsonData[0] +
@@ -1313,12 +1356,20 @@ class ConfigManagerBloc {
         members = await _checkAgainMembers(members, fundingPanelAddress);
 
         double totalUnlockedForStartup = 0;
+        double totalPortfolioValue = 0;
+        String portfolioCurrency;
 
         for (int i = 0; i < members.length; i++) {
           if (members[i] != null && members[i].seedsUnlocked != null) {
             totalUnlockedForStartup += double.parse(members[i].seedsUnlocked);
           }
+
+          if (members[i] != null && members[i].portfolioValue != null)
+            totalPortfolioValue += members[i].portfolioValue;
         }
+
+        if (members.length > 0)
+          portfolioCurrency = members[0].portfolioCurrency;
 
         FundingPanelItem FPItem = FundingPanelItem(
             totalUnlockedForStartup: totalUnlockedForStartup.toString(),
@@ -1338,7 +1389,7 @@ class ConfigManagerBloc {
             documents: documents,
             members: members,
             basketSuccessFee: basketSuccessFee,
-            portfolioValue: portfolioValue,
+            totalPortfolioValue: totalPortfolioValue,
             portfolioCurrency: portfolioCurrency);
 
         fundingPanelItems.add(FPItem);
@@ -1365,7 +1416,9 @@ class ConfigManagerBloc {
             'url': members[i].url,
             'imgBase64': members[i].imgBase64,
             'documents': members[i].documents,
-            'seeds_unlocked': members[i].seedsUnlocked
+            'seeds_unlocked': members[i].seedsUnlocked,
+            'portfolio_value': members[i].portfolioValue,
+            'portfolio_currency': members[i].portfolioCurrency
           };
 
           membersMapsSharedPrefs.add(memberMapSP);
@@ -1406,7 +1459,7 @@ class ConfigManagerBloc {
           'total_unlocked': FPItem.totalUnlockedForStartup,
           'documents': FPItem.documents,
           'basket_success_fee': FPItem.basketSuccessFee,
-          'portfolio_value': FPItem.portfolioValue,
+          'total_portfolio_value': FPItem.totalPortfolioValue,
           'portfolio_currency': FPItem.portfolioCurrency,
           'members': membersMapsSharedPrefs
         };
@@ -1513,28 +1566,22 @@ class ConfigManagerBloc {
           basketSuccessFee = double.parse(fundingPanelVisualData[6]);
         }
 
-        double portfolioValue;
-
-        if (fundingPanelVisualData[7] != null &&
-            fundingPanelVisualData[7] != '') {
-          portfolioValue = double.parse(fundingPanelVisualData[7]);
-        }
-
-        String portfolioCurrency;
-
-        if (fundingPanelVisualData[8] != null &&
-            fundingPanelVisualData[8] != '') {
-          portfolioCurrency = fundingPanelVisualData[8];
-        }
-
         List<MemberItem> members =
             await _getMembersOfFundingPanel(basketContracts[3]);
 
         double totalUnlockedForStartup = 0;
+        double totalPortfolioValue = 0;
+        String portfolioCurrency;
 
         for (int i = 0; i < members.length; i++) {
           totalUnlockedForStartup += double.parse(members[i].seedsUnlocked);
+
+          if (members[i].portfolioValue != null)
+            totalPortfolioValue += members[i].portfolioValue;
         }
+
+        if (members.length > 0)
+          portfolioCurrency = members[0].portfolioCurrency;
 
         FundingPanelItem FPItem = FundingPanelItem(
             totalUnlockedForStartup: totalUnlockedForStartup.toString(),
@@ -1554,7 +1601,7 @@ class ConfigManagerBloc {
             tags: tags,
             documents: documents,
             basketSuccessFee: basketSuccessFee,
-            portfolioValue: portfolioValue,
+            totalPortfolioValue: totalPortfolioValue,
             portfolioCurrency: portfolioCurrency);
 
         fundingPanelItems.add(FPItem);
@@ -1580,7 +1627,9 @@ class ConfigManagerBloc {
             'url': members[i].url,
             'imgBase64': members[i].imgBase64,
             'documents': members[i].documents,
-            'seeds_unlocked': members[i].seedsUnlocked
+            'seeds_unlocked': members[i].seedsUnlocked,
+            'portfolio_value': members[i].portfolioValue,
+            'portfolio_currency': members[i].portfolioCurrency
           };
 
           membersMapsSharedPrefs.add(memberMapSP);
@@ -1621,7 +1670,7 @@ class ConfigManagerBloc {
           'total_unlocked': FPItem.totalUnlockedForStartup,
           'documents': FPItem.documents,
           'basket_success_fee': FPItem.basketSuccessFee,
-          'portfolio_value': FPItem.portfolioValue,
+          'total_portfolio_value': FPItem.totalPortfolioValue,
           'portfolio_currency': FPItem.portfolioCurrency,
           'members': membersMapsSharedPrefs
         };
@@ -1670,6 +1719,22 @@ class ConfigManagerBloc {
           });
         }
 
+        double portfolioValue;
+
+        if (memberJsonData[5] != null &&
+            memberJsonData[5] != 'null' &&
+            memberJsonData[5] != '') {
+          portfolioValue = double.parse(memberJsonData[5]);
+        }
+
+        String portfolioCurrency;
+
+        if (memberJsonData[6] != null &&
+            memberJsonData[6] != 'null' &&
+            memberJsonData[6] != '') {
+          portfolioCurrency = memberJsonData[6];
+        }
+
         members.add(MemberItem(
             seedsUnlocked: memberData[2],
             memberAddress: memberAddress,
@@ -1680,7 +1745,9 @@ class ConfigManagerBloc {
             description: memberJsonData[1],
             url: memberJsonData[2],
             imgBase64: memberJsonData[3],
-            documents: documents));
+            documents: documents,
+            portfolioValue: portfolioValue,
+            portfolioCurrency: portfolioCurrency));
       } else {
         _addToMembersCheckAgainList(fundingPanelAddress, memberAddress);
       }
@@ -1714,6 +1781,18 @@ class ConfigManagerBloc {
 
       if (responseMap['documents'] != null) {
         memberJsonData.add(jsonEncode(responseMap['documents']));
+      } else {
+        memberJsonData.add('');
+      }
+
+      if (responseMap['portfolioValue'] != null) {
+        memberJsonData.add(jsonEncode(responseMap['portfolioValue']));
+      } else {
+        memberJsonData.add('');
+      }
+
+      if (responseMap['portfolioCurrency'] != null) {
+        memberJsonData.add(responseMap['portfolioCurrency']);
       } else {
         memberJsonData.add('');
       }
@@ -1803,7 +1882,7 @@ class ConfigManagerBloc {
         ret.add(jsonEncode(maps[i]['documents']));
         ret.add(jsonEncode(maps[i]['tags']));
         ret.add(jsonEncode(maps[i]['basket_success_fee']));
-        ret.add(jsonEncode(maps[i]['portfolio_value']));
+        ret.add(jsonEncode(maps[i]['total_portfolio_value']));
         ret.add(maps[i]['portfolio_currency']);
 
         return ret;
@@ -1839,7 +1918,7 @@ class ConfigManagerBloc {
           tags: maps[i]['tags'],
           documents: maps[i]['documents'],
           basketSuccessFee: maps[i]['basket_success_fee'],
-          portfolioValue: maps[i]['portfolio_value'],
+          totalPortfolioValue: maps[i]['total_portfolio_value'],
           portfolioCurrency: maps[i]['portfolio_currency'],
           url: maps[i]['url'],
           members: members));
@@ -2402,7 +2481,7 @@ class ConfigManagerBloc {
   }
 
   static Future<int> _getMembersLength(String fundingPanelAddress) async {
-    String data = "0x7351262f"; // get deployerListLength
+    String data = "0x7351262f";
     Map callParams = {
       "id": "1",
       "jsonrpc": "2.0",
