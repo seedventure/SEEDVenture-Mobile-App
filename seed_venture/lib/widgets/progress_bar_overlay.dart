@@ -71,7 +71,7 @@ class ProgressBarOverlay extends ModalRoute<void> {
   String getTextByMode(int mode) {
     switch (mode) {
       case ProgressBarOverlay.generatingConfig:
-        return 'Generating Keys and Config file...';
+        return 'Generating Keys and Config file...It may take some minutes';
         break;
       case ProgressBarOverlay.sendingTransaction:
         return 'Sending Transaction...It may take some minutes';
