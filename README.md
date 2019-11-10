@@ -6,7 +6,7 @@ This is the official repo for the SEED Venture's mobile client. It is built usin
 
 <a href='https://play.google.com/store/apps/details?id=io.seedventure.seed_venture&pcampaignid=pcampaignidMKT-Other-global-all-co-prtnr-py-PartBadge-Mar2515-1'><img width=250 height=97 alt='Get it on Google Play' src='https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png'/></a>
 
-<a href='https://play.google.com/store/apps/details?id=io.seedventure.seed_venture&pcampaignid=pcampaignidMKT-Other-global-all-co-prtnr-py-PartBadge-Mar2515-1'><img width=250 height=97 alt='Get it on App Store' src='http://www.mondino.it/wp-content/uploads/2019/05/app-store-badge.png'/></a>
+<a href='https://apps.apple.com/us/app/seed-venture/id1482151582?l=it&ls=1'><img width=250 height=97 alt='Get it on App Store' src='http://www.mondino.it/wp-content/uploads/2019/05/app-store-badge.png'/></a>
 
 
 The App is built using BLoC pattern, useful to separate UI from logic components of the app, making it easier to mantain.
