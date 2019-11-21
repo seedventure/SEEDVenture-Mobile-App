@@ -15,6 +15,7 @@ import 'package:seed_venture/pages/create_wallet_page.dart';
 import 'package:seed_venture/pages/import_wallet_page.dart';
 import 'package:seed_venture/pages/insert_password_mnemonic_page.dart';
 import 'package:seed_venture/pages/repeat_mnemonic_page.dart';
+import 'package:seed_venture/pages/coupons_page.dart';
 
 void main() {
   return runApp(SEEDVentureApp());
@@ -26,14 +27,11 @@ class SEEDVentureApp extends StatelessWidget {
     return MaterialApp(
         debugShowCheckedModeBanner: false,
         theme: ThemeData(
-
             brightness: Brightness.light,
             primaryColor: Color(0xFF006B97),
             accentColor: Color(0xFF6fd2fb),
             buttonColor: Color(0xFF006B97),
-
             fontFamily: 'Poppins-Regular',
-
             textTheme: TextTheme(
                 headline:
                     TextStyle(fontSize: 72.0, fontWeight: FontWeight.bold),
@@ -41,7 +39,6 @@ class SEEDVentureApp extends StatelessWidget {
                 body1: TextStyle(fontSize: 14.0, fontFamily: 'Hind'),
                 button:
                     TextStyle(fontSize: 15.0, fontWeight: FontWeight.bold))),
-
         title: 'SEED Venture',
         home: HomePage(),
         routes: <String, WidgetBuilder>{
@@ -86,6 +83,9 @@ class SEEDVentureApp extends StatelessWidget {
           },
           '/wallet_info': (BuildContext context) {
             return WalletInfoPage();
+          },
+          '/coupons': (BuildContext context) {
+            return CouponsPage();
           }
         });
   }

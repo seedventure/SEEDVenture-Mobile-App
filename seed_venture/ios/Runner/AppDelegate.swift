@@ -14,7 +14,7 @@ import Flutter
     
     
     let aesChannel = FlutterMethodChannel(name: "seedventure.io/aes",
-                                             binaryMessenger: controller)
+                                          binaryMessenger: controller.binaryMessenger)
     
     aesChannel.setMethodCallHandler({
         (call: FlutterMethodCall, result: FlutterResult) -> Void in
@@ -43,7 +43,7 @@ import Flutter
     })
     
     let exportChannel = FlutterMethodChannel(name: "seedventure.io/export_config",
-                                             binaryMessenger: controller)
+                                             binaryMessenger: controller.binaryMessenger)
     
     exportChannel.setMethodCallHandler({
         (call: FlutterMethodCall, result: FlutterResult) -> Void in

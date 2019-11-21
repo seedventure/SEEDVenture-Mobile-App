@@ -12,6 +12,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:math';
 import 'package:seed_venture/models/funding_panel_item.dart';
 import 'package:seed_venture/blocs/address_manager_bloc.dart';
+import 'package:seed_venture/utils/utils.dart';
 
 final ContributionBloc contributionBloc = ContributionBloc();
 
@@ -98,7 +99,7 @@ class ContributionBloc {
     }
   }
 
-  Future<String> _postNonce(String address) async {
+  /*Future<String> _postNonce(String address) async {
     Map txCountParams = {
       "id": "1",
       "jsonrpc": "2.0",
@@ -119,7 +120,7 @@ class ContributionBloc {
 
   static String _parseTxHashJSON(String sendResponseBody) {
     return jsonDecode(sendResponseBody)['result'];
-  }
+  }*/
 
   Future<String> _sendApproveTransaction(Credentials credentials,
       String fpAddress, String amountToApprove, BigInt nonce) async {
@@ -163,7 +164,7 @@ class ContributionBloc {
       data: numbers.hexToBytes(data),
     );
 
-    var signed = rawTx.sign(numbers.numberToBytes(credentials.privateKey), 3);
+    var signed = rawTx.sign(numbers.numberToBytes(credentials.privateKey), addressManagerBloc.chainID);
 
     Map sendParams = {
       "id": "1",
@@ -180,12 +181,12 @@ class ContributionBloc {
   Future<String> approve(
       Credentials credentials, String seedAmount, String fpAddress) async {
     String address = credentials.address.hex;
-    String nonceResponse = await _postNonce(address);
-    BigInt nonce = await compute(_parseNonceJSON, nonceResponse);
+    String nonceResponse = await Utils.postNonce(address);
+    BigInt nonce = await compute(Utils.parseNonceJSON, nonceResponse);
     String txResponse = await _sendApproveTransaction(
         credentials, fpAddress, seedAmount, nonce);
     if (!txResponse.contains('error')) {
-      String txHash = await compute(_parseTxHashJSON, txResponse);
+      String txHash = await compute(Utils.parseTxHashJSON, txResponse);
       return txHash;
     } else {
       return null;
@@ -232,7 +233,7 @@ class ContributionBloc {
       data: numbers.hexToBytes(data),
     );
 
-    var signed = rawTx.sign(numbers.numberToBytes(credentials.privateKey), 3);
+    var signed = rawTx.sign(numbers.numberToBytes(credentials.privateKey), addressManagerBloc.chainID);
 
     Map sendParams = {
       "id": "1",
@@ -295,12 +296,12 @@ class ContributionBloc {
   Future<String> holderSendSeeds(
       Credentials credentials, String seedAmount, String fpAddress) async {
     String address = credentials.address.hex;
-    String nonceResponse = await _postNonce(address);
-    BigInt nonce = await compute(_parseNonceJSON, nonceResponse);
+    String nonceResponse = await Utils.postNonce(address);
+    BigInt nonce = await compute(Utils.parseNonceJSON, nonceResponse);
     String txResponse = await _holderSendSeedsTransaction(
         credentials, fpAddress, seedAmount, nonce);
     if (!txResponse.contains('error')) {
-      String txHash = await compute(_parseTxHashJSON, txResponse);
+      String txHash = await compute(Utils.parseTxHashJSON, txResponse);
       return txHash;
     } else {
       return null;

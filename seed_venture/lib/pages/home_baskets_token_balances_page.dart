@@ -4,6 +4,8 @@ import 'package:seed_venture/blocs/config_manager_bloc.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:intl/intl.dart';
+import 'package:seed_venture/blocs/address_manager_bloc.dart';
+import 'package:seed_venture/utils/constants.dart';
 
 class HomeBasketsTokenBalancesPage extends StatefulWidget {
   @override
@@ -134,6 +136,7 @@ class _HomeBasketsTokenBalancesPageState
                   Navigator.pushNamed(context, '/wallet_info');
                 },
               ),
+              _getCouponWidget()
             ],
           ),
         ),
@@ -394,5 +397,18 @@ class _HomeBasketsTokenBalancesPageState
         ? TextStyle(color: Color(0xFF333333), fontWeight: FontWeight.bold)
         : TextStyle(color: Color(0xFF333333));
     return style;
+  }
+
+  Widget _getCouponWidget() {
+    if (addressManagerBloc.network == Ropsten) {
+      return ListTile(
+        title: Text('Coupons'),
+        onTap: () {
+          Navigator.pushNamed(context, '/coupons');
+        },
+      );
+    }
+
+    return Container();
   }
 }
