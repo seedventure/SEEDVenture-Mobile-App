@@ -99,29 +99,6 @@ class ContributionBloc {
     }
   }
 
-  /*Future<String> _postNonce(String address) async {
-    Map txCountParams = {
-      "id": "1",
-      "jsonrpc": "2.0",
-      "method": "eth_getTransactionCount",
-      "params": ["$address", "latest"]
-    };
-
-    var response = await http.post(addressManagerBloc.infuraEndpoint,
-        body: jsonEncode(txCountParams),
-        headers: {'content-type': 'application/json'});
-
-    return response.body;
-  }
-
-  static BigInt _parseNonceJSON(String nonceResponseBody) {
-    return (numbers.hexToInt(jsonDecode(nonceResponseBody)['result']));
-  }
-
-  static String _parseTxHashJSON(String sendResponseBody) {
-    return jsonDecode(sendResponseBody)['result'];
-  }*/
-
   Future<String> _sendApproveTransaction(Credentials credentials,
       String fpAddress, String amountToApprove, BigInt nonce) async {
     amountToApprove = amountToApprove.replaceAll(',', '.');
@@ -164,7 +141,8 @@ class ContributionBloc {
       data: numbers.hexToBytes(data),
     );
 
-    var signed = rawTx.sign(numbers.numberToBytes(credentials.privateKey), addressManagerBloc.chainID);
+    var signed = rawTx.sign(numbers.numberToBytes(credentials.privateKey),
+        addressManagerBloc.chainID);
 
     Map sendParams = {
       "id": "1",
@@ -233,7 +211,8 @@ class ContributionBloc {
       data: numbers.hexToBytes(data),
     );
 
-    var signed = rawTx.sign(numbers.numberToBytes(credentials.privateKey), addressManagerBloc.chainID);
+    var signed = rawTx.sign(numbers.numberToBytes(credentials.privateKey),
+        addressManagerBloc.chainID);
 
     Map sendParams = {
       "id": "1",

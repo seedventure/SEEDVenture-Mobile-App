@@ -1,5 +1,4 @@
 import 'package:barcode_scan/barcode_scan.dart';
-import 'package:flutter/services.dart';
 import 'package:crypto/crypto.dart' as crypto;
 import 'package:seed_venture/blocs/address_manager_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
