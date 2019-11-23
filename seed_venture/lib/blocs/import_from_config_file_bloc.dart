@@ -69,7 +69,7 @@ class ImportFromConfigFileBloc {
     try {
       Map configJson = jsonDecode(decryptedData);
       Credentials credentials =
-          Credentials.fromPrivateKeyHex(configJson['user']['privateKey']);
+          Credentials.fromPrivateKeyHex(configJson['privateKey']);
       if (crypto.sha256
               .convert(utf8.encode(credentials.address.hex.toLowerCase()))
               .toString() ==

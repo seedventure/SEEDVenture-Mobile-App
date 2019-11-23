@@ -43,3 +43,7 @@ const String WLThresholdChangedTopic = "0x10b2a5b108c7f1e07744f78d98a096424f89c3
 
 // DEX events
 const String tradeTopic = "0x74fe7e1f8cd2a8282b88fefc87ef874cc84ac7b165218719b0b646fb53497f32";
+
+// URLs
+const String ropstenETHFaucet = "https://faucet.ropsten.be/";
+const String ropstenSEEDFaucet = "http://86.107.98.39/faucet?addr=";

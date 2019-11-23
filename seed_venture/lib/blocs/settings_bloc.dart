@@ -3,6 +3,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/services.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:seed_venture/blocs/baskets_bloc.dart';
+import 'package:seed_venture/utils/constants.dart';
 
 SettingsBloc settingsBloc = SettingsBloc();
 
@@ -29,6 +30,11 @@ class SettingsBloc {
   Stream<bool> get outZeroDocsStartupsSettings =>
       _zeroDocsStartupsSettings.stream;
   Sink<bool> get _inZeroDocsStartupsSettings => _zeroDocsStartupsSettings.sink;
+
+  BehaviorSubject<List> _faucetSettings = BehaviorSubject<List>();
+
+  Stream<List> get outFaucetSettings => _faucetSettings.stream;
+  Sink<List> get _inFaucetSettings => _faucetSettings.sink;
 
   BehaviorSubject<String> _currentNetwork = BehaviorSubject<String>();
 
@@ -62,7 +68,16 @@ class SettingsBloc {
       _inZeroDocsStartupsSettings
           .add(prefs.getBool('filter_zero_docs_startup'));
 
-      _inCurrentNetwork.add(prefs.getString("network"));
+      String network = prefs.getString("network");
+      String address = prefs.getString("address");
+
+      _inCurrentNetwork.add(network);
+
+      List faucetParams = List();
+      faucetParams.add(network == Ropsten);
+      faucetParams.add(address);
+
+      _inFaucetSettings.add(faucetParams);
     });
   }
 
@@ -111,6 +126,7 @@ class SettingsBloc {
     _zeroStartupsSettings.close();
     _withoutURLBasketsSettings.close();
     _zeroDocsStartupsSettings.close();
+    _faucetSettings.close();
     _currentNetwork.close();
   }
 

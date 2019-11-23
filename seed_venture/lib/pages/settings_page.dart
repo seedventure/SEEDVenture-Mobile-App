@@ -3,6 +3,8 @@ import 'package:seed_venture/blocs/settings_bloc.dart';
 import 'package:seed_venture/widgets/progress_bar_overlay.dart';
 import 'package:seed_venture/blocs/onboarding_bloc.dart';
 import 'package:seed_venture/blocs/config_manager_bloc.dart';
+import 'package:seed_venture/utils/constants.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class SettingsPage extends StatefulWidget {
   @override
@@ -163,6 +165,52 @@ class _SettingsStatePage extends State<SettingsPage> {
                             return Container();
                         },
                         stream: settingsBloc.outZeroDocsStartupsSettings,
+                      ),
+                      StreamBuilder(
+                        builder:
+                            (BuildContext context, AsyncSnapshot snapshot) {
+                          if (snapshot.hasData && snapshot.data[0]) {
+                            return Column(
+                              children: <Widget>[
+                                Container(
+                                  child: InkWell(
+                                      onTap: () {
+                                        launch(ropstenSEEDFaucet +
+                                            snapshot.data[1]);
+                                      },
+                                      child: Padding(
+                                          padding: const EdgeInsets.only(
+                                              top: 8.0, bottom: 8.0),
+                                          child: Row(
+                                            children: <Widget>[
+                                              Expanded(
+                                                child: Text('Get Ropsten SEED'),
+                                              ),
+                                            ],
+                                          ))),
+                                ),
+                                Container(
+                                  child: InkWell(
+                                      onTap: () {
+                                        launch(ropstenETHFaucet);
+                                      },
+                                      child: Padding(
+                                          padding: const EdgeInsets.only(
+                                              top: 8.0, bottom: 8.0),
+                                          child: Row(
+                                            children: <Widget>[
+                                              Expanded(
+                                                child: Text('Get Ropsten ETH'),
+                                              ),
+                                            ],
+                                          ))),
+                                ),
+                              ],
+                            );
+                          } else
+                            return Container();
+                        },
+                        stream: settingsBloc.outFaucetSettings,
                       ),
                       Container(
                         child: InkWell(
