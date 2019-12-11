@@ -8,7 +8,7 @@ const int RopstenChainID = 3;
 const String RopstenGlobalFactoryAddress = '0xf5b5042766eeb6dfc5ba8ebbafc61df26f0901da';
 const String RopstenSeedTokenAddress = '0x029eb9c1810a97431200c08b827944b30f615325';
 const String RopstenDexAddress = '0xe5ce0116743779b871b925db915d32025ccf2248';
-const String RopstenCouponAddress = '0x5948F873c2FB3C4fB5B355bB96d385230CBE02E0';
+const String RopstenCouponAddress = '0x4c424333B4d3C11A581FbCF53216C399cEff034a';
 const String RopstenInfuraHTTP = 'https://testnet.seedventure.io';
 const String RopstenEtherscanURL = 'https://ropsten.etherscan.io/';
 
