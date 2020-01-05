@@ -37,6 +37,7 @@ dependencies:
   url_launcher: ^5.0.2
   auto_size_text: ^2.0.2
   intl: ^0.15.8
+  barcode_scan: ^1.0.0
 
   flutter:
     sdk: flutter

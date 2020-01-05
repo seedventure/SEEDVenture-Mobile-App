@@ -4,6 +4,8 @@ import 'package:seed_venture/blocs/config_manager_bloc.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:intl/intl.dart';
+import 'package:seed_venture/blocs/address_manager_bloc.dart';
+import 'package:seed_venture/utils/constants.dart';
 
 class HomeBasketsTokenBalancesPage extends StatefulWidget {
   @override
@@ -134,6 +136,12 @@ class _HomeBasketsTokenBalancesPageState
                   Navigator.pushNamed(context, '/wallet_info');
                 },
               ),
+              ListTile(
+                title: Text('Coupons'),
+                onTap: () {
+                  Navigator.pushNamed(context, '/coupons');
+                },
+              )
             ],
           ),
         ),
