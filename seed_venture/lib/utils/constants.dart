@@ -18,7 +18,7 @@ const int MainnetChainID = 1;
 const String MainnetGlobalFactoryAddress = '0x35c8c5D9Bec0DCd50Ce4bd929FA3BeD9eD1f7C89';
 const String MainnetSeedTokenAddress = '0xC969e16e63fF31ad4BCAc3095C616644e6912d79';
 const String MainnetDexAddress = '0x829b36f1C052D7fAb8fbF68B51E1Bf5d65a23e74';
-const String MainnetCouponAddress = '';
+const String MainnetCouponAddress = '0x43BB30d5aD36005821E6ed949c9a7EbD203C9337';
 const String MainnetInfuraHTTP = 'https://mainnet.seedventure.io';
 const String MainnetEtherscanURL = 'https://etherscan.io/';
 

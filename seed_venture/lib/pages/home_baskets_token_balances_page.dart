@@ -136,7 +136,12 @@ class _HomeBasketsTokenBalancesPageState
                   Navigator.pushNamed(context, '/wallet_info');
                 },
               ),
-              _getCouponWidget()
+              ListTile(
+                title: Text('Coupons'),
+                onTap: () {
+                  Navigator.pushNamed(context, '/coupons');
+                },
+              )
             ],
           ),
         ),
@@ -397,18 +402,5 @@ class _HomeBasketsTokenBalancesPageState
         ? TextStyle(color: Color(0xFF333333), fontWeight: FontWeight.bold)
         : TextStyle(color: Color(0xFF333333));
     return style;
-  }
-
-  Widget _getCouponWidget() {
-    if (addressManagerBloc.network == Ropsten) {
-      return ListTile(
-        title: Text('Coupons'),
-        onTap: () {
-          Navigator.pushNamed(context, '/coupons');
-        },
-      );
-    }
-
-    return Container();
   }
 }
