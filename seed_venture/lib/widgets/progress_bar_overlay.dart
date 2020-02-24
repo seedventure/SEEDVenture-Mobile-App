@@ -57,6 +57,7 @@ class ProgressBarOverlay extends ModalRoute<void> {
               child: Center(
                 child: Text(
                   getTextByMode(_mode),
+                  textAlign: TextAlign.center,
                   style: TextStyle(
                       color: Theme.of(context).accentColor,
                       fontWeight: FontWeight.bold),
