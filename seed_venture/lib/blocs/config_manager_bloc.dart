@@ -655,7 +655,7 @@ class ConfigManagerBloc {
           body: jsonEncode(callParams),
           headers: {'content-type': 'application/json'});
     } catch (e) {
-      //print('error http');
+      print('error http');
       return null;
     }
 
@@ -841,7 +841,7 @@ class ConfigManagerBloc {
         }
 
         if (changed) {
-          //print('seed max supply changed');
+          print('seed max supply changed');
           seedMaxSupply = await _getSeedMaxSupply(fundingPanelAddress);
 
           if (seedMaxSupply != null) {
@@ -881,7 +881,7 @@ class ConfigManagerBloc {
         }
 
         if (changed) {
-          //print('owner data hash changed');
+          print('owner data hash changed');
 
           latestOwnerData = await _getLatestOwnerData(fundingPanelAddress);
 
@@ -979,7 +979,7 @@ class ConfigManagerBloc {
         }
 
         if (changed) {
-          //print('exchangeRateSeed changed');
+          print('exchangeRateSeed changed');
 
           exchangeRateSeed =
               await _getBasketSeedExchangeRate(fundingPanelAddress);
@@ -1013,7 +1013,7 @@ class ConfigManagerBloc {
         }
 
         if (changed) {
-          //print('exchangeRate on top changed');
+          print('exchangeRate on top changed');
 
           exchangeRateOnTop =
               await _getBasketExchangeRateOnTop(fundingPanelAddress);
@@ -1055,7 +1055,7 @@ class ConfigManagerBloc {
         }
 
         if (changed) {
-          //print('exchangeRateSeed changed (DEX)');
+          print('exchangeRateSeed changed (DEX)');
 
           List retParams = await _getBasketSeedExchangeRateFromDEX(
               tokenAddress, fromBlock, toBlock, resMap);
@@ -1086,7 +1086,7 @@ class ConfigManagerBloc {
         }
 
         if (changed) {
-          //print('totalRaised changed');
+          print('totalRaised changed');
 
           seedTotalRaised = await _getSeedTotalRaised(fundingPanelAddress);
         } else {
@@ -1107,7 +1107,7 @@ class ConfigManagerBloc {
         }
 
         if (changed) {
-          //print('threshold changed');
+          print('threshold changed');
 
           WLThreshold =
               await _getWhitelistThreshold(adminToolsAddress, exchangeRateSeed);
@@ -1157,7 +1157,7 @@ class ConfigManagerBloc {
         }
 
         if (changed || fundsUnlocked) {
-          //print('some member hash changed or funds were unlocked');
+          print('some member hash changed or funds were unlocked');
 
           if (fundsUnlocked) {
             // Notification if funds unlocked
@@ -1282,7 +1282,7 @@ class ConfigManagerBloc {
         }
 
         if (changed) {
-          //print('members added');
+          print('members added');
 
           int newMembersLength = await _getMembersLength(fundingPanelAddress);
           List<MemberItem> oldMembers =
@@ -1805,9 +1805,9 @@ class ConfigManagerBloc {
 
   static Future<List> _getFundingPanelDetails(String ipfsUrl) async {
     try {
-      //print('AAAAA IPFS: ' + ipfsUrl);
+      print('AAAAA IPFS: ' + ipfsUrl);
       var response = await http.get(ipfsUrl).timeout(Duration(seconds: 10));
-      //print('BBBBBBB');
+      print('BBBBBBB');
 
       if (response.statusCode != 200) {
         return null;
@@ -1858,7 +1858,7 @@ class ConfigManagerBloc {
 
       return returnFpDetails;
     } catch (e) {
-      //print('error http get ' + e.toString() + ' FROM ' + ipfsUrl);
+      print('error http get ' + e.toString() + ' FROM ' + ipfsUrl);
       return null;
     }
   }
@@ -2036,7 +2036,7 @@ class ConfigManagerBloc {
 
       this._fundingPanelItems = fundingPanelItems;
 
-      //print('configuration updated!');
+      print('configuration updated!');
 
       _previousConfigurationMap = configurationMap;
     }
@@ -2100,7 +2100,7 @@ class ConfigManagerBloc {
 
     data += indexHex;
 
-    //print(data);
+    print(data);
 
     Map callParams = {
       "id": "1",
@@ -2142,7 +2142,7 @@ class ConfigManagerBloc {
             resMap['result'].toString().length))
         .hex;
 
-    //print(callResponse.body);
+    print(callResponse.body);
 
     return addresses;
   }
@@ -2175,7 +2175,7 @@ class ConfigManagerBloc {
             body: jsonEncode(callParams),
             headers: {'content-type': 'application/json'});
       } catch (e) {
-        //print('error http');
+        print('error http');
         return null;
       }
 
@@ -2210,7 +2210,7 @@ class ConfigManagerBloc {
                 body: jsonEncode(callParams),
                 headers: {'content-type': 'application/json'});
           } catch (e) {
-            //print('error http');
+            print('error http');
             return null;
           }
 
@@ -2355,9 +2355,9 @@ class ConfigManagerBloc {
 
     Map resMap = jsonDecode(callResponse.body);
 
-    //print("get owner data: " + callResponse.body);
+    print("get owner data: " + callResponse.body);
 
-    //print('hash: ' + resMap['result'].substring(66, 130));
+    print('hash: ' + resMap['result'].substring(66, 130));
 
     HexDecoder a = HexDecoder();
     List byteArray = a.convert(resMap['result'].toString().substring(130));
@@ -2390,7 +2390,7 @@ class ConfigManagerBloc {
 
     data = data + memberAddress.substring(2);
 
-    //print(data);
+    print(data);
 
     Map callParams = {
       "id": "1",
@@ -2454,7 +2454,7 @@ class ConfigManagerBloc {
 
     data += indexHex;
 
-    //print(data);
+    print(data);
 
     Map callParams = {
       "id": "1",
@@ -2714,7 +2714,7 @@ class ConfigManagerBloc {
 
   void _updateHoldings() async {
     if (_fundingPanelItems != null) {
-      //print('updating holdings...');
+      print('updating holdings...');
       basketsBloc.getCurrentBalances();
       await getBasketTokensBalances(_fundingPanelItems);
       basketsBloc.getBasketsTokenBalances();

@@ -20,7 +20,12 @@ class JSONWalletLogicBloc {
 
   void selectWalletFile() async {
     try {
-      String filePath = await FilePicker.getFilePath(type: FileType.ANY);
+      FilePickerResult result = await FilePicker.platform.pickFiles();
+      String filePath;
+      if (result != null) {
+        filePath = result.files.single.path;
+      } else
+        return;
       if (filePath == '' || filePath == null) {
         return null;
       }
